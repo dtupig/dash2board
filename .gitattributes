@@ -1,0 +1,23 @@
+# Normalização de fim de linha: o repositório guarda LF.
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.dart text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# Binários
+*.png  binary
+*.jpg  binary
+*.pdf  binary
+*.ttf  binary
+*.otf  binary
+*.jks  binary
+*.keystore binary
+
+# Arquivos gerados: colapsados no diff do GitHub para a revisão ficar legível
+pubspec.lock            linguist-generated=true
+**/package-lock.json    linguist-generated=true
+lib/firebase_options.dart linguist-generated=true

@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "elytron-dash2board-dev",
+    "staging": "elytron-dash2board-stg",
+    "prod": "elytron-dash2board-prd",
+    "e-dash2board": "elytron-d2b-dev"
+  },
+  "targets": {},
+  "etags": {}
+}

@@ -1,0 +1,49 @@
+name: elytron_dash2board
+description: "Elytron Dash2Board - Inteligência de segurança cibernética para times técnicos, CISOs e Board."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.13.0"
+
+# ---------------------------------------------------------------------------
+# ATENÇÃO
+# As versões abaixo são intencionalmente abertas. Rode `scripts/bootstrap.sh`
+# (ou `flutter pub add <pacote>` para cada dependência) para que o pub resolva
+# e FIXE as versões estáveis compatíveis com o seu Flutter/Dart SDK local.
+# Depois do primeiro `pub get`, faça commit do pubspec.lock.
+# ---------------------------------------------------------------------------
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^4.13.0
+  firebase_auth: ^6.5.7
+  cloud_firestore: ^6.8.0
+
+  # Estado / navegação
+  flutter_riverpod: ^3.4.2
+  go_router: ^17.5.0
+
+  # UI / utilidades
+  intl: ^0.20.3
+  shared_preferences: ^2.5.5
+
+  # Geração e compartilhamento do briefing executivo (PDF)
+  pdf: ^3.13.0
+  printing: ^5.15.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  # A marca é desenhada em CustomPainter (lib/core/widgets/elytron_logo.dart),
+  # portanto o app não depende de nenhum asset de imagem. Ao adicionar assets,
+  # declare a pasta aqui e crie o diretório antes de rodar `flutter pub get`.

@@ -1,0 +1,51 @@
+rules_version = '2';
+
+// ===========================================================================
+// Cloud Storage - anexos de relatórios e evidências de compliance.
+// Mesma lógica de isolamento por tenant e papel usada no Firestore.
+// ===========================================================================
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userTenant() {
+      return isSignedIn() ? request.auth.token.get('tenantId', '') : '';
+    }
+
+    function userRole() {
+      return isSignedIn() ? request.auth.token.get('role', 'pending') : 'pending';
+    }
+
+    function inTenant(tenantId) {
+      return isSignedIn() && tenantId != '' && userTenant() == tenantId;
+    }
+
+    // Relatórios publicados (PDF). Somente leitura, e só do público correto.
+    match /tenants/{tenantId}/reports/{audience}/{fileName} {
+      allow read: if inTenant(tenantId) && audience == userRole();
+      allow write: if false;
+    }
+
+    // Evidências de compliance: leitura restrita ao CISO/GRC.
+    match /tenants/{tenantId}/compliance/{allPaths=**} {
+      allow read: if inTenant(tenantId) && userRole() == 'strategic';
+      allow write: if false;
+    }
+
+    // Foto de perfil do próprio usuário (máx. 2 MB, somente imagem).
+    match /tenants/{tenantId}/avatars/{uid} {
+      allow read: if inTenant(tenantId);
+      allow write: if inTenant(tenantId) &&
+                      request.auth.uid == uid &&
+                      request.resource.size < 2 * 1024 * 1024 &&
+                      request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

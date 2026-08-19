@@ -1,0 +1,67 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata
+*.iml
+
+# IDE
+.idea/
+*.swp
+.DS_Store
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/google-services.json
+**/*.keystore
+**/*.jks
+
+# ---------------------------------------------------------------------------
+# SEGREDOS - nunca versionar
+# ---------------------------------------------------------------------------
+# Obs.: lib/firebase_options.dart PODE ser versionado (as chaves do Firebase
+# para cliente são públicas por design; a proteção real está nas
+# security rules e no App Check). Já os arquivos abaixo, não:
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+.env
+.env.*
+service-account*.json
+
+# Node (qualquer subprojeto: functions/, scripts/seed/, ...)
+**/node_modules/
+functions/lib/
+scripts/seed/lib/
+functions/.env
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
+
+# Obs.: .firebaserc É VERSIONADO. Ids de projeto não são segredo, e deixá-lo
+# fora do repositório obriga cada desenvolvedor a recriá-lo à mão - foi a
+# origem do achado A-01 da auditoria (alias apontando para projeto inexistente).
+
+# scaffold temporário do bootstrap
+_scaffold/
+
+# Saídas locais de ferramenta
+audit-report.txt
+coverage/
+*.log
+lcov.info

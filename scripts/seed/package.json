@@ -1,0 +1,20 @@
+{
+  "name": "elytron-dash2board-seed",
+  "description": "Seed reproduzível do tenant de demonstração (Auth + Firestore), para emulador ou projeto real",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "seed": "npm run build && node lib/seed.js",
+    "seed:prod": "npm run build && node lib/seed.js --prod"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  }
+}

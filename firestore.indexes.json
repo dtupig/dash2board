@@ -1,0 +1,102 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "incidents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "severityRank", "order": "DESCENDING" },
+        { "fieldPath": "openedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "incidents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assigneeUid", "order": "ASCENDING" },
+        { "fieldPath": "slaDueAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vulnerabilities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "remediationStatus", "order": "ASCENDING" },
+        { "fieldPath": "activelyExploited", "order": "DESCENDING" },
+        { "fieldPath": "epssScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vulnerabilities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assetCriticality", "order": "DESCENDING" },
+        { "fieldPath": "cvssScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "posture_snapshots",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "domain", "order": "ASCENDING" },
+        { "fieldPath": "capturedAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "risks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "businessUnit", "order": "ASCENDING" },
+        { "fieldPath": "residualScore", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "risks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "acceptance", "order": "ASCENDING" },
+        { "fieldPath": "reviewDueAt", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "compliance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "framework", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "controlId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "audience", "order": "ASCENDING" },
+        { "fieldPath": "publishedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "insights",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "topic", "order": "ASCENDING" },
+        { "fieldPath": "publishedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "members",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "role", "order": "ASCENDING" },
+        { "fieldPath": "displayName", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "audit_logs",
+      "fieldPath": "payload",
+      "indexes": []
+    }
+  ]
+}

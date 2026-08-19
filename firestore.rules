@@ -1,0 +1,228 @@
+rules_version = '2';
+
+// ===========================================================================
+// Elytron Dash2Board - Cloud Firestore Security Rules
+//
+// Princípios:
+//  1. FAIL-CLOSED: nada é legível por padrão. Cada match libera explicitamente.
+//  2. A AUTORIDADE É O CUSTOM CLAIM. `role` e `tenantId` vêm do ID token
+//     assinado pelo backend; o cliente não consegue forjá-los e a regra não
+//     precisa fazer `get()` no Firestore (mais rápido e mais barato).
+//  3. ISOLAMENTO POR TENANT é a fronteira principal: nenhum documento de um
+//     cliente é alcançável por outro.
+//  4. O cliente NUNCA escreve papel, tenant, métrica agregada ou trilha de
+//     auditoria. Essas escritas são exclusivas das Cloud Functions
+//     (Admin SDK, que ignora estas regras).
+// ===========================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function token() {
+      return request.auth.token;
+    }
+
+    function userTenant() {
+      return isSignedIn() ? token().get('tenantId', '') : '';
+    }
+
+    function userRole() {
+      return isSignedIn() ? token().get('role', 'pending') : 'pending';
+    }
+
+    function inTenant(tenantId) {
+      return isSignedIn() && tenantId != '' && userTenant() == tenantId;
+    }
+
+    function hasAnyRole(roles) {
+      return userRole() in roles;
+    }
+
+    // Persona 1
+    function isOperational() { return userRole() == 'operational'; }
+    // Persona 2
+    function isStrategic()   { return userRole() == 'strategic'; }
+    // Persona 3
+    function isBoard()       { return userRole() == 'board'; }
+
+    // Administrador do tenant (claim booleano separado do papel de leitura).
+    function isTenantAdmin() {
+      return isSignedIn() && token().get('tenantAdmin', false) == true;
+    }
+
+    function isSelf(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Campos que o próprio usuário pode alterar no seu perfil.
+    function onlyProfileFieldsChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['displayName', 'jobTitle', 'businessUnit', 'photoUrl',
+                  'locale', 'updatedAt']);
+    }
+
+    // ---------------------------------------------------------------
+    // /users/{uid} - índice global uid -> tenant (mínimo necessário)
+    // ---------------------------------------------------------------
+    match /users/{uid} {
+      allow get: if isSelf(uid);
+      allow list: if false;
+      allow create, delete: if false;                 // só Cloud Functions
+      allow update: if isSelf(uid) && onlyProfileFieldsChanged();
+    }
+
+    // ---------------------------------------------------------------
+    // /invites/{inviteId} - consumido por Cloud Function no primeiro login
+    // ---------------------------------------------------------------
+    match /invites/{inviteId} {
+      allow read, write: if false;
+    }
+
+    // ---------------------------------------------------------------
+    // /tenants/{tenantId}
+    // ---------------------------------------------------------------
+    match /tenants/{tenantId} {
+
+      allow get: if inTenant(tenantId);
+      allow list, write: if false;
+
+      // -------------------------------------------------------------
+      // Membros: quem é quem dentro do cliente
+      // -------------------------------------------------------------
+      match /members/{uid} {
+        // O próprio usuário sempre lê o seu registro.
+        // CISO e admin enxergam o time inteiro; Board e Operação, não.
+        allow get: if inTenant(tenantId) &&
+                      (isSelf(uid) || isStrategic() || isTenantAdmin());
+        allow list: if inTenant(tenantId) && (isStrategic() || isTenantAdmin());
+
+        // Papel, tenant e status são gravados apenas pelo backend.
+        allow create, delete: if false;
+        allow update: if inTenant(tenantId) &&
+                         isSelf(uid) &&
+                         onlyProfileFieldsChanged();
+      }
+
+      // -------------------------------------------------------------
+      // Preferências de UI por usuário
+      // -------------------------------------------------------------
+      match /preferences/{uid} {
+        allow read, write: if inTenant(tenantId) && isSelf(uid);
+      }
+
+      // -------------------------------------------------------------
+      // Métricas agregadas (uma leitura por card do dashboard)
+      // Escrita exclusiva do pipeline de ingestão (Cloud Functions).
+      // -------------------------------------------------------------
+      match /metrics/{metricId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['operational', 'strategic', 'board']);
+        allow write: if false;
+      }
+
+      match /posture_snapshots/{snapshotId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['strategic', 'board']);
+        allow write: if false;
+      }
+
+      // -------------------------------------------------------------
+      // Operação e tática (Persona 1)
+      // -------------------------------------------------------------
+      match /incidents/{incidentId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['operational', 'strategic']);
+        allow create, delete: if false;
+        // O analista pode triar: atribuir, mudar status e comentar.
+        allow update: if inTenant(tenantId) &&
+                         isOperational() &&
+                         request.resource.data.diff(resource.data)
+                           .affectedKeys()
+                           .hasOnly(['status', 'assigneeUid', 'severity',
+                                     'acknowledgedAt', 'notes', 'updatedAt']);
+      }
+
+      match /vulnerabilities/{vulnId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['operational', 'strategic']);
+        allow create, delete: if false;
+        allow update: if inTenant(tenantId) &&
+                         isOperational() &&
+                         request.resource.data.diff(resource.data)
+                           .affectedKeys()
+                           .hasOnly(['remediationStatus', 'ownerUid',
+                                     'dueDate', 'notes', 'updatedAt']);
+      }
+
+      // -------------------------------------------------------------
+      // Estratégia e governança (Persona 2)
+      // -------------------------------------------------------------
+      match /compliance/{controlId} {
+        allow read: if inTenant(tenantId) && hasAnyRole(['strategic']);
+        allow write: if false;
+      }
+
+      match /insights/{insightId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['strategic', 'board']);
+        allow write: if false;
+      }
+
+      match /surveys/{surveyId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['strategic', 'board']);
+        allow write: if false;
+
+        // Respostas: cada usuário só enxerga e escreve a própria.
+        match /responses/{uid} {
+          allow read, create, update: if inTenant(tenantId) && isSelf(uid);
+          allow delete: if false;
+        }
+      }
+
+      // -------------------------------------------------------------
+      // Negócio e board (Persona 3)
+      // -------------------------------------------------------------
+      match /risks/{riskId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['strategic', 'board']);
+        allow create, delete: if false;
+        // Aceite de risco é decisão executiva registrada pelo board.
+        allow update: if inTenant(tenantId) &&
+                         isBoard() &&
+                         request.resource.data.diff(resource.data)
+                           .affectedKeys()
+                           .hasOnly(['acceptance', 'acceptedByUid',
+                                     'acceptedAt', 'boardNote', 'updatedAt']);
+      }
+
+      match /reports/{reportId} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['operational', 'strategic', 'board']) &&
+                       resource.data.get('audience', 'strategic') == userRole();
+        allow write: if false;
+      }
+
+      // -------------------------------------------------------------
+      // Trilha de auditoria: append-only via Admin SDK, ilegível no app.
+      // -------------------------------------------------------------
+      match /audit_logs/{logId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Qualquer caminho não declarado acima permanece bloqueado.
+    // ---------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

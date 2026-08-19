@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "elytron-dash2board-dev",
+    "staging": "elytron-dash2board-stg",
+    "prod": "elytron-dash2board-prd"
+  }
+}

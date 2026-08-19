@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dash2Board · dev",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=dev"]
+    },
+    {
+      "name": "Dash2Board · dev + SSO",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=dev", "--dart-define=ENABLE_SSO=true"]
+    },
+    {
+      "name": "Dash2Board · mock",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=dev", "--dart-define=MOCK=true"]
+    },
+    {
+      "name": "Dash2Board · staging (profile)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=staging"]
+    },
+    {
+      "name": "Dash2Board · prod (release)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "program": "lib/main.dart",
+      "args": ["--dart-define=ENV=prod"]
+    }
+  ]
+}
