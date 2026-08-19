@@ -38,6 +38,9 @@ para configurar o Firebase e criar os usuários de teste.
 | [`docs/11_MODELO_FISICO_DADOS.md`](docs/11_MODELO_FISICO_DADOS.md) | **Modelo físico**: Firestore vs RTDB, coleções, índices, retenção, custo |
 | [`docs/12_OPERACAO_FIREBASE.md`](docs/12_OPERACAO_FIREBASE.md) | Runbook de provisionamento, backup, PITR, App Check e IAM |
 | [`docs/13_DECISOES_PENDENTES.md`](docs/13_DECISOES_PENDENTES.md) | **Registro de decisões** — o que está decidido e o que trava cada prompt |
+| [`docs/14_AUDITORIA_QUALIDADE.md`](docs/14_AUDITORIA_QUALIDADE.md) | Relatório de auditoria de qualidade com achados classificados |
+| [`docs/15_GIT_E_GITHUB.md`](docs/15_GIT_E_GITHUB.md) | Repositório, CI, proteção de branch e fluxo de trabalho |
+| [`docs/16_PLANO_DE_RETOMADA.md`](docs/16_PLANO_DE_RETOMADA.md) | **Plano de retomada** — ordem das features e o ritual de cada prompt |
 | [`docs/prompts/00_INDICE.md`](docs/prompts/00_INDICE.md) | **Roteiro de execução** — os prompts 2 a 9, em ordem |
 
 ## O que já está implementado

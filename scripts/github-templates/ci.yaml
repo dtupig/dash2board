@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Análise e testes Flutter
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Formatação
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      # A regra do projeto é "No issues found!". `--fatal-infos` garante que
+      # até apontamento informativo derruba o build.
+      - name: Análise estática
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Testes
+        run: flutter test --reporter expanded
+
+  guardrails:
+    name: Regras inegociáveis do projeto
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Cada verificação abaixo é uma regra do CLAUDE.md. Se uma passar a
+      # falhar, é porque alguém violou a regra - não porque o teste está ruim.
+      - name: APIs proibidas
+        run: |
+          set -e
+          fail=0
+          check() {
+            # ignora linhas de comentário: a regra é sobre código, não sobre doc
+            n=$(grep -rn --include='*.dart' -F "$1" lib test 2>/dev/null \
+                | grep -vE ':\s*(//|///)' | wc -l | tr -d ' ')
+            if [ "$n" -ne 0 ]; then
+              echo "::error::$2 encontrado em $n linha(s)"
+              grep -rn --include='*.dart' -F "$1" lib test | grep -vE ':\s*(//|///)' || true
+              fail=1
+            else
+              echo "ok: $2"
+            fi
+          }
+          check "withOpacity"    "Color.withOpacity (use withValues(alpha:))"
+          check "MaterialState"  "MaterialState* (use WidgetState*)"
+          check "surfaceVariant" "ColorScheme.surfaceVariant"
+          check "onBackground"   "ColorScheme.onBackground"
+          check "StateNotifier"  "StateNotifier"
+          check "AutoDispose"    "AutoDispose*Notifier"
+          check "pumpAndSettle(" "pumpAndSettle (use pump(Duration))"
+          exit $fail
+
+      - name: Acento de marca fora dos gráficos
+        run: |
+          n=$(grep -rn "brandGreen\|brandCyan\|brandViolet" lib/core/widgets/charts/ 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$n" -ne 0 ]; then echo "::error::acento de marca usado em gráfico ($n)"; exit 1; fi
+          echo "ok"
+
+      - name: Firebase fora de presentation/
+        run: |
+          if grep -rln "cloud_firestore\|firebase_auth" lib/features/*/presentation lib/features/*/*/presentation 2>/dev/null | grep .; then
+            echo "::error::presentation/ não pode importar Firebase"; exit 1
+          fi
+          echo "ok"
+
+      - name: Segredos não versionados
+        run: |
+          set -e
+          for f in android/app/google-services.json ios/Runner/GoogleService-Info.plist functions/.env; do
+            if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+              echo "::error::segredo versionado: $f"; exit 1
+            fi
+          done
+          if git ls-files | grep -q "node_modules/"; then echo "::error::node_modules versionado"; exit 1; fi
+          echo "ok"
+
+  rules:
+    name: Testes das security rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Rodar se existir
+        run: |
+          if [ -d test/rules ]; then
+            cd test/rules && npm ci && npm test
+          else
+            echo "::warning::test/rules ainda não existe (achado A-02 da auditoria)"
+          fi

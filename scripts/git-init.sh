@@ -160,7 +160,7 @@ cat <<'NEXT'
          - NÃO marque README, .gitignore nem license (já existem aqui)
 
       2. Conecte e publique (SSH recomendado):
-         git remote add origin git@github.com:<ORG>/elytron-dash2board.git
+         git remote add origin git@github.com:dtupig/dash2board.git
          git push -u origin main --follow-tags
 
       Guia visual das telas do GitHub: docs/15_GIT_E_GITHUB.md

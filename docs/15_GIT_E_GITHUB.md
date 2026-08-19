@@ -65,7 +65,7 @@ Telas ilustradas em **`docs/guia-github.html`** (abra no navegador).
 1. Acesse **https://github.com/new**
 2. Preencha:
    - **Owner:** sua organização (recomendado) ou sua conta
-   - **Repository name:** `elytron-dash2board`
+   - **Repository name:** `dash2board`
    - **Description:** `Inteligência de segurança cibernética para CISOs e tomadores de decisão`
    - **Visibility: Private** ← obrigatório
    - **Initialize this repository with:** deixe **tudo desmarcado**.
@@ -103,7 +103,7 @@ ssh -T git@github.com     # deve dizer: Hi <usuário>! You've successfully authe
 ### Publicar
 
 ```bash
-git remote add origin git@github.com:<ORG>/elytron-dash2board.git
+git remote add origin git@github.com:dtupig/dash2board.git
 git push -u origin main --follow-tags
 ```
 
@@ -132,6 +132,24 @@ Se você é o único desenvolvedor, mantenha `Required approvals: 0` mas **exija
 os status checks**: é o que impede subir código com `analyze` sujo.
 
 ---
+
+## Repositório publicado
+
+| | |
+|---|---|
+| **Remote** | `git@github.com:dtupig/dash2board.git` |
+| **Branch padrão** | `main` |
+| **Tag do estado auditado** | `v0.1.0-auditado` |
+| **Chave SSH** | `~/.ssh/id_ed25519_elytron`, amarrada via `core.sshCommand` |
+| **Primeiro push** | 290 objetos, 357 KiB — confirma que nenhum `node_modules` entrou |
+
+A chave está ligada a **este** repositório por `core.sshCommand` em
+`.git/config`, não por alias em `~/.ssh/config`. Se um dia o push reclamar de
+permissão, confira primeiro:
+
+```bash
+git config --get core.sshCommand
+```
 
 ## Fluxo do dia a dia
 
