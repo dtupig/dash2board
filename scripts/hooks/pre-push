@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# Guarda local de pre-push.
+#
+# Substitui parcialmente a proteção de branch do GitHub quando ela não está
+# disponível (repositório privado em plano gratuito). NÃO é equivalente:
+# vale só nesta máquina e pode ser contornada com --no-verify. Serve para
+# evitar o erro por distração, não para impedir um ato deliberado.
+#
+# Instale com: ./scripts/hooks/install.sh
+# ---------------------------------------------------------------------------
+set -uo pipefail
+PROTECTED="main"
+R='\033[0;31m'; Y='\033[0;33m'; G='\033[0;32m'; N='\033[0m'
+
+BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null || echo '')"
+
+# 1. Bloqueia push direto no branch protegido
+if [ "$BRANCH" = "$PROTECTED" ]; then
+  printf "\n${R}✗ Push direto em '%s' bloqueado.${N}\n\n" "$PROTECTED"
+  printf "  O fluxo do projeto é branch + PR (docs/16_PLANO_DE_RETOMADA.md):\n\n"
+  printf "    git switch -c prompt/NN-descricao\n"
+  printf "    git push -u origin HEAD\n"
+  printf "    gh pr create --fill\n\n"
+  printf "  Em emergência, e assumindo o risco:\n"
+  printf "    git push --no-verify\n\n"
+  exit 1
+fi
+
+# 2. Formatação — é o que derrubou a CI antes
+if command -v dart >/dev/null 2>&1; then
+  if ! dart format --output=none --set-exit-if-changed lib test >/dev/null 2>&1; then
+    printf "\n${R}✗ Formatação pendente.${N} A CI vai reprovar.\n\n"
+    printf "  Rode: ${G}dart format lib test${N}\n\n"
+    exit 1
+  fi
+fi
+
+# 3. Análise estática nos mesmos termos da CI
+if command -v flutter >/dev/null 2>&1; then
+  printf "${Y}› rodando flutter analyze…${N}\n"
+  if ! flutter analyze --fatal-infos --fatal-warnings >/tmp/d2b-analyze.log 2>&1; then
+    printf "\n${R}✗ flutter analyze reprovou.${N} Últimas linhas:\n\n"
+    tail -20 /tmp/d2b-analyze.log | sed 's/^/    /'
+    printf "\n  Log completo: /tmp/d2b-analyze.log\n"
+    printf "  Para empurrar mesmo assim: git push --no-verify\n\n"
+    exit 1
+  fi
+fi
+
+printf "${G}✓ guardas locais aprovadas${N}\n"
+exit 0
