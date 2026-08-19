@@ -164,8 +164,7 @@ class RiskItem {
       domain: domain ?? this.domain,
       inherentScore: inherentScore ?? this.inherentScore,
       residualScore: residualScore ?? this.residualScore,
-      annualLossExpectancy:
-          annualLossExpectancy ?? this.annualLossExpectancy,
+      annualLossExpectancy: annualLossExpectancy ?? this.annualLossExpectancy,
       currency: currency ?? this.currency,
       treatment: treatment ?? this.treatment,
       acceptance: acceptance ?? this.acceptance,
@@ -205,5 +204,6 @@ class RiskItem {
       );
 
   @override
-  String toString() => 'RiskItem($id, $businessUnit, ALE: $annualLossExpectancy $currency)';
+  String toString() =>
+      'RiskItem($id, $businessUnit, ALE: $annualLossExpectancy $currency)';
 }

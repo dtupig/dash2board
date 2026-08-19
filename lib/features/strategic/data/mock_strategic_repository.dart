@@ -36,7 +36,18 @@ class MockStrategicRepository implements StrategicRepository {
   /// Índice geral mês a mês, dos 12 meses anteriores até hoje. Melhora
   /// consistente (64 → 72), com um recuo nos meses 7 e 8 do período.
   static const List<int> _monthlyOverallScores = <int>[
-    64, 65, 66, 67, 68, 69, 66, 65, 68, 70, 71, 72,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    66,
+    65,
+    68,
+    70,
+    71,
+    72,
   ];
 
   static const int _peerMedian = 68;
@@ -55,7 +66,8 @@ class MockStrategicRepository implements StrategicRepository {
   /// geral). Appsec e terceiros pioraram no mês, mesmo com a média geral
   /// melhorando - é exatamente o tipo de contraste que justifica o
   /// drill-down por domínio em vez de só olhar o número geral.
-  static const Map<SecurityDomain, int> _byDomainDelta30d = <SecurityDomain, int>{
+  static const Map<SecurityDomain, int> _byDomainDelta30d =
+      <SecurityDomain, int>{
     SecurityDomain.identity: 2,
     SecurityDomain.endpoint: 1,
     SecurityDomain.cloud: 3,
@@ -232,8 +244,7 @@ class MockStrategicRepository implements StrategicRepository {
       ),
       SurveyQuestion(
         id: 'prazo-reducao',
-        prompt:
-            'Em quanto tempo você espera reduzir pela metade o número de '
+        prompt: 'Em quanto tempo você espera reduzir pela metade o número de '
             'lacunas abertas?',
         options: <String>[
           'Até 3 meses',
@@ -245,8 +256,7 @@ class MockStrategicRepository implements StrategicRepository {
       ),
       SurveyQuestion(
         id: 'domínio-investido',
-        prompt:
-            'Qual domínio de segurança recebeu mais investimento da sua '
+        prompt: 'Qual domínio de segurança recebeu mais investimento da sua '
             'empresa no último ano?',
         options: <String>[
           'Identidade e Acesso',
@@ -562,7 +572,8 @@ class MockStrategicRepository implements StrategicRepository {
       ),
       RiskItem(
         id: 'risk-ecommerce-ddos',
-        title: 'Indisponibilidade do e-commerce por ataque de negação de serviço',
+        title:
+            'Indisponibilidade do e-commerce por ataque de negação de serviço',
         businessUnit: 'Varejo',
         domain: SecurityDomain.cloud,
         inherentScore: 70,
@@ -656,7 +667,8 @@ class MockStrategicRepository implements StrategicRepository {
       insight(
         id: 'ransomware-varejo-2026',
         topic: 'Ameaças',
-        title: 'Aumento de 35% em ataques de ransomware contra o varejo brasileiro',
+        title:
+            'Aumento de 35% em ataques de ransomware contra o varejo brasileiro',
         summary:
             'Grupos de ransomware miram cadeias de suprimento do varejo com dupla extorsão.',
         publishedDaysAgo: 5,
@@ -711,7 +723,8 @@ class MockStrategicRepository implements StrategicRepository {
       insight(
         id: 'appsec-shift-left',
         topic: 'AppSec',
-        title: 'Tendência: adoção de segurança de aplicações (AppSec) shift-left',
+        title:
+            'Tendência: adoção de segurança de aplicações (AppSec) shift-left',
         summary:
             'Empresas que testam segurança no pipeline reduzem o custo de correção em até 6x.',
         publishedDaysAgo: 35,

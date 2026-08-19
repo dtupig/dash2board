@@ -23,7 +23,8 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
   }
 
-  testWidgets('renderiza todos os widgets de gráfico sem exceção no tema escuro', (
+  testWidgets(
+      'renderiza todos os widgets de gráfico sem exceção no tema escuro', (
     WidgetTester tester,
   ) async {
     useTallSurface(tester);
@@ -39,7 +40,8 @@ void main() {
     expect(find.text('ChartFrame · estados'), findsOneWidget);
   });
 
-  testWidgets('renderiza todos os widgets de gráfico sem exceção no tema claro', (
+  testWidgets('renderiza todos os widgets de gráfico sem exceção no tema claro',
+      (
     WidgetTester tester,
   ) async {
     useTallSurface(tester);

@@ -29,7 +29,8 @@ class BoardDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     const UserRole role = UserRole.board;
     final AsyncValue<List<RiskItem>> risksAsync = ref.watch(allRisksProvider);
-    final AsyncValue<TenantProfile> profileAsync = ref.watch(tenantProfileProvider);
+    final AsyncValue<TenantProfile> profileAsync =
+        ref.watch(tenantProfileProvider);
 
     void retryAll() {
       ref.invalidate(allRisksProvider);
@@ -156,13 +157,15 @@ class _BoardBody extends ConsumerWidget {
     final double maxBuAle = aleByBu.values.isEmpty
         ? 1
         : aleByBu.values.reduce((double a, double b) => a > b ? a : b);
-    final double percentOfRevenue =
-        profile.annualRevenue <= 0 ? 0 : (totalAle / profile.annualRevenue) * 100;
+    final double percentOfRevenue = profile.annualRevenue <= 0
+        ? 0
+        : (totalAle / profile.annualRevenue) * 100;
     final double quarterlyDelta = totalAle - profile.previousQuarterAle;
     final List<RiskItem> pending = risks
         .where((RiskItem r) => r.acceptance == RiskAcceptance.pending)
         .toList(growable: false)
-      ..sort((RiskItem a, RiskItem b) => a.reviewDueAt.compareTo(b.reviewDueAt));
+      ..sort(
+          (RiskItem a, RiskItem b) => a.reviewDueAt.compareTo(b.reviewDueAt));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -183,7 +186,8 @@ class _BoardBody extends ConsumerWidget {
                     Text(
                       'Exposição financeira estimada',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -197,7 +201,8 @@ class _BoardBody extends ConsumerWidget {
                     Text(
                       '${percentOfRevenue.toStringAsFixed(1)}% da receita anual',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ],
@@ -227,7 +232,8 @@ class _BoardBody extends ConsumerWidget {
         // Bloco 2 - impacto por unidade de negócio.
         ChartFrame(
           title: 'Impacto por unidade de negócio',
-          subtitle: 'Toque em uma unidade para ver os riscos por trás do número.',
+          subtitle:
+              'Toque em uma unidade para ver os riscos por trás do número.',
           height: 76.0 * aleByBu.length + 24,
           onShowTable: (BuildContext sheetContext) => _businessUnitTable(
             sheetContext,
@@ -408,7 +414,8 @@ class _RiskSummaryCard extends StatelessWidget {
         children: <Widget>[
           Text(
             risk.title,
-            style: theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
+            style:
+                theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -435,7 +442,8 @@ class _PendingDecisionCard extends ConsumerStatefulWidget {
   final String ownerName;
 
   @override
-  ConsumerState<_PendingDecisionCard> createState() => _PendingDecisionCardState();
+  ConsumerState<_PendingDecisionCard> createState() =>
+      _PendingDecisionCardState();
 }
 
 class _PendingDecisionCardState extends ConsumerState<_PendingDecisionCard> {
@@ -507,7 +515,8 @@ class _PendingDecisionCardState extends ConsumerState<_PendingDecisionCard> {
         children: <Widget>[
           Text(
             risk.title,
-            style: theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
+            style:
+                theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
@@ -538,8 +547,9 @@ class _PendingDecisionCardState extends ConsumerState<_PendingDecisionCard> {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: FilledButton(
-                  onPressed:
-                      _submitting ? null : () => _decide(RiskAcceptance.accepted),
+                  onPressed: _submitting
+                      ? null
+                      : () => _decide(RiskAcceptance.accepted),
                   child: _submitting
                       ? const SizedBox(
                           width: 18,
@@ -601,12 +611,14 @@ class _RiskDecisionDialogState extends State<_RiskDecisionDialog> {
             '${formatDatePtBr(widget.risk.reviewDueAt)}.';
 
     return AlertDialog(
-      title: Text(isAccepting ? 'Aceitar risco' : 'Solicitar plano de mitigação'),
+      title:
+          Text(isAccepting ? 'Aceitar risco' : 'Solicitar plano de mitigação'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(widget.risk.title, style: Theme.of(context).textTheme.titleSmall),
+          Text(widget.risk.title,
+              style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: AppSpacing.md),
           Text(explanation),
           const SizedBox(height: AppSpacing.lg),

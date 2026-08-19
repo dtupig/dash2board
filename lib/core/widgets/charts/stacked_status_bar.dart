@@ -53,8 +53,7 @@ class StackedStatusBar extends StatelessWidget {
         _StackSegment(count: compliantCount, color: AppColors.success),
       if (partialCount > 0)
         _StackSegment(count: partialCount, color: AppColors.warning),
-      if (gapCount > 0)
-        _StackSegment(count: gapCount, color: AppColors.danger),
+      if (gapCount > 0) _StackSegment(count: gapCount, color: AppColors.danger),
     ];
 
     return Semantics(
@@ -83,7 +82,8 @@ class StackedStatusBar extends StatelessWidget {
                       children: <Widget>[
                         for (int i = 0; i < segments.length; i++) ...<Widget>[
                           if (i > 0)
-                            const SizedBox(width: ChartTokens.stackedSegmentGap),
+                            const SizedBox(
+                                width: ChartTokens.stackedSegmentGap),
                           Expanded(
                             flex: segments[i].count,
                             child: Container(

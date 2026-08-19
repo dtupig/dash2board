@@ -94,9 +94,7 @@ class PostureIndex {
     if (byDomain.isEmpty) {
       return null;
     }
-    return byDomain.entries
-        .reduce((a, b) => a.value <= b.value ? a : b)
-        .key;
+    return byDomain.entries.reduce((a, b) => a.value <= b.value ? a : b).key;
   }
 
   /// Domínio com a maior nota.
@@ -104,9 +102,7 @@ class PostureIndex {
     if (byDomain.isEmpty) {
       return null;
     }
-    return byDomain.entries
-        .reduce((a, b) => a.value >= b.value ? a : b)
-        .key;
+    return byDomain.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
   }
 
   PostureIndex copyWith({

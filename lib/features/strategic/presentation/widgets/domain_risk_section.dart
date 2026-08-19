@@ -33,12 +33,12 @@ class DomainRiskSection extends ConsumerWidget {
   }
 
   Widget _table(BuildContext context, PostureIndex index) {
-    final List<MapEntry<SecurityDomain, int>> sorted =
-        index.byDomain.entries.toList(growable: false)
-          ..sort(
-            (MapEntry<SecurityDomain, int> a, MapEntry<SecurityDomain, int> b) =>
-                a.value.compareTo(b.value),
-          );
+    final List<MapEntry<SecurityDomain, int>> sorted = index.byDomain.entries
+        .toList(growable: false)
+      ..sort(
+        (MapEntry<SecurityDomain, int> a, MapEntry<SecurityDomain, int> b) =>
+            a.value.compareTo(b.value),
+      );
     return SizedBox(
       height: 280,
       child: ListView.builder(
@@ -57,8 +57,7 @@ class DomainRiskSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<PostureIndex> indexAsync =
-        ref.watch(postureIndexProvider);
+    final AsyncValue<PostureIndex> indexAsync = ref.watch(postureIndexProvider);
     final PostureIndex? index = indexAsync.value;
 
     return ChartFrame(
@@ -72,8 +71,7 @@ class DomainRiskSection extends ConsumerWidget {
       child: indexAsync.when(
         loading: () => const ChartLoading(),
         error: (Object error, StackTrace stackTrace) => ChartError(
-          message:
-              'Não foi possível carregar a postura por domínio agora.',
+          message: 'Não foi possível carregar a postura por domínio agora.',
           onRetry: () => ref.invalidate(postureIndexProvider),
         ),
         data: (PostureIndex data) {
@@ -86,7 +84,8 @@ class DomainRiskSection extends ConsumerWidget {
           final List<DomainBarDatum> bars = <DomainBarDatum>[
             for (final MapEntry<SecurityDomain, int> entry
                 in data.byDomain.entries)
-              DomainBarDatum(label: entry.key.label, value: entry.value.toDouble()),
+              DomainBarDatum(
+                  label: entry.key.label, value: entry.value.toDouble()),
           ];
 
           return DomainBarChart(

@@ -30,7 +30,8 @@ void main() {
       'Subiu 8 pontos em 30 dias.',
     );
 
-    final Icon icon = tester.widget<Icon>(find.byIcon(Icons.arrow_upward_rounded));
+    final Icon icon =
+        tester.widget<Icon>(find.byIcon(Icons.arrow_upward_rounded));
     expect(icon.color, ChartTokens.divergentPositive);
 
     handle.dispose();

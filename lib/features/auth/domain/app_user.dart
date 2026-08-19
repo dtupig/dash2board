@@ -74,7 +74,8 @@ class AppUser {
   bool get hasTenant => tenantId.isNotEmpty;
 
   /// Pode entrar em um dashboard? Exige papel provisionado e tenant válido.
-  bool get canEnterDashboard => isAuthenticated && hasTenant && role.isProvisioned;
+  bool get canEnterDashboard =>
+      isAuthenticated && hasTenant && role.isProvisioned;
 
   /// Primeiro nome, para a saudação da tela de boas-vindas.
   String get firstName {

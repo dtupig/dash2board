@@ -119,7 +119,8 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgets('abrir um controle sem evidência mostra o estado vazio de evidência', (
+  testWidgets(
+      'abrir um controle sem evidência mostra o estado vazio de evidência', (
     WidgetTester tester,
   ) async {
     useTallSurface(tester);

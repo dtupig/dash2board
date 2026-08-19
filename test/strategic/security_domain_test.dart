@@ -11,7 +11,8 @@ void main() {
     expect(SecurityDomain.fromWire('thirdparty'), SecurityDomain.thirdParty);
   });
 
-  test('fromWire desconhecido, nulo ou de tipo errado cai em fallback seguro', () {
+  test('fromWire desconhecido, nulo ou de tipo errado cai em fallback seguro',
+      () {
     expect(SecurityDomain.fromWire('setor-novo'), SecurityDomain.identity);
     expect(SecurityDomain.fromWire(null), SecurityDomain.identity);
     expect(SecurityDomain.fromWire(42), SecurityDomain.identity);

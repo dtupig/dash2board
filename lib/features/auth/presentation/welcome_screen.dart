@@ -97,9 +97,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                                   child: _Brand(compact: compact),
                                 ),
                                 SizedBox(
-                                  height: compact
-                                      ? AppSpacing.xl
-                                      : AppSpacing.xxxl,
+                                  height:
+                                      compact ? AppSpacing.xl : AppSpacing.xxxl,
                                 ),
                                 _Fade(
                                   controller: _entrance,

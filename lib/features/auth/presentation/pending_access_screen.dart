@@ -96,8 +96,7 @@ class PendingAccessScreen extends ConsumerWidget {
                                   bottom: AppSpacing.sm,
                                 ),
                                 child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Icon(
                                       Icons.check_circle_outline,
@@ -124,7 +123,8 @@ class PendingAccessScreen extends ConsumerWidget {
                           child: Container(
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             decoration: BoxDecoration(
-                              color: scheme.errorContainer.withValues(alpha: 0.28),
+                              color:
+                                  scheme.errorContainer.withValues(alpha: 0.28),
                               borderRadius: AppRadius.fieldRadius,
                               border: Border.all(
                                 color: scheme.error.withValues(alpha: 0.55),
@@ -133,7 +133,8 @@ class PendingAccessScreen extends ConsumerWidget {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Icon(Icons.error_outline, size: 20, color: scheme.error),
+                                Icon(Icons.error_outline,
+                                    size: 20, color: scheme.error),
                                 const SizedBox(width: AppSpacing.md),
                                 Expanded(
                                   child: Text(
@@ -161,11 +162,14 @@ class PendingAccessScreen extends ConsumerWidget {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.refresh, size: 20),
                         label: Text(
-                          isBusy ? 'Verificando...' : 'Verificar liberação agora',
+                          isBusy
+                              ? 'Verificando...'
+                              : 'Verificar liberação agora',
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),

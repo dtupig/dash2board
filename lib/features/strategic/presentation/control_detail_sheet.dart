@@ -25,7 +25,8 @@ class ControlDetailSheet extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final ColorScheme scheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
-    final bool overdue = isReviewOverdue(control.lastReviewedAt, DateTime.now());
+    final bool overdue =
+        isReviewOverdue(control.lastReviewedAt, DateTime.now());
 
     return DraggableScrollableSheet(
       expand: false,
@@ -87,7 +88,8 @@ class ControlDetailSheet extends StatelessWidget {
                 label: 'Responsável',
                 child: Text(
                   control.ownerName,
-                  style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                  style:
+                      textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -97,16 +99,18 @@ class ControlDetailSheet extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       formatDatePtBr(control.lastReviewedAt),
-                      style:
-                          textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: scheme.onSurface),
                     ),
                     if (overdue) ...<Widget>[
                       const SizedBox(width: AppSpacing.sm),
-                      Icon(Icons.event_busy_rounded, size: 16, color: scheme.error),
+                      Icon(Icons.event_busy_rounded,
+                          size: 16, color: scheme.error),
                       const SizedBox(width: AppSpacing.xxs),
                       Text(
                         'prazo de revisão vencido',
-                        style: textTheme.labelSmall?.copyWith(color: scheme.error),
+                        style:
+                            textTheme.labelSmall?.copyWith(color: scheme.error),
                       ),
                     ],
                   ],
@@ -178,13 +182,15 @@ class _EmptyEvidence extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Icon(Icons.link_off_rounded, color: scheme.onSurfaceVariant, size: 20),
+            Icon(Icons.link_off_rounded,
+                color: scheme.onSurfaceVariant, size: 20),
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 'Este controle não tem evidência anexada. Não há artefato '
                 'registrado que sustente o status atual perante auditoria.',
-                style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                style: textTheme.bodySmall
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               ),
             ),
           ],

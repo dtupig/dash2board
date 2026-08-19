@@ -70,9 +70,8 @@ class _SparklinePainter extends CustomPainter {
 
     final double minValue = values.reduce(math.min);
     final double maxValue = values.reduce(math.max);
-    final double range = (maxValue - minValue).abs() < 1e-9
-        ? 1
-        : maxValue - minValue;
+    final double range =
+        (maxValue - minValue).abs() < 1e-9 ? 1 : maxValue - minValue;
 
     final double stepX = size.width / (values.length - 1);
     final Paint linePaint = Paint()

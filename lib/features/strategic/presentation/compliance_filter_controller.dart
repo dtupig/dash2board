@@ -77,8 +77,9 @@ class ComplianceFilterNotifier extends Notifier<ComplianceFilterState> {
           ? ComplianceFramework.fromWire(frameworkWire)
           : state.framework,
       status: state.status,
-      domain:
-          domainWire != null ? SecurityDomain.fromWire(domainWire) : state.domain,
+      domain: domainWire != null
+          ? SecurityDomain.fromWire(domainWire)
+          : state.domain,
     );
   }
 }

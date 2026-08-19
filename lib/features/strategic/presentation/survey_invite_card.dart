@@ -10,7 +10,8 @@ import '../domain/survey.dart';
 /// pesquisa nunca desaparece, porque ver a comparação de novo também tem
 /// valor.
 class SurveyInviteCard extends StatelessWidget {
-  const SurveyInviteCard({super.key, required this.survey, required this.onTap});
+  const SurveyInviteCard(
+      {super.key, required this.survey, required this.onTap});
 
   final Survey survey;
   final VoidCallback onTap;

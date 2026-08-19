@@ -33,7 +33,8 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
   void _openDetail(InsightItem insight) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => InsightDetailScreen(insight: insight),
+        builder: (BuildContext context) =>
+            InsightDetailScreen(insight: insight),
       ),
     );
   }
@@ -220,8 +221,9 @@ class _InsightsBody extends StatelessWidget {
                       child: Text(
                         formatMonthYearPtBr(row.headerDate!),
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                     ),
@@ -353,7 +355,8 @@ class _InsightCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(
               insight.title,
-              style: theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
+              style:
+                  theme.textTheme.titleSmall?.copyWith(color: scheme.onSurface),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(

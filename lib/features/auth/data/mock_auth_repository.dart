@@ -47,8 +47,7 @@ class MockAuthRepository implements AuthRepository {
     final String normalized = email.trim().toLowerCase();
     final String? wireRole = AppConfig.demoAccounts[normalized];
 
-    if (wireRole == null ||
-        password.length < AppConfig.minDemoPasswordLength) {
+    if (wireRole == null || password.length < AppConfig.minDemoPasswordLength) {
       throw const AppFailure.invalidCredentials();
     }
 

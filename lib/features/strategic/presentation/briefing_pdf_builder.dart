@@ -139,9 +139,8 @@ abstract final class BriefingPdfBuilder {
     // gráfico (mínimo 3:1).
     final PdfColor deltaTriangleColor =
         isPositive ? _accent : (isNegative ? _negative : _textMuted);
-    final String deltaText = isPositive
-        ? '+${data.delta}'
-        : (isNegative ? '${data.delta}' : '0');
+    final String deltaText =
+        isPositive ? '+${data.delta}' : (isNegative ? '${data.delta}' : '0');
     final String peerComparisonText = data.overallScore >= data.peerMedian
         ? 'acima da mediana do setor (empresas do mesmo porte e segmento), '
             'que está em ${data.peerMedian} pontos'
@@ -176,7 +175,8 @@ abstract final class BriefingPdfBuilder {
                 child: pw.CustomPaint(
                   size: const PdfPoint(7, 7),
                   painter: (PdfGraphics canvas, PdfPoint size) {
-                    _paintTrend(canvas, size, up: isPositive, color: deltaTriangleColor);
+                    _paintTrend(canvas, size,
+                        up: isPositive, color: deltaTriangleColor);
                   },
                 ),
               ),

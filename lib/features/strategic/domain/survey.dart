@@ -22,7 +22,8 @@ class SurveyQuestion {
       id: map['id'] as String? ?? '',
       prompt: map['prompt'] as String? ?? '',
       options: <String>[
-        for (final Object? option in (map['options'] as List?) ?? const <Object?>[])
+        for (final Object? option
+            in (map['options'] as List?) ?? const <Object?>[])
           option as String,
       ],
       peerDistribution: <int>[

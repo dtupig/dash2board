@@ -147,13 +147,15 @@ abstract final class AppTheme {
             RoundedRectangleBorder(borderRadius: AppRadius.buttonRadius),
           ),
           textStyle: WidgetStatePropertyAll<TextStyle?>(textTheme.labelLarge),
-          backgroundColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          backgroundColor:
+              WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
               return scheme.onSurface.withValues(alpha: 0.12);
             }
             return scheme.primary;
           }),
-          foregroundColor: WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
+          foregroundColor:
+              WidgetStateProperty.resolveWith<Color>((Set<WidgetState> states) {
             if (states.contains(WidgetState.disabled)) {
               return scheme.onSurface.withValues(alpha: 0.38);
             }

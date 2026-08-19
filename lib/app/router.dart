@@ -164,18 +164,18 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
         name: 'operational',
         builder: (BuildContext context, GoRouterState state) =>
             const OnboardingGate(
-              role: UserRole.operational,
-              child: OperationalDashboardScreen(),
-            ),
+          role: UserRole.operational,
+          child: OperationalDashboardScreen(),
+        ),
       ),
       GoRoute(
         path: AppRoute.strategic,
         name: 'strategic',
         builder: (BuildContext context, GoRouterState state) =>
             const OnboardingGate(
-              role: UserRole.strategic,
-              child: StrategicDashboardScreen(),
-            ),
+          role: UserRole.strategic,
+          child: StrategicDashboardScreen(),
+        ),
         routes: <RouteBase>[
           GoRoute(
             // Relativo: compõe com o pai para formar
@@ -208,9 +208,9 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
         name: 'board',
         builder: (BuildContext context, GoRouterState state) =>
             const OnboardingGate(
-              role: UserRole.board,
-              child: BoardDashboardScreen(),
-            ),
+          role: UserRole.board,
+          child: BoardDashboardScreen(),
+        ),
       ),
       // Só existe em modo de demonstração: nenhum build de produção enxerga
       // esta rota, mesmo lendo o código-fonte publicado.

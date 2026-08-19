@@ -58,7 +58,8 @@ class InsightDetailScreen extends StatelessWidget {
               header: true,
               child: Text(
                 insight.title,
-                style: textTheme.headlineSmall?.copyWith(color: scheme.onSurface),
+                style:
+                    textTheme.headlineSmall?.copyWith(color: scheme.onSurface),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -85,7 +86,8 @@ class InsightDetailScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             SelectableText(
               insight.sourceUrl,
-              style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+              style:
+                  textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ],
         ),

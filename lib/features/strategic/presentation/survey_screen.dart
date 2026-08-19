@@ -25,10 +25,9 @@ class SurveyScreen extends ConsumerStatefulWidget {
 
 class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   int _questionIndex = 0;
-  late final Map<String, String> _answers =
-      widget.survey.yourAnswers == null
-          ? <String, String>{}
-          : Map<String, String>.of(widget.survey.yourAnswers!);
+  late final Map<String, String> _answers = widget.survey.yourAnswers == null
+      ? <String, String>{}
+      : Map<String, String>.of(widget.survey.yourAnswers!);
   late bool _showResults = widget.survey.alreadyResponded;
   bool _submitting = false;
   String? _submitError;
@@ -106,7 +105,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       ),
       body: SafeArea(
         child: _showResults
-            ? _SurveyResults(survey: _survey, answers: _answers, onClose: _close)
+            ? _SurveyResults(
+                survey: _survey, answers: _answers, onClose: _close)
             : _SurveyQuestionStep(
                 survey: _survey,
                 questionIndex: _questionIndex,
@@ -231,7 +231,8 @@ class _SurveyQuestionStep extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   submitError!,
-                  style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+                  style:
+                      theme.textTheme.bodySmall?.copyWith(color: scheme.error),
                 ),
               ],
             ],
@@ -415,7 +416,8 @@ class _OptionShareBar extends StatelessWidget {
                   option,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: scheme.onSurface,
-                    fontWeight: isYourAnswer ? FontWeight.w700 : FontWeight.w400,
+                    fontWeight:
+                        isYourAnswer ? FontWeight.w700 : FontWeight.w400,
                   ),
                 ),
               ),

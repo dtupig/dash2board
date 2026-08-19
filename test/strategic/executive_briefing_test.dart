@@ -149,7 +149,8 @@ void main() {
     },
   );
 
-  testWidgets('com histórico de postura vazio, mostra o estado de dado insuficiente', (
+  testWidgets(
+      'com histórico de postura vazio, mostra o estado de dado insuficiente', (
     WidgetTester tester,
   ) async {
     useTallSurface(tester);

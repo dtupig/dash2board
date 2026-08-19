@@ -157,7 +157,8 @@ class _ComplianceScreenState extends ConsumerState<ComplianceScreen> {
         context: context,
         isScrollControlled: true,
         showDragHandle: true,
-        builder: (BuildContext sheetContext) => ControlDetailSheet(control: control),
+        builder: (BuildContext sheetContext) =>
+            ControlDetailSheet(control: control),
       ),
     );
   }
@@ -366,7 +367,8 @@ class _ComplianceBody extends StatelessWidget {
                     child: _FrameworkSummaryCard(
                       framework: framework,
                       controls: allControls
-                          .where((ComplianceControl c) => c.framework == framework)
+                          .where(
+                              (ComplianceControl c) => c.framework == framework)
                           .toList(growable: false),
                       selected: filter.framework == framework,
                       onTap: () => filterNotifier.setFramework(
@@ -430,8 +432,9 @@ class _FrameworkSummaryCard extends StatelessWidget {
     final int partial = controls
         .where((ComplianceControl c) => c.status == ControlStatus.partial)
         .length;
-    final int gap =
-        controls.where((ComplianceControl c) => c.status == ControlStatus.gap).length;
+    final int gap = controls
+        .where((ComplianceControl c) => c.status == ControlStatus.gap)
+        .length;
     final int total = controls.length;
     final int percent = total == 0 ? 0 : ((compliant / total) * 100).round();
 
@@ -448,7 +451,8 @@ class _FrameworkSummaryCard extends StatelessWidget {
             subtitle: '$percent% conforme · $gap lacuna${gap == 1 ? '' : 's'}',
             height: 110,
             action: selected
-                ? Icon(Icons.check_circle_rounded, color: scheme.primary, size: 18)
+                ? Icon(Icons.check_circle_rounded,
+                    color: scheme.primary, size: 18)
                 : null,
             onShowTable: (BuildContext sheetContext) => _frameworkTable(
               sheetContext,
@@ -506,7 +510,8 @@ class _FilterRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: <Widget>[
-          for (final ComplianceFramework framework in ComplianceFramework.values)
+          for (final ComplianceFramework framework
+              in ComplianceFramework.values)
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.xs),
               child: FilterChip(

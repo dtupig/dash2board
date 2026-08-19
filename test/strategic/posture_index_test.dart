@@ -24,8 +24,10 @@ void main() {
 
   test('trendDirection reflete o sinal do delta', () {
     expect(index.trendDirection, TrendDirection.up);
-    expect(index.copyWith(previousScore: 72).trendDirection, TrendDirection.flat);
-    expect(index.copyWith(previousScore: 80).trendDirection, TrendDirection.down);
+    expect(
+        index.copyWith(previousScore: 72).trendDirection, TrendDirection.flat);
+    expect(
+        index.copyWith(previousScore: 80).trendDirection, TrendDirection.down);
   });
 
   test('weakestDomain e strongestDomain apontam para os extremos', () {

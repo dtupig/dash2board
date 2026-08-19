@@ -20,8 +20,7 @@ class PostureHeadline extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<PostureIndex> indexAsync =
-        ref.watch(postureIndexProvider);
+    final AsyncValue<PostureIndex> indexAsync = ref.watch(postureIndexProvider);
     final AsyncValue<List<PostureSnapshot>> historyAsync =
         ref.watch(postureHistoryProvider);
 
@@ -35,8 +34,7 @@ class PostureHeadline extends ConsumerWidget {
         child: SizedBox(
           height: _height,
           child: ChartError(
-            message:
-                'Não foi possível carregar o índice de postura agora.',
+            message: 'Não foi possível carregar o índice de postura agora.',
             onRetry: () {
               ref.invalidate(postureIndexProvider);
               ref.invalidate(postureHistoryProvider);

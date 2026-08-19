@@ -34,7 +34,8 @@ String formatCurrencyCompactBrl(num value) {
   final num magnitude = value.abs();
   final String sign = value < 0 ? '-' : '';
   if (magnitude >= 1000000) {
-    final String millions = (magnitude / 1000000).toStringAsFixed(1).replaceAll('.', ',');
+    final String millions =
+        (magnitude / 1000000).toStringAsFixed(1).replaceAll('.', ',');
     return '${sign}R\$ $millions mi';
   }
   if (magnitude >= 1000) {

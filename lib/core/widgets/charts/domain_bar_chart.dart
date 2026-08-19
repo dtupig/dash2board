@@ -82,7 +82,8 @@ class DomainBarChart extends StatelessWidget {
   }
 
   String _labelFor(double value) =>
-      valueLabelBuilder?.call(value) ?? '${value.toStringAsFixed(0)}$valueSuffix';
+      valueLabelBuilder?.call(value) ??
+      '${value.toStringAsFixed(0)}$valueSuffix';
 
   String _semanticLabel() {
     if (data.isEmpty) {
@@ -90,9 +91,8 @@ class DomainBarChart extends StatelessWidget {
     }
     final List<DomainBarDatum> sortedForLabel = List<DomainBarDatum>.of(data)
       ..sort(
-        (DomainBarDatum a, DomainBarDatum b) => ascending
-            ? a.value.compareTo(b.value)
-            : b.value.compareTo(a.value),
+        (DomainBarDatum a, DomainBarDatum b) =>
+            ascending ? a.value.compareTo(b.value) : b.value.compareTo(a.value),
       );
     final String items = sortedForLabel
         .map((DomainBarDatum d) => '${d.label}: ${_labelFor(d.value)}')
@@ -100,7 +100,8 @@ class DomainBarChart extends StatelessWidget {
     final String medianSuffix = peerMedian == null
         ? ''
         : ' Mediana do setor: ${_labelFor(peerMedian!)}.';
-    final String order = ascending ? 'do menor para o maior' : 'do maior para o menor';
+    final String order =
+        ascending ? 'do menor para o maior' : 'do maior para o menor';
     return 'Valores por domínio, $order: $items.$medianSuffix';
   }
 
@@ -112,9 +113,8 @@ class DomainBarChart extends StatelessWidget {
 
     final List<DomainBarDatum> sorted = List<DomainBarDatum>.of(data)
       ..sort(
-        (DomainBarDatum a, DomainBarDatum b) => ascending
-            ? a.value.compareTo(b.value)
-            : b.value.compareTo(a.value),
+        (DomainBarDatum a, DomainBarDatum b) =>
+            ascending ? a.value.compareTo(b.value) : b.value.compareTo(a.value),
       );
 
     return Semantics(
@@ -205,7 +205,8 @@ class _DomainBarRow extends StatelessWidget {
             datum.label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+            style:
+                textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ),
         const SizedBox(width: AppSpacing.sm),

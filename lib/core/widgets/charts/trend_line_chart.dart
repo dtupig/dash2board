@@ -8,8 +8,18 @@ import 'chart_legend.dart';
 import 'chart_motion.dart';
 
 const List<String> _monthAbbreviations = <String>[
-  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
 ];
 
 String _formatMonth(DateTime date) {
@@ -124,14 +134,12 @@ class _TrendLineChartState extends State<TrendLineChart> {
 
   String _semanticLabel() {
     final int count = widget.series.length;
-    final String seriesDescriptions = widget.series
-        .map((TrendSeries s) {
-          final double first = s.values.first;
-          final double last = s.values.last;
-          return '${s.label} de ${first.toStringAsFixed(0)} para '
-              '${last.toStringAsFixed(0)}${widget.valueSuffix}';
-        })
-        .join('; ');
+    final String seriesDescriptions = widget.series.map((TrendSeries s) {
+      final double first = s.values.first;
+      final double last = s.values.last;
+      return '${s.label} de ${first.toStringAsFixed(0)} para '
+          '${last.toStringAsFixed(0)}${widget.valueSuffix}';
+    }).join('; ');
     return 'Gráfico de tendência com $count série${count > 1 ? 's' : ''}: '
         '$seriesDescriptions.';
   }
@@ -242,8 +250,9 @@ class _Tooltip extends StatelessWidget {
     final double stepX =
         timestamps.length > 1 ? size.width / (timestamps.length - 1) : 0;
     final double x = stepX * index;
-    final double left =
-        (x - tooltipWidth / 2).clamp(0, math.max(0, size.width - tooltipWidth)).toDouble();
+    final double left = (x - tooltipWidth / 2)
+        .clamp(0, math.max(0, size.width - tooltipWidth))
+        .toDouble();
 
     return Positioned(
       left: left,
@@ -366,15 +375,13 @@ class _TrendPainter extends CustomPainter {
       minValue = allValues.reduce(math.min);
       maxValue = allValues.reduce(math.max);
     }
-    final double range = (maxValue - minValue).abs() < 1e-9
-        ? 1
-        : maxValue - minValue;
+    final double range =
+        (maxValue - minValue).abs() < 1e-9 ? 1 : maxValue - minValue;
 
     _drawGrid(canvas, plotArea);
 
-    final double stepX = timestamps.length > 1
-        ? plotArea.width / (timestamps.length - 1)
-        : 0;
+    final double stepX =
+        timestamps.length > 1 ? plotArea.width / (timestamps.length - 1) : 0;
 
     double yFor(double value) {
       final double normalized = (value - minValue) / range;
@@ -456,15 +463,20 @@ class _TrendPainter extends CustomPainter {
     final TextPainter painter = TextPainter(
       text: TextSpan(
         text: '${s.label} ${s.values.last.toStringAsFixed(0)}$valueSuffix',
-        style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.w600),
+        style: TextStyle(
+            color: textColor, fontSize: 10, fontWeight: FontWeight.w600),
       ),
       textDirection: TextDirection.ltr,
       maxLines: 1,
       ellipsis: '…',
     );
     painter.layout(maxWidth: math.max(0, plotArea.width - x - 4));
-    final double dx = (x + 6).clamp(0, math.max(0, plotArea.width - painter.width)).toDouble();
-    final double dy = (y - painter.height / 2).clamp(plotArea.top, plotArea.bottom).toDouble();
+    final double dx = (x + 6)
+        .clamp(0, math.max(0, plotArea.width - painter.width))
+        .toDouble();
+    final double dy = (y - painter.height / 2)
+        .clamp(plotArea.top, plotArea.bottom)
+        .toDouble();
     painter.paint(canvas, Offset(dx, dy));
   }
 
@@ -517,7 +529,8 @@ class _TrendPainter extends CustomPainter {
       final double dx = alignEnd ? x - painter.width : x;
       painter.paint(
         canvas,
-        Offset(dx.clamp(0, size.width - painter.width).toDouble(), size.height - painter.height),
+        Offset(dx.clamp(0, size.width - painter.width).toDouble(),
+            size.height - painter.height),
       );
     }
 

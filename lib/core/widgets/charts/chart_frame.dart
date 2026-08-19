@@ -177,7 +177,8 @@ class _ChartLoadingState extends State<ChartLoading>
                   alignment: Alignment.bottomCenter,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: scheme.onSurfaceVariant.withValues(alpha: alpha * 0.35),
+                      color: scheme.onSurfaceVariant
+                          .withValues(alpha: alpha * 0.35),
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(4),
                       ),
@@ -232,7 +233,8 @@ class ChartEmpty extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               ),
               if (actionLabel != null && onAction != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.sm),
@@ -276,7 +278,8 @@ class ChartError extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: textTheme.bodyMedium
+                    ?.copyWith(color: scheme.onSurfaceVariant),
               ),
               const SizedBox(height: AppSpacing.sm),
               OutlinedButton.icon(

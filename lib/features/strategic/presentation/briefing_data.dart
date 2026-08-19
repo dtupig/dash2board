@@ -39,7 +39,8 @@ class BriefingData {
           ..sort((a, b) => a.value.compareTo(b.value));
 
     final List<RiskItem> byAleDesc = List<RiskItem>.of(risks)
-      ..sort((a, b) => b.annualLossExpectancy.compareTo(a.annualLossExpectancy));
+      ..sort(
+          (a, b) => b.annualLossExpectancy.compareTo(a.annualLossExpectancy));
 
     final Map<ComplianceFramework, int?> percentByFramework =
         <ComplianceFramework, int?>{
@@ -51,8 +52,9 @@ class BriefingData {
     // histórico), não a `previousScore` de `PostureIndex` - que é só o mês
     // anterior. `postureHistory` chega ordenada do mais antigo para o mais
     // recente (contrato de `StrategicRepository.watchPostureHistory`).
-    final int twelveMonthsAgoScore =
-        postureHistory.isEmpty ? postureIndex.overallScore : postureHistory.first.score;
+    final int twelveMonthsAgoScore = postureHistory.isEmpty
+        ? postureIndex.overallScore
+        : postureHistory.first.score;
 
     return BriefingData(
       overallScore: postureIndex.overallScore,

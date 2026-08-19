@@ -49,8 +49,7 @@ class TopRisksSection extends ConsumerWidget {
         risksAsync.when(
           loading: () => const SizedBox(height: 96, child: ChartLoading()),
           error: (Object error, StackTrace stackTrace) => ChartError(
-            message:
-                'Não foi possível carregar os riscos de negócio agora.',
+            message: 'Não foi possível carregar os riscos de negócio agora.',
             onRetry: () => ref.invalidate(topRisksProvider),
           ),
           data: (List<RiskItem> risks) {

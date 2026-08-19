@@ -30,7 +30,8 @@ abstract final class AppRadius {
 
   static const BorderRadius cardRadius = BorderRadius.all(Radius.circular(lg));
   static const BorderRadius fieldRadius = BorderRadius.all(Radius.circular(md));
-  static const BorderRadius buttonRadius = BorderRadius.all(Radius.circular(md));
+  static const BorderRadius buttonRadius =
+      BorderRadius.all(Radius.circular(md));
 }
 
 /// Durações de animação padronizadas.

@@ -229,7 +229,8 @@ class _BriefingInsufficientDataBody extends StatelessWidget {
               'os snapshots mensais de postura existirem, o briefing pode '
               'ser gerado - não geramos um PDF com seções em branco.',
               textAlign: TextAlign.center,
-              style: textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: textTheme.bodyMedium
+                  ?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.lg),
             OutlinedButton.icon(
@@ -334,7 +335,8 @@ class _BriefingPreview extends StatelessWidget {
                             TextSpan(
                               text: '${entry.key.label} (${entry.value} '
                                   'pontos): ',
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             TextSpan(text: entry.key.briefingConsequence),
                           ],
@@ -346,8 +348,7 @@ class _BriefingPreview extends StatelessWidget {
             ),
             _Section(
               number: '3',
-              title:
-                  'Maiores exposições financeiras (perda anual esperada, ou '
+              title: 'Maiores exposições financeiras (perda anual esperada, ou '
                   'ALE)',
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +368,10 @@ class _BriefingPreview extends StatelessWidget {
                           const SizedBox(width: AppSpacing.sm),
                           Text(
                             formatCurrencyBrl(risk.annualLossExpectancy),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
@@ -414,10 +418,10 @@ class _BriefingPreview extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(999),
                             child: LinearProgressIndicator(
-                              value:
-                                  (data.compliancePercentByFramework[framework] ??
-                                          0) /
-                                      100,
+                              value: (data.compliancePercentByFramework[
+                                          framework] ??
+                                      0) /
+                                  100,
                               minHeight: 6,
                               backgroundColor: AppColors.lightSurfaceHighest,
                               color: AppColors.brandGreenDim,
@@ -442,7 +446,8 @@ class _BriefingPreview extends StatelessWidget {
                       children: <Widget>[
                         for (final RiskItem risk in data.pendingDecisions)
                           Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.xs),
                             child: Text(
                               '• ${risk.title} (${risk.businessUnit}) - '
                               'tratamento proposto: ${risk.treatment.label}, '
@@ -483,7 +488,8 @@ class _BriefingPreview extends StatelessWidget {
 }
 
 class _Section extends StatelessWidget {
-  const _Section({required this.number, required this.title, required this.child});
+  const _Section(
+      {required this.number, required this.title, required this.child});
 
   final String number;
   final String title;

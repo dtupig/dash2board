@@ -48,10 +48,8 @@ void main() {
     final MockStrategicRepository first = MockStrategicRepository();
     final MockStrategicRepository second = MockStrategicRepository();
 
-    final PostureIndex indexA =
-        await first.watchPostureIndex(tenantId).first;
-    final PostureIndex indexB =
-        await second.watchPostureIndex(tenantId).first;
+    final PostureIndex indexA = await first.watchPostureIndex(tenantId).first;
+    final PostureIndex indexB = await second.watchPostureIndex(tenantId).first;
     expect(indexA, indexB);
 
     final List<PostureSnapshot> historyA =
@@ -61,7 +59,8 @@ void main() {
     expect(historyA, historyB);
   });
 
-  test('watchCompliance traz os 24 controles distribuídos nos frameworks', () async {
+  test('watchCompliance traz os 24 controles distribuídos nos frameworks',
+      () async {
     final MockStrategicRepository repository = MockStrategicRepository();
     final List<ComplianceControl> all =
         await repository.watchCompliance(tenantId).first;
@@ -86,7 +85,8 @@ void main() {
     expect(risks.length, 3);
   });
 
-  test('watchInsights traz os 8 insights com 3 marcados como benchmark', () async {
+  test('watchInsights traz os 8 insights com 3 marcados como benchmark',
+      () async {
     final MockStrategicRepository repository = MockStrategicRepository();
     final List<InsightItem> insights =
         await repository.watchInsights(tenantId).first;

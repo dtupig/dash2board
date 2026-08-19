@@ -130,16 +130,14 @@ class DomainDetailSheet extends ConsumerWidget {
                 loading: () =>
                     const SizedBox(height: 96, child: ChartLoading()),
                 error: (Object error, StackTrace stackTrace) => ChartError(
-                  message:
-                      'Não foi possível carregar os controles agora.',
+                  message: 'Não foi possível carregar os controles agora.',
                   onRetry: () => ref.invalidate(complianceProvider),
                 ),
                 data: (List<ComplianceControl> controls) {
                   final List<ComplianceControl> gaps = controls
                       .where(
                         (ComplianceControl c) =>
-                            c.domain == domain &&
-                            c.status == ControlStatus.gap,
+                            c.domain == domain && c.status == ControlStatus.gap,
                       )
                       .toList(growable: false);
                   if (gaps.isEmpty) {
@@ -152,8 +150,7 @@ class DomainDetailSheet extends ConsumerWidget {
                     children: <Widget>[
                       for (final ComplianceControl control in gaps)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.sm),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                           child: _GapControlRow(control: control),
                         ),
                     ],

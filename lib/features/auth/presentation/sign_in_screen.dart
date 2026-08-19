@@ -102,9 +102,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     child: IconButton(
-                      onPressed: isBusy
-                          ? null
-                          : () => context.go(AppRoute.welcome),
+                      onPressed:
+                          isBusy ? null : () => context.go(AppRoute.welcome),
                       tooltip: 'Voltar',
                       icon: Icon(
                         Icons.arrow_back,
@@ -204,8 +203,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 Align(
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
-                                    onPressed:
-                                        isBusy ? null : () => unawaited(
+                                    onPressed: isBusy
+                                        ? null
+                                        : () => unawaited(
                                               _forgotPassword(),
                                             ),
                                     child: const Text('Esqueci minha senha'),
@@ -213,8 +213,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 ),
                                 const SizedBox(height: AppSpacing.sm),
                                 FilledButton(
-                                  onPressed:
-                                      isBusy ? null : () => unawaited(_submit()),
+                                  onPressed: isBusy
+                                      ? null
+                                      : () => unawaited(_submit()),
                                   child: isBusy
                                       ? SizedBox(
                                           width: 22,

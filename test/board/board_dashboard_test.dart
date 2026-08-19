@@ -82,7 +82,8 @@ void main() {
     return buffer.toString().toLowerCase();
   }
 
-  testWidgets('exibe a soma de ALE dos riscos do mock', (WidgetTester tester) async {
+  testWidgets('exibe a soma de ALE dos riscos do mock',
+      (WidgetTester tester) async {
     useTallSurface(tester);
     await tester.pumpWidget(harness());
     await tester.pump(loadDelay);
@@ -135,19 +136,21 @@ void main() {
     }
   });
 
-  testWidgets('confirmar aceite sem nota é bloqueado', (WidgetTester tester) async {
+  testWidgets('confirmar aceite sem nota é bloqueado',
+      (WidgetTester tester) async {
     useTallSurface(tester);
     await tester.pumpWidget(harness());
     await tester.pump(loadDelay);
 
-    final Finder acceptButton = find.widgetWithText(FilledButton, 'Aceitar o risco').first;
+    final Finder acceptButton =
+        find.widgetWithText(FilledButton, 'Aceitar o risco').first;
     await tester.ensureVisible(acceptButton);
     await tester.pump();
     await tester.tap(acceptButton);
     await tester.pump(const Duration(milliseconds: 300));
 
-    final FilledButton confirmButton =
-        tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Confirmar'));
+    final FilledButton confirmButton = tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Confirmar'));
     expect(confirmButton.onPressed, isNull);
   });
 }

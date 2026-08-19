@@ -106,7 +106,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 child: Text(
                                   page.title,
                                   textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                  style:
+                                      theme.textTheme.headlineSmall?.copyWith(
                                     color: scheme.onSurface,
                                   ),
                                 ),
@@ -145,9 +146,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           width: i == _page ? 20 : 6,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: i == _page
-                                ? accent
-                                : scheme.outlineVariant,
+                            color: i == _page ? accent : scheme.outlineVariant,
                             borderRadius: BorderRadius.circular(999),
                           ),
                         ),

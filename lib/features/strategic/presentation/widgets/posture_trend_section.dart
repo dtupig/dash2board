@@ -36,8 +36,7 @@ class PostureTrendSection extends ConsumerWidget {
       child: historyAsync.when(
         loading: () => const ChartLoading(),
         error: (Object error, StackTrace stackTrace) => ChartError(
-          message:
-              'Não foi possível carregar a evolução da postura agora.',
+          message: 'Não foi possível carregar a evolução da postura agora.',
           onRetry: () => ref.invalidate(postureHistoryProvider),
         ),
         data: (List<PostureSnapshot> series) {

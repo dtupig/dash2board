@@ -26,16 +26,14 @@ class DataFreshnessFooter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final AsyncValue<PostureIndex> indexAsync =
-        ref.watch(postureIndexProvider);
+    final AsyncValue<PostureIndex> indexAsync = ref.watch(postureIndexProvider);
     final DateTime? capturedAt = indexAsync.value?.capturedAt;
 
     if (capturedAt == null) {
       return const SizedBox.shrink();
     }
 
-    const String origin =
-        AppConfig.mockMode ? ' · dados de demonstração' : '';
+    const String origin = AppConfig.mockMode ? ' · dados de demonstração' : '';
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),

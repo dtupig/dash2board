@@ -117,8 +117,9 @@ class StrategicDashboardScreen extends StatelessWidget {
                         'Tendências curadas, benchmarks e pesquisas '
                         'respondidas por CISOs do mesmo segmento.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                       ),
                     ],

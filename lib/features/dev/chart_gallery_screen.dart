@@ -22,7 +22,18 @@ class ChartGalleryScreen extends ConsumerWidget {
   const ChartGalleryScreen({super.key});
 
   static const List<double> _postureHistory = <double>[
-    64, 65, 66, 67, 68, 69, 66, 65, 68, 70, 71, 72,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    66,
+    65,
+    68,
+    70,
+    71,
+    72,
   ];
 
   static final List<DateTime> _trendTimestamps = List<DateTime>.generate(
@@ -31,7 +42,14 @@ class ChartGalleryScreen extends ConsumerWidget {
   );
 
   static const List<double> _ourOrgValues = <double>[64, 66, 68, 67, 70, 72];
-  static const List<double> _peerMedianValues = <double>[68, 68, 68, 68, 68, 68];
+  static const List<double> _peerMedianValues = <double>[
+    68,
+    68,
+    68,
+    68,
+    68,
+    68
+  ];
   static const List<double> _targetValues = <double>[75, 75, 75, 75, 75, 75];
 
   static const List<DomainBarDatum> _domainData = <DomainBarDatum>[
@@ -61,8 +79,7 @@ class ChartGalleryScreen extends ConsumerWidget {
                     ? Icons.light_mode_outlined
                     : Icons.dark_mode_outlined,
               ),
-              onPressed: () =>
-                  ref.read(themeModeProvider.notifier).toggle(),
+              onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
             ),
           ),
         ],

@@ -115,7 +115,9 @@ class FirestoreStrategicRepository implements StrategicRepository {
     try {
       // Só os campos que `firestore.rules` libera para o papel `board` -
       // nenhum outro campo do risco muda aqui.
-      await _firestore.doc('${FirestorePaths.risks(tenantId)}/$riskId').update(<String, Object?>{
+      await _firestore
+          .doc('${FirestorePaths.risks(tenantId)}/$riskId')
+          .update(<String, Object?>{
         'acceptance': decision.wireValue,
         'acceptedByUid': actorUid,
         'acceptedAt': FieldValue.serverTimestamp(),
@@ -193,16 +195,17 @@ class FirestoreStrategicRepository implements StrategicRepository {
         : (responseData['answers'] as Map<String, dynamic>? ??
                 const <String, dynamic>{})
             .map(
-              (String key, Object? value) =>
-                  MapEntry<String, String>(key, value as String? ?? ''),
-            );
+            (String key, Object? value) =>
+                MapEntry<String, String>(key, value as String? ?? ''),
+          );
     return Survey.fromMap(data, yourAnswers: yourAnswers);
   }
 
   PostureIndex _mapPostureIndex(DocumentSnapshot<Map<String, dynamic>> doc) {
     final Map<String, Object?> data = doc.data() ?? const <String, Object?>{};
     final Map<String, dynamic> byDomainRaw =
-        (data['byDomain'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+        (data['byDomain'] as Map<String, dynamic>?) ??
+            const <String, dynamic>{};
     final Map<SecurityDomain, int> byDomain = <SecurityDomain, int>{
       for (final MapEntry<String, dynamic> entry in byDomainRaw.entries)
         SecurityDomain.fromWire(entry.key): (entry.value as num?)?.toInt() ?? 0,
