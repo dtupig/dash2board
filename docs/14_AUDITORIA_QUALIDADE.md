@@ -92,8 +92,11 @@ esse ID, o deploy acerta um projeto de terceiro.
 **Causa raiz:** `.firebaserc.example` trazia IDs que *pareciam* reais em vez de
 marcadores. Defeito de origem meu.
 
-**Correção:** deixar `default` apontando para o projeto real e remover os
-inexistentes.
+**Correção — APLICADA.** `.firebaserc` passou a declarar apenas
+`default: elytron-d2b-dev`, o único projeto que existe. Os aliases `staging` e
+`prod` foram removidos e serão acrescentados quando os projetos forem criados.
+O `.firebaserc.example` passou a usar marcadores explícitos
+(`<SEU_PROJETO_DEV>`), para o defeito não se repetir.
 
 ---
 
@@ -202,13 +205,13 @@ Cobertos pelo `.gitignore`; some sozinho ao inicializar o git.
 
 | Ordem | Achado | Esforço | Bloqueia |
 |---|---|---|---|
-| 1 | C-01 git init | 2 min | **tudo** |
-| 2 | A-01 `.firebaserc` | 2 min | qualquer deploy |
-| 3 | M-02 `CLAUDE.md` | 15 min | qualidade fora dos prompts |
+| 1 | ~~C-01 git init~~ | ✅ corrigido | — |
+| 2 | ~~A-01 `.firebaserc`~~ | ✅ corrigido | — |
+| 3 | ~~M-02 `CLAUDE.md`~~ | ✅ criado | — |
 | 4 | A-03 `flutterfire configure` + emulador | 1 h | A-04 |
 | 5 | A-04 índices | 1 h | demo com dado real |
 | 6 | A-02 `test/rules` | 4 h | prompt 12 |
-| 7 | M-01 CI | 2 h | escala do time |
+| 7 | ~~M-01 CI~~ | ✅ ativa e obrigatória | — |
 | 8 | M-04, M-05, M-03 | 1 h | — |
 
 **Recomendação de sequência:** itens 1 a 3 hoje; 4 a 6 antes de iniciar o
