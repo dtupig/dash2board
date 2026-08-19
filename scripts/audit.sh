@@ -93,10 +93,19 @@ fi
 if [ -f .firebaserc ]; then
   def=$(python3 -c "import json;print(json.load(open('.firebaserc'))['projects'].get('default','')) " 2>/dev/null)
   log "  alias default -> ${def:-<vazio>}"
-  if command -v firebase >/dev/null 2>&1 && firebase projects:list 2>/dev/null | grep -q "$def"; then
-    ok "projeto '$def' acessível na sua conta"
+  if ! command -v firebase >/dev/null 2>&1; then
+    warn "firebase CLI ausente: nao deu para verificar '$def'"
   else
-    bad "projeto '$def' NÃO acessível — achado A-01"
+    # `firebase projects:list` depende de rede e de sessao valida. Uma falha
+    # aqui nao e defeito do repositorio, entao e ATENCAO e nao FALHA.
+    plist="$(firebase projects:list 2>/dev/null)"
+    if [ -z "$plist" ]; then
+      warn "nao consegui listar projetos (rede ou sessao) — verifique com: firebase projects:list"
+    elif printf '%s' "$plist" | grep -q "$def"; then
+      ok "projeto '$def' acessivel na sua conta"
+    else
+      bad "projeto '$def' NAO existe na sua conta — achado A-01"
+    fi
   fi
 else
   bad ".firebaserc ausente"
