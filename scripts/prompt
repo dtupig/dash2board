@@ -172,18 +172,35 @@ cmd_ship(){
   gh pr view >/dev/null 2>&1 && ok "PR já existe" || run gh pr create --fill || die "falha ao criar o PR"
 
   st "Aguardando a CI"
-  # O GitHub leva alguns segundos para registrar os check runs de um PR recem
-  # criado. Sem esta espera, `gh pr checks` responde "no checks reported" e
-  # sai com erro - o que parecia reprovacao da CI, mas era corrida.
-  local waited=0
-  while gh pr checks 2>&1 | grep -q "no checks reported"; do
-    waited=$((waited + 3))
-    [ "$waited" -gt 90 ] && die "a CI nao registrou nenhum check em 90s — confira .github/workflows/ci.yaml"
-    printf "\r    registrando os checks… %ss" "$waited"
-    sleep 3
+  # Nao usamos `gh pr checks --watch`: ele depende de TTY e devolve codigo de
+  # saida ambiguo enquanto os checks ainda estao pendentes - foi o que fez o
+  # ritual anunciar "a CI reprovou" com os tres jobs verdes. Aqui lemos o
+  # rollup do proprio PR, que e deterministico.
+  local waited=0 rollup pend fail
+  while :; do
+    rollup="$(gh pr view --json statusCheckRollup \
+      --jq '.statusCheckRollup[] | "\(.status):\(.conclusion)"' 2>/dev/null)"
+    if [ -z "$rollup" ]; then
+      pend=1; fail=0
+    else
+      pend=$(printf '%s
+' "$rollup" | grep -cv '^COMPLETED:')
+      fail=$(printf '%s
+' "$rollup" | grep -cE '^COMPLETED:(FAILURE|TIMED_OUT|CANCELLED|ACTION_REQUIRED|STARTUP_FAILURE)')
+      if [ "$fail" -gt 0 ]; then
+        printf "%*s" 44 ""
+        run gh pr checks
+        die "a CI reprovou - corrija, commite e rode ship de novo"
+      fi
+      [ "$pend" -eq 0 ] && break
+    fi
+    waited=$((waited + 5))
+    [ "$waited" -gt 900 ] && die "a CI passou de 15 min - veja: gh pr checks"
+    printf "    aguardando a CI... %ss" "$waited"
+    sleep 5
   done
-  [ "$waited" -gt 0 ] && printf "\r%*s\r" 44 ""
-  run gh pr checks --watch || die "a CI reprovou — corrija, commite e rode ship de novo"
+  printf "%*s" 44 ""
+  run gh pr checks
 
   st "Merge"
   run gh pr merge --squash --delete-branch || {

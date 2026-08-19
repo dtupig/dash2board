@@ -1,5 +1,42 @@
 python3 - <<'PATCH'
 import re, pathlib
+p = pathlib.Path("scripts/prompt"); s = p.read_text()
+novo = '''st "Aguardando a CI"
+  # Nao usamos `gh pr checks --watch`: ele depende de TTY e devolve codigo de
+  # saida ambiguo enquanto os checks ainda estao pendentes - foi o que fez o
+  # ritual anunciar "a CI reprovou" com os tres jobs verdes. Aqui lemos o
+  # rollup do proprio PR, que e deterministico.
+  local waited=0 rollup pend fail
+  while :; do
+    rollup="$(gh pr view --json statusCheckRollup \\
+      --jq '.statusCheckRollup[] | "\\(.status):\\(.conclusion)"' 2>/dev/null)"
+    if [ -z "$rollup" ]; then
+      pend=1; fail=0
+    else
+      pend=$(printf '%s\\n' "$rollup" | grep -cv '^COMPLETED:')
+      fail=$(printf '%s\\n' "$rollup" | grep -cE '^COMPLETED:(FAILURE|TIMED_OUT|CANCELLED|ACTION_REQUIRED|STARTUP_FAILURE)')
+      if [ "$fail" -gt 0 ]; then
+        printf "\\r%*s\\r" 44 ""
+        run gh pr checks
+        die "a CI reprovou - corrija, commite e rode ship de novo"
+      fi
+      [ "$pend" -eq 0 ] && break
+    fi
+    waited=$((waited + 5))
+    [ "$waited" -gt 900 ] && die "a CI passou de 15 min - veja: gh pr checks"
+    printf "\\r    aguardando a CI... %ss" "$waited"
+    sleep 5
+  done
+  printf "\\r%*s\\r" 44 ""
+  run gh pr checks
+'''
+s2 = re.sub(r'st "Aguardando a CI"\n.*?gh pr checks --watch[^\n]*\n', novo, s, count=1, flags=re.S)
+assert s2 != s, "nao achei o bloco - me avise"
+p.write_text(s2); print("prompt: rollup determinístico aplicado")
+PATCH
+
+bash -n scripts/prompt && echo SINTAXE_OKpython3 - <<'PATCH'
+import re, pathlib
 
 # ---- 1) scripts/prompt: espera o GitHub registrar os check runs -----------
 p = pathlib.Path("scripts/prompt"); s = p.read_text()
