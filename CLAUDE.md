@@ -72,6 +72,18 @@ firebase emulators:start
 ./scripts/audit.sh                         # laudo de qualidade
 ```
 
+## Fluxo de trabalho
+
+Um branch por prompt, automatizado em `scripts/prompt`:
+
+```bash
+./scripts/prompt start 10                  # branch + abre o prompt
+./scripts/prompt check                     # format, analyze, test, audit
+./scripts/prompt ship "feat(escopo): …"    # commit, push, PR, CI, merge
+```
+
+`main` é protegido: nada entra sem PR com os checks verdes.
+
 ## Antes de dar por pronto
 
 `flutter analyze` limpo, `flutter test` verde, e nenhuma regra acima violada.

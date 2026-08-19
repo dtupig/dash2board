@@ -41,6 +41,7 @@ para configurar o Firebase e criar os usuários de teste.
 | [`docs/14_AUDITORIA_QUALIDADE.md`](docs/14_AUDITORIA_QUALIDADE.md) | Relatório de auditoria de qualidade com achados classificados |
 | [`docs/15_GIT_E_GITHUB.md`](docs/15_GIT_E_GITHUB.md) | Repositório, CI, proteção de branch e fluxo de trabalho |
 | [`docs/16_PLANO_DE_RETOMADA.md`](docs/16_PLANO_DE_RETOMADA.md) | **Plano de retomada** — ordem das features e o ritual de cada prompt |
+| [`docs/17_PONTO_DE_RETOMADA.md`](docs/17_PONTO_DE_RETOMADA.md) | **Comece por aqui** — estado atual, o que falta e como abrir uma conversa nova |
 | [`docs/prompts/00_INDICE.md`](docs/prompts/00_INDICE.md) | **Roteiro de execução** — os prompts 2 a 9, em ordem |
 
 ## O que já está implementado
@@ -73,8 +74,23 @@ para configurar o Firebase e criar os usuários de teste.
 ## Comandos
 
 ```bash
-flutter analyze
-flutter test
-flutter run --dart-define=ENV=dev
+flutter run --dart-define=MOCK=true    # roda sem Firebase, com contas de demonstração
+flutter analyze && flutter test
 firebase emulators:start
+./scripts/audit.sh                     # laudo de qualidade
 ```
+
+## Fluxo de trabalho
+
+Um branch por prompt. O ritual está automatizado:
+
+```bash
+./scripts/prompt start 10                  # sincroniza main, cria o branch, abre o prompt
+# … roda o prompt no Claude Code …
+./scripts/prompt check                     # formata, analisa, testa, audita
+./scripts/prompt ship "feat(escopo): …"    # commit, push, PR, aguarda CI, merge
+./scripts/prompt tag 0.2.0 nome            # marca o milestone
+```
+
+`./scripts/prompt --help` lista tudo. Detalhes em
+[`docs/16_PLANO_DE_RETOMADA.md`](docs/16_PLANO_DE_RETOMADA.md).

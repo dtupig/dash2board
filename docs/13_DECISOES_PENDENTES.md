@@ -15,7 +15,7 @@ externa · **[PODE ESPERAR]** não impede a próxima onda.
 
 | # | Decisão | Valor |
 |---|---|---|
-| D-01 | Região do Firestore | `southamerica-east1` (São Paulo) — permanente |
+| D-01 | Região do Firestore | `southamerica-east1` (São Paulo) — permanente. Banco de dev recriado nesta região em 19/08/2026 (estava em `eur3`) |
 | D-02 | Motor do núcleo | Cloud Firestore; RTDB só presença e efêmeros |
 | D-03 | Alçada de RFS | Técnico abre · CISO aprova · Board informado por fato relevante |
 | D-04 | Modelo da 4ª persona | Dimensão separada (`PrincipalKind` + `StaffRole` + tenants atribuídos) |
