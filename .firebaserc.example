@@ -1,7 +1,17 @@
 {
+  "_comentario": [
+    "Copie para .firebaserc e substitua pelos IDs dos projetos que EXISTEM na",
+    "sua conta. Confira com: firebase projects:list",
+    "",
+    "NUNCA deixe um alias apontando para projeto inexistente: `firebase deploy`",
+    "sem -P usa o alias `default`, e um ID fantasma faz o comando falhar - ou,",
+    "pior, acertar o projeto de um terceiro se o ID vier a ser registrado.",
+    "Foi o achado A-01 da auditoria (docs/14_AUDITORIA_QUALIDADE.md).",
+    "",
+    "Declare apenas os ambientes que já existem. Acrescente staging e prod",
+    "quando os projetos forem criados de fato."
+  ],
   "projects": {
-    "default": "elytron-dash2board-dev",
-    "staging": "elytron-dash2board-stg",
-    "prod": "elytron-dash2board-prd"
+    "default": "<SEU_PROJETO_DEV>"
   }
 }
