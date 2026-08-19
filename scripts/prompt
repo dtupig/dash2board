@@ -1,0 +1,260 @@
+#!/usr/bin/env bash
+# ---------------------------------------------------------------------------
+# Ritual de execução de prompt — Elytron Dash2Board
+#
+#   ./scripts/prompt start 10        cria o branch e mostra o prompt
+#   ./scripts/prompt check           roda só os portões de qualidade
+#   ./scripts/prompt ship "msg"      portões + commit + push + PR + merge
+#   ./scripts/prompt tag 0.2.0 nome  marca o milestone
+#   ./scripts/prompt status          onde estou
+#
+# O script imprime cada comando antes de executar. Se algo falhar, ele para e
+# diz o que fazer — nunca contorna um portão em silêncio.
+# ---------------------------------------------------------------------------
+set -uo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$ROOT"
+
+G='\033[0;32m'; R='\033[0;31m'; Y='\033[0;33m'; C='\033[0;36m'; B='\033[1m'; N='\033[0m'
+ok(){   printf "  ${G}✓${N} %s\n" "$1"; }
+er(){   printf "  ${R}✗${N} %s\n" "$1"; }
+wr(){   printf "  ${Y}!${N} %s\n" "$1"; }
+st(){   printf "\n${B}› %s${N}\n" "$1"; }
+run(){  printf "    ${C}\$ %s${N}\n" "$*"; "$@"; }
+die(){  printf "\n${R}✗ %s${N}\n\n" "$1"; exit 1; }
+
+BRANCH(){ git symbolic-ref --short HEAD 2>/dev/null || echo ''; }
+
+# ---------------------------------------------------------------------------
+guard_repo(){
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "não é um repositório git"
+}
+guard_clean(){
+  [ -z "$(git status --porcelain)" ] || {
+    printf "\n"; git status --short | sed 's/^/    /'
+    printf "\n  Há mudanças não commitadas. Escolha uma saída:\n\n"
+    printf "    ./scripts/prompt ship \"chore(escopo): resumo\"   publica o que está pendente\n"
+    printf "    git stash                                        guarda para depois\n"
+    printf "    git checkout -- .                                descarta (irreversível)\n"
+    die "árvore suja"
+  }
+}
+guard_tools(){
+  command -v flutter >/dev/null || die "flutter não encontrado no PATH"
+  command -v dart    >/dev/null || die "dart não encontrado no PATH"
+}
+
+# ---------------------------------------------------------------------------
+cmd_status(){
+  guard_repo
+  st "Estado"
+  printf "    branch:    %s\n" "$(BRANCH)"
+  printf "    upstream:  %s\n" "$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || echo '(nenhum)')"
+  printf "    pendências: %s arquivo(s)\n" "$(git status --porcelain | wc -l | tr -d ' ')"
+  printf "    último:    %s\n" "$(git log --oneline -1 2>/dev/null || echo '(sem commits)')"
+  if command -v gh >/dev/null 2>&1 && [ "$(BRANCH)" != "main" ]; then
+    st "PR desta branch"; gh pr view --json number,title,state,mergeStateStatus \
+      --template '    #{{.number}} {{.title}} — {{.state}} / {{.mergeStateStatus}}{{"\n"}}' 2>/dev/null \
+      || printf "    (nenhum PR aberto)\n"
+  fi
+  echo
+}
+
+# ---------------------------------------------------------------------------
+cmd_start(){
+  local nn="${1:-}"
+  [ -n "$nn" ] || die "uso: ./scripts/prompt start <NN>   (ex.: start 10)"
+  nn="$(printf '%02d' "$((10#${nn}))" 2>/dev/null || echo "$nn")"
+
+  guard_repo; guard_clean
+
+  local file
+  file="$(ls docs/prompts/${nn}_*.md 2>/dev/null | head -1)"
+  [ -n "$file" ] || die "não encontrei docs/prompts/${nn}_*.md — veja docs/prompts/00_INDICE.md"
+
+  local slug
+  slug="$(basename "$file" .md | sed "s/^${nn}_//" | tr 'A-Z_' 'a-z-' \
+        | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null || basename "$file" .md)"
+  local br="prompt/${nn}-${slug}"
+
+  st "Sincronizando com o main"
+  run git switch main || die "não consegui trocar para main"
+  run git pull --ff-only || wr "pull não avançou (siga se o main já está atualizado)"
+
+  if git show-ref --verify --quiet "refs/heads/$br"; then
+    st "Branch já existe — retomando"
+    run git switch "$br"
+  else
+    st "Criando o branch"
+    run git switch -c "$br" || die "não consegui criar $br"
+  fi
+
+  st "Prompt a executar"
+  printf "    ${B}%s${N}\n\n" "$file"
+  printf "    Abra o arquivo, copie TODO o conteúdo entre as cercas \`\`\`text\n"
+  printf "    e cole numa sessão do Claude Code nesta pasta.\n"
+  command -v code >/dev/null 2>&1 && run code "$file"
+
+  st "Quando o prompt terminar"
+  printf "    ./scripts/prompt check              # confere sem publicar\n"
+  printf "    ./scripts/prompt ship \"feat(escopo): resumo\"\n\n"
+}
+
+# ---------------------------------------------------------------------------
+cmd_check(){
+  guard_repo; guard_tools
+  local fail=0
+
+  st "Formatação"
+  if dart format --output=none --set-exit-if-changed lib test >/dev/null 2>&1; then
+    ok "já está no padrão"
+  else
+    wr "havia arquivos fora do padrão — aplicando"
+    run dart format lib test | tail -1 | sed 's/^/    /'
+  fi
+
+  st "Análise estática"
+  if run flutter analyze --fatal-infos --fatal-warnings >/tmp/d2b-analyze.log 2>&1; then
+    ok "No issues found!"
+  else
+    er "reprovou"; tail -25 /tmp/d2b-analyze.log | sed 's/^/    /'; fail=1
+  fi
+
+  st "Testes"
+  if run flutter test >/tmp/d2b-test.log 2>&1; then
+    ok "$(grep -Eo '[0-9]+ tests? passed' /tmp/d2b-test.log | tail -1 || echo 'todos passaram')"
+  else
+    er "reprovou"; tail -30 /tmp/d2b-test.log | sed 's/^/    /'; fail=1
+  fi
+
+  if [ -x scripts/audit.sh ]; then
+    st "Auditoria de conformidade"
+    if ./scripts/audit.sh >/tmp/d2b-audit.log 2>&1; then
+      grep -E "FALHA|ATEN" /tmp/d2b-audit.log | sed 's/^/    /' || ok "sem apontamentos"
+    else
+      grep -E "FALHA|ATEN" /tmp/d2b-audit.log | sed 's/^/    /'
+      wr "audit.sh apontou itens — confira se são os já conhecidos (A-02, A-03)"
+    fi
+  fi
+
+  echo
+  [ "$fail" -eq 0 ] && { printf "${G}Portões aprovados.${N}\n\n"; return 0; }
+  die "portões reprovados — corrija antes de publicar"
+}
+
+# ---------------------------------------------------------------------------
+cmd_ship(){
+  local msg="${1:-}"
+  [ -n "$msg" ] || die "uso: ./scripts/prompt ship \"feat(escopo): resumo\""
+
+  guard_repo
+  local br; br="$(BRANCH)"
+
+  # No main, o push é recusado pelo ruleset. Em vez de falhar, criamos o branch:
+  # as mudanças não commitadas acompanham a troca.
+  if [ "$br" = "main" ]; then
+    [ -n "$(git status --porcelain)" ] || die "no main e sem mudanças — nada a publicar"
+    wr "você está no main, que é protegido — precisamos de um branch"
+    local scope sug
+    scope="$(printf '%s' "$msg" | sed -n 's/^[a-z]*(\([a-z0-9-]*\)).*/\1/p')"
+    [ -n "$scope" ] || scope="ajuste"
+    sug="chore/${scope}"
+    printf "      sugestão: ${C}%s${N}\n" "$sug"
+    read -r -p "      Nome do branch [$sug]: " br
+    br="${br:-$sug}"
+    st "Criando o branch (as mudanças vêm junto)"
+    run git switch -c "$br" || die "não consegui criar $br"
+  fi
+
+  if ! printf '%s' "$msg" | grep -qE '^(feat|fix|refactor|test|docs|chore|perf|sec|style)(\([a-z0-9-]+\))?: .{8,}'; then
+    wr "a mensagem não segue 'tipo(escopo): resumo'"
+    printf "      tipos: feat fix refactor test docs chore perf sec style\n"
+    printf "      use sec(...) para mudanças em rules ou política de acesso\n"
+    read -r -p "      Continuar assim? [s/N] " a
+    [[ "$a" =~ ^[SsYy]$ ]] || die "cancelado"
+  fi
+
+  cmd_check || exit 1
+
+  st "Commit"
+  run git add -A
+  run git commit -m "$msg" || die "nada para commitar?"
+
+  st "Publicando"
+  run git push -u origin HEAD || die "push recusado — veja a mensagem acima"
+
+  command -v gh >/dev/null 2>&1 || {
+    wr "gh não instalado — abra o PR pelo link que o push imprimiu"
+    exit 0
+  }
+
+  st "Pull request"
+  gh pr view >/dev/null 2>&1 && ok "PR já existe" || run gh pr create --fill || die "falha ao criar o PR"
+
+  st "Aguardando a CI"
+  run gh pr checks --watch || die "a CI reprovou — corrija, commite e rode ship de novo"
+
+  st "Merge"
+  run gh pr merge --squash --delete-branch || {
+    er "merge recusado pela política do branch"
+    printf "    Verifique: gh pr view --json mergeStateStatus\n"
+    printf "    NÃO use --admin: isso passa por cima da proteção.\n"
+    exit 1
+  }
+
+  st "Voltando ao main"
+  run git switch main
+  run git pull
+  run git remote prune origin >/dev/null
+
+  printf "\n${G}Concluído.${N} Se este prompt é um marco, marque:\n"
+  printf "    ./scripts/prompt tag 0.X.0 nome-curto\n\n"
+}
+
+# ---------------------------------------------------------------------------
+cmd_tag(){
+  local ver="${1:-}" name="${2:-}"
+  [ -n "$ver" ] && [ -n "$name" ] || die "uso: ./scripts/prompt tag 0.2.0 catalogo"
+  guard_repo
+  [ "$(BRANCH)" = "main" ] || die "marque a partir do main"
+  guard_clean
+  st "Marcando v${ver}-${name}"
+  run git tag -a "v${ver}-${name}" -m "$name" || die "tag já existe?"
+  run git push --follow-tags
+  echo
+}
+
+# ---------------------------------------------------------------------------
+usage(){
+  cat <<'U'
+
+  Ritual de execução de prompt — Elytron Dash2Board
+
+    ./scripts/prompt start 10                 sincroniza o main, cria prompt/10-…
+                                              e abre o arquivo do prompt
+    ./scripts/prompt check                    formata, analisa, testa, audita
+    ./scripts/prompt ship "feat(x): resumo"   portões + commit + push + PR + merge
+    ./scripts/prompt tag 0.2.0 catalogo       marca o milestone no main
+    ./scripts/prompt status                   onde estou
+
+  Fluxo típico:
+
+    ./scripts/prompt start 10
+    # … roda o prompt no Claude Code …
+    ./scripts/prompt check
+    ./scripts/prompt ship "feat(servicos): catálogo dos 44 serviços e wizard de RFS"
+    ./scripts/prompt tag 0.2.0 catalogo
+
+  Detalhes em docs/16_PLANO_DE_RETOMADA.md
+
+U
+}
+
+case "${1:-}" in
+  start)  shift; cmd_start "$@" ;;
+  check)  shift; cmd_check "$@" ;;
+  ship)   shift; cmd_ship  "$@" ;;
+  tag)    shift; cmd_tag   "$@" ;;
+  status) shift; cmd_status "$@" ;;
+  ''|-h|--help|help) usage ;;
+  *) er "subcomando desconhecido: $1"; usage; exit 1 ;;
+esac

@@ -82,7 +82,24 @@ Mínimo obrigatório: cliente do tenant A não lê nada de B; `board` não lê
 
 ## Ritual de execução de cada prompt
 
-Sempre igual. É o que mantém a qualidade sem depender de memória.
+Sempre igual. É o que mantém a qualidade sem depender de memória — e está
+automatizado em `scripts/prompt`:
+
+```bash
+./scripts/prompt start 10                 # sincroniza main, cria prompt/10-…, abre o arquivo
+# … roda o prompt no Claude Code …
+./scripts/prompt check                    # formata, analisa, testa, audita
+./scripts/prompt ship "feat(servicos): catálogo dos 44 serviços e wizard de RFS"
+./scripts/prompt tag 0.2.0 catalogo       # se for marco
+```
+
+O script imprime cada comando antes de executar, para você continuar
+entendendo o que acontece. Ele **para** em qualquer portão reprovado e nunca
+usa `--admin` para forçar merge.
+
+`./scripts/prompt status` diz onde você está a qualquer momento.
+
+### O que o script faz por baixo
 
 ```bash
 # 1. branch próprio
