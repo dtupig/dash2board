@@ -1,0 +1,6 @@
+{
+  "spec": "*.spec.ts",
+  "require": ["ts-node/register", "./root-hooks.ts"],
+  "timeout": 20000,
+  "reporter": "spec"
+}
