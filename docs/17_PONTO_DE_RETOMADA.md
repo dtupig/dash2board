@@ -58,13 +58,13 @@ primeiro uso; modo de demonstração sem Firebase; security rules, índices,
 
 ## 3. O que falta — mapa completo
 
-### Fase C · Fundação Firestore real *(fechada, com uma pendência de QA)*
+### Fase C · Fundação Firestore real *(fechada)*
 
 | # | Passo | Estado |
 |---|---|---|
 | C1 | Criar banco em `southamerica-east1` | ✅ feito |
 | C2 | `flutterfire configure --project=elytron-d2b-dev` | ✅ feito — `firebase_options.dart` sem `PLACEHOLDER` |
-| C3 | Emuladores + seed + rodar com `DATA_SOURCE=firestore` | ✅ boot confirmado (20/08/2026) — app inicializa e renderiza igual ao mock. Login por persona não foi exercitado por gesto (sem `idb`/XCUITest no ambiente); pendente QA manual ou `integration_test` |
+| C3 | Emuladores + seed + rodar com `DATA_SOURCE=firestore` | ✅ fechado (20/08/2026) — boot confirmado e, nesta sessão, login por gesto testado manualmente no simulador iOS para as 3 personas (`operacao@`, `ciso@`, `board@demo.elytron`): roteamento e conteúdo de cada persona corretos contra o Firestore real do emulador |
 | C4 | Colher índices faltantes no console e comitar | ✅ analisado (20/08/2026) — **nenhum índice composto é necessário hoje**: as 5 queries de `FirestoreStrategicRepository` usam no máximo um `where` ou um `orderBy` isolado (índice automático de campo único). Os 11 índices em `firestore.indexes.json` são especulativos, para coleções (`incidents`, `vulnerabilities`, `reports`, `members`) e filtros combinados que ainda não existem em código — revisar contra a query real quando os prompts 10-14 as implementarem, não antes |
 
 Fecha o achado **A-03**. **A-04** revisado: não há índice faltante para o código atual, mas os índices declarados não correspondem a nenhuma query existente — ver nota C4.
@@ -79,24 +79,25 @@ arquivo sem extensão `.json`, que o Node compila como JS e quebra — trocado
 por leitura de arquivo + `JSON.parse`. O seed nunca tinha rodado com sucesso
 contra o build compilado até esta correção.
 
-### Fase D · Rede de segurança
+### Fase D · Rede de segurança *(fechada)*
 
-`test/rules` com `@firebase/rules-unit-testing`, caso positivo **e** negativo
-por regra. Fecha o achado **A-02** e é **pré-requisito do prompt 12**.
-
-Cobertura mínima: tenant A não lê B · `board` não lê `incidents` nem
-`compliance` · `operational` não lê `risks` · ninguém lê `audit_logs` ·
-cliente não escreve o próprio `role`.
+✅ `test/rules` criado com `@firebase/rules-unit-testing` (20/08/2026) — 18
+testes, caso positivo **e** negativo por regra: isolamento entre tenants,
+`board` não lê `incidents`/`compliance`, `operational` não lê `risks`,
+ninguém lê `audit_logs` pelo client SDK, cliente não escreve o próprio
+`role`. Fecha o achado **A-02** e a decisão **D-26**. O job "Testes das
+security rules" do CI passou a executar de verdade (antes só emitia
+`::warning::` porque o diretório não existia).
 
 ### Fase E · Prompts pendentes
 
 | # | Prompt | Escopo | Bloqueado por |
 |---|---|---|---|
-| 10 | `10_CATALOGO_E_WIZARD` | Catálogo dos 44 serviços, bifurcação relatórios/demanda, wizard de RFS em 5 passos, `RequestPolicy` com a alçada técnico→CISO→board | D-30 |
-| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | D-27, D-29, Fase C |
-| 12 | `12_PERSONA_ESPECIALISTA_RETROFIT` | 4ª persona (staff Elytron), identidade cross-tenant, `TenantScope`, `StaffPolicy`, reescrita das rules | **Fase D**, D-18 |
-| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, revisão, verificação de redação, publicação | D-05, D-06, D-07 |
-| 14 | `14_ESTRUTURA_DADOS_FIREBASE` | Schema, conversores, `TenantGuard`, rules das 4 personas, TTL, agregados, seed, RTDB de presença | D-12, D-13 |
+| 10 | `10_CATALOGO_E_WIZARD` | Catálogo dos 44 serviços, bifurcação relatórios/demanda, wizard de RFS em 5 passos, `RequestPolicy` com a alçada técnico→CISO→board | Nenhum bloqueio técnico — D-30 já confirmado |
+| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | D-27 (agendado para 21/08/2026) |
+| 12 | `12_PERSONA_ESPECIALISTA_RETROFIT` | 4ª persona (staff Elytron), identidade cross-tenant, `TenantScope`, `StaffPolicy`, reescrita das rules | D-21 (Cloud Function de criação de tenant, ainda não implementada) — Fase D e D-18 já resolvidos |
+| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, revisão, verificação de redação, publicação | Nenhum bloqueio técnico — D-05/06/07 já confirmados |
+| 14 | `14_ESTRUTURA_DADOS_FIREBASE` | Schema, conversores, `TenantGuard`, rules das 4 personas, TTL, agregados, seed, RTDB de presença | Nenhum bloqueio técnico — D-12/13 já confirmados |
 
 ---
 
@@ -183,26 +184,27 @@ operational (SOC), strategic (CISO, público primário), board (C-level) e
 staff (especialista Elytron, cross-tenant, ainda não implementada).
 
 ESTADO
-- Repositório dtupig/dash2board, main protegido, CI com 3 jobs (o job "Testes
-  das security rules" hoje só imprime warning — test/rules não existe ainda)
+- Repositório dtupig/dash2board, main protegido, CI com 3 jobs verdes de
+  verdade (o job "Testes das security rules" agora roda test/rules, não é
+  mais um warning)
 - flutter analyze limpo, flutter test verde
 - Prompts 1 a 9 executados: jornada de entrada, design system, kit de gráficos,
   módulo estratégico do CISO completo, onboarding, seed
 - Fase C fechada: flutterfire configure feito, emuladores + seed corrigidos e
-  funcionando, boot confirmado com DATA_SOURCE=firestore, nenhum índice
-  composto faltante hoje. App ainda roda no dia a dia com --dart-define=MOCK=true
-- Pendência menor da Fase C: login por persona não foi exercitado por gesto
-  contra o emulador (só o boot foi validado) — QA manual ou integration_test
-- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); só falta
-  D-27
+  funcionando, login por gesto testado manualmente para as 3 personas contra o
+  Firestore real do emulador, nenhum índice composto faltante hoje. App ainda
+  roda no dia a dia com --dart-define=MOCK=true
+- Fase D fechada: test/rules com 18 testes (positivo e negativo por regra),
+  fecha A-02 e D-26
+- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); D-27 tem
+  reunião agendada para 21/08/2026 16h-17h
 
 PRÓXIMOS PASSOS, NESTA ORDEM
-1. Fase D: test/rules com @firebase/rules-unit-testing (fecha A-02,
-   pré-requisito do prompt 12) — próxima frente técnica
-2. Em paralelo: agendar a 1h de D-27 com pentest, forense, GRC, AppSec e
-   SOC/Threat Intel — não depende de código
-3. Fase E: prompts 10 a 14, em docs/prompts/ (prompt 10 já destravado por
-   decisão, D-30 confirmado)
+1. Fase E: prompts 10, 13 e 14 já sem bloqueio técnico — podem entrar na
+   esteira em docs/prompts/
+2. Prompt 11 aguarda a reunião de D-27 (21/08/2026)
+3. Prompt 12 aguarda D-21 (Cloud Function de criação de tenant, ainda não
+   implementada) — Fase D e D-18 já resolvidos
 
 REGRAS DO PROJETO
 Estão em CLAUDE.md e são inegociáveis: flutter analyze em "No issues found!",
@@ -259,3 +261,10 @@ branch por prompt.
    `<SEU_PROJETO_DEV>`, nunca algo que pareça real.
 6. **Região de Firestore é permanente.** Confira antes de criar; se estiver
    errada e o banco estiver vazio, recrie na hora — nunca vai custar tão pouco.
+7. **Um job de CI "protegido por `if [ -d ... ]`" pode passar sem testar
+   nada.** O job `rules` ficou verde por semanas só imprimindo `::warning::`
+   porque `test/rules` não existia — "CI verde" não provava cobertura de
+   segurança. Vale desconfiar de qualquer job condicional assim.
+8. **`firebase-tools` recente exige JDK 21+ para o emulador do Firestore.**
+   O runner padrão do GitHub Actions tem uma versão mais antiga; sem
+   `actions/setup-java@v4` (Temurin 21), o job `rules` falha só nisso.
