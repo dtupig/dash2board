@@ -101,6 +101,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      # firebase-tools exige JDK 21+ para o emulador do Firestore; o Java
+      # padrão do runner é mais antigo.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
       - name: Rodar se existir
         run: |
           if [ -d test/rules ]; then
