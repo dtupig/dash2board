@@ -31,11 +31,7 @@ guard_repo(){
 guard_clean(){
   [ -z "$(git status --porcelain)" ] || {
     printf "\n"; git status --short | sed 's/^/    /'
-    printf "\n  Há mudanças não commitadas. Escolha uma saída:\n\n"
-    printf "    ./scripts/prompt ship \"chore(escopo): resumo\"   publica o que está pendente\n"
-    printf "    git stash                                        guarda para depois\n"
-    printf "    git checkout -- .                                descarta (irreversível)\n"
-    die "árvore suja"
+    die "há mudanças não commitadas. Faça commit, stash ou descarte antes."
   }
 }
 guard_tools(){
@@ -148,22 +144,7 @@ cmd_ship(){
 
   guard_repo
   local br; br="$(BRANCH)"
-
-  # No main, o push é recusado pelo ruleset. Em vez de falhar, criamos o branch:
-  # as mudanças não commitadas acompanham a troca.
-  if [ "$br" = "main" ]; then
-    [ -n "$(git status --porcelain)" ] || die "no main e sem mudanças — nada a publicar"
-    wr "você está no main, que é protegido — precisamos de um branch"
-    local scope sug
-    scope="$(printf '%s' "$msg" | sed -n 's/^[a-z]*(\([a-z0-9-]*\)).*/\1/p')"
-    [ -n "$scope" ] || scope="ajuste"
-    sug="chore/${scope}"
-    printf "      sugestão: ${C}%s${N}\n" "$sug"
-    read -r -p "      Nome do branch [$sug]: " br
-    br="${br:-$sug}"
-    st "Criando o branch (as mudanças vêm junto)"
-    run git switch -c "$br" || die "não consegui criar $br"
-  fi
+  [ "$br" != "main" ] || die "você está no main. Rode ./scripts/prompt start <NN> primeiro."
 
   if ! printf '%s' "$msg" | grep -qE '^(feat|fix|refactor|test|docs|chore|perf|sec|style)(\([a-z0-9-]+\))?: .{8,}'; then
     wr "a mensagem não segue 'tipo(escopo): resumo'"
@@ -191,7 +172,35 @@ cmd_ship(){
   gh pr view >/dev/null 2>&1 && ok "PR já existe" || run gh pr create --fill || die "falha ao criar o PR"
 
   st "Aguardando a CI"
-  run gh pr checks --watch || die "a CI reprovou — corrija, commite e rode ship de novo"
+  # Nao usamos `gh pr checks --watch`: ele depende de TTY e devolve codigo de
+  # saida ambiguo enquanto os checks ainda estao pendentes - foi o que fez o
+  # ritual anunciar "a CI reprovou" com os tres jobs verdes. Aqui lemos o
+  # rollup do proprio PR, que e deterministico.
+  local waited=0 rollup pend fail
+  while :; do
+    rollup="$(gh pr view --json statusCheckRollup \
+      --jq '.statusCheckRollup[] | "\(.status):\(.conclusion)"' 2>/dev/null)"
+    if [ -z "$rollup" ]; then
+      pend=1; fail=0
+    else
+      pend=$(printf '%s
+' "$rollup" | grep -cv '^COMPLETED:')
+      fail=$(printf '%s
+' "$rollup" | grep -cE '^COMPLETED:(FAILURE|TIMED_OUT|CANCELLED|ACTION_REQUIRED|STARTUP_FAILURE)')
+      if [ "$fail" -gt 0 ]; then
+        printf "%*s" 44 ""
+        run gh pr checks
+        die "a CI reprovou - corrija, commite e rode ship de novo"
+      fi
+      [ "$pend" -eq 0 ] && break
+    fi
+    waited=$((waited + 5))
+    [ "$waited" -gt 900 ] && die "a CI passou de 15 min - veja: gh pr checks"
+    printf "    aguardando a CI... %ss" "$waited"
+    sleep 5
+  done
+  printf "%*s" 44 ""
+  run gh pr checks
 
   st "Merge"
   run gh pr merge --squash --delete-branch || {
