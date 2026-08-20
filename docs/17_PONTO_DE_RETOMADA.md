@@ -4,7 +4,7 @@ Documento de handoff. Serve para abrir uma conversa nova de arquitetura sem
 perder contexto, e para qualquer pessoa entender em cinco minutos onde o
 projeto está e o que vem a seguir.
 
-**Atualizado em:** 19/08/2026
+**Atualizado em:** 20/08/2026
 
 ---
 
@@ -32,7 +32,7 @@ regras do `CLAUDE.md` em 85 arquivos Dart · 18 arquivos de teste.
 | Firestore | recriado em **`southamerica-east1`** (era `eur3`) |
 | Plano (dev) | Spark — intencional (D-12): Functions/Storage/exportação exigem Blaze e só serão ativados no projeto de produção |
 | Rules/índices | escritos no repositório, **nunca deployados** |
-| `firebase_options.dart` | **ainda é placeholder** — o app só roda em `MOCK=true` |
+| `firebase_options.dart` | configurado via `flutterfire configure`, **sem placeholder** — dia a dia ainda roda com `MOCK=true` |
 
 ### Como rodar hoje
 ```bash
@@ -58,7 +58,7 @@ primeiro uso; modo de demonstração sem Firebase; security rules, índices,
 
 ## 3. O que falta — mapa completo
 
-### Fase C · Fundação Firestore real *(em andamento)*
+### Fase C · Fundação Firestore real *(fechada, com uma pendência de QA)*
 
 | # | Passo | Estado |
 |---|---|---|
@@ -100,24 +100,29 @@ cliente não escreve o próprio `role`.
 
 ---
 
-## 4. Decisões que travam — as 8 urgentes
+## 4. Decisões — status
 
 Detalhe completo em `docs/13_DECISOES_PENDENTES.md`.
 
-| # | Decisão | Recomendação | Trava |
+**Confirmadas em 19/08/2026** — destravam os prompts 10, 13 e 14, e as
+pré-condições dos prompts 11 e 12:
+
+| # | Decisão | Valor confirmado | Destravava |
 |---|---|---|---|
-| D-05 | App guarda evidência forense ou só o registro de custódia? | **Só o registro** + ponteiro para o cofre | 13 |
-| D-06 | Prazos separados para registro e evidência? | **Sim**: registro 10 anos, evidência 12 meses pós-contrato | 14 |
-| D-07 | Como aplicar o prazo? | `retentionUntil` + `legalHold` por registro, **nunca TTL global** | 14 |
-| D-12 | Plano de faturamento | **Spark** em dev/staging · **Blaze** em produção, com alerta de orçamento | 14, Functions (produção) |
+| D-05 | App guarda evidência forense ou só o registro de custódia? | Só o registro + ponteiro para o cofre | 13 |
+| D-06 | Prazos separados para registro e evidência? | Sim: registro 10 anos, evidência 12 meses pós-contrato | 14 |
+| D-07 | Como aplicar o prazo? | `retentionUntil` + `legalHold` por registro, nunca TTL global | 14 |
+| D-12 | Plano de faturamento | Spark em dev/staging · Blaze em produção, com alerta de orçamento | 14, Functions (produção) |
 | D-13 | Retenção de `audit_logs` | 5 anos | 14 |
-| D-18 | Um build ou dois flavors (cliente/staff)? | **Dois** | 12 |
-| D-27 | Validar os 8 modelos de relatório com as disciplinas | 1h com pentest, forense e GRC | **11** |
-| D-29 | Limite de fato relevante | **% da receita**, não valor fixo | 11 |
+| D-18 | Um build ou dois flavors (cliente/staff)? | Dois | 12 |
+| D-29 | Limite de fato relevante | 25% da receita do cliente, por tenant | 11 |
 | D-30 | SLA de resposta a RFS | Crise 2h · urgente 1 dia · planejado 5 dias | 10 |
 
-**D-27 é o de maior risco de retrabalho do projeto.** Campo errado num modelo
-de relatório contamina código, banco e histórico.
+**Ainda aberta — D-27.** Validar os 8 modelos de relatório com as
+disciplinas: escopo definido, falta agendar 1h com pentest, forense, GRC,
+AppSec lead e SOC/Threat Intel lead. **É o de maior risco de retrabalho do
+projeto** — campo errado num modelo de relatório contamina código, banco e
+histórico. Trava o prompt 11.
 
 ---
 
@@ -125,14 +130,15 @@ de relatório contamina código, banco e histórico.
 
 | Achado | Situação |
 |---|---|
-| **A-02** `test/rules` ausente | Fase D |
-| **A-03** `firebase_options.dart` placeholder | Fase C2 |
-| **A-04** Índices defasados | Fase C4 |
+| **A-02** `test/rules` ausente | Fase D — CI tem job `rules`, mas ele só roda se o diretório existir; hoje passa com `::warning::`, sem cobertura nenhuma |
 | **M-03** `sections` sem regra explícita | Entra no prompt 11 |
 | **M-05** `bootstrap.sh` não idempotente | Baixa prioridade |
 | **B-01** 2 TODOs de `url_launcher` | Dívida consciente |
 
-Fechados: **C-01** (git), **A-01** (`.firebaserc`), **A-05** (doc 04),
+Fechados: **C-01** (git), **A-01** (`.firebaserc`), **A-03**
+(`firebase_options.dart` sem placeholder, Fase C2), **A-04** (nenhum índice
+composto necessário para as queries atuais, Fase C4 — revisitar quando os
+prompts 10-14 implementarem novas coleções/filtros), **A-05** (doc 04),
 **M-01** (CI), **M-02** (`CLAUDE.md`), **M-04** (`.firebaserc` versionado).
 
 ---
@@ -177,18 +183,26 @@ operational (SOC), strategic (CISO, público primário), board (C-level) e
 staff (especialista Elytron, cross-tenant, ainda não implementada).
 
 ESTADO
-- Repositório dtupig/dash2board, main protegido, CI com 3 jobs verdes
-- flutter analyze limpo, flutter test verde, 85 arquivos Dart
+- Repositório dtupig/dash2board, main protegido, CI com 3 jobs (o job "Testes
+  das security rules" hoje só imprime warning — test/rules não existe ainda)
+- flutter analyze limpo, flutter test verde
 - Prompts 1 a 9 executados: jornada de entrada, design system, kit de gráficos,
   módulo estratégico do CISO completo, onboarding, seed
-- App roda hoje só com --dart-define=MOCK=true
-- Firestore criado em southamerica-east1; firebase_options.dart ainda placeholder
+- Fase C fechada: flutterfire configure feito, emuladores + seed corrigidos e
+  funcionando, boot confirmado com DATA_SOURCE=firestore, nenhum índice
+  composto faltante hoje. App ainda roda no dia a dia com --dart-define=MOCK=true
+- Pendência menor da Fase C: login por persona não foi exercitado por gesto
+  contra o emulador (só o boot foi validado) — QA manual ou integration_test
+- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); só falta
+  D-27
 
 PRÓXIMOS PASSOS, NESTA ORDEM
-1. Fase C: flutterfire configure, emuladores + seed, rodar com
-   DATA_SOURCE=firestore, corrigir índices
-2. Fase D: test/rules com @firebase/rules-unit-testing (pré-requisito do prompt 12)
-3. Fase E: prompts 10 a 14, em docs/prompts/
+1. Fase D: test/rules com @firebase/rules-unit-testing (fecha A-02,
+   pré-requisito do prompt 12) — próxima frente técnica
+2. Em paralelo: agendar a 1h de D-27 com pentest, forense, GRC, AppSec e
+   SOC/Threat Intel — não depende de código
+3. Fase E: prompts 10 a 14, em docs/prompts/ (prompt 10 já destravado por
+   decisão, D-30 confirmado)
 
 REGRAS DO PROJETO
 Estão em CLAUDE.md e são inegociáveis: flutter analyze em "No issues found!",
@@ -196,12 +210,11 @@ Color.withValues (nunca withOpacity), sem MaterialState/pageTransitionsTheme/
 CardTheme em ThemeData, Riverpod só com APIs estáveis, nunca pumpAndSettle,
 domain/ em Dart puro, presentation/ sem Firebase, tenantId sempre explícito.
 
-DECISÕES ABERTAS QUE TRAVAM
-D-30 (SLA de RFS) trava o prompt 10 · D-27 (validar os 8 modelos de relatório
-com as disciplinas) e D-29 (limite de fato relevante como % da receita) travam
-o 11 · D-18 (dois flavors) trava o 12 · D-05/06/07 (custódia) travam o 13 ·
-D-12 (Spark em dev/staging, Blaze em produção) e D-13 (retenção) travam o 14.
-Detalhe em docs/13.
+DECISÃO ABERTA QUE TRAVA
+Só D-27 (validar os 8 modelos de relatório com as disciplinas) continua
+aberta — trava o prompt 11, e é a de maior risco de retrabalho do projeto.
+Todas as outras 8 decisões urgentes (D-05/06/07/12/13/18/29/30) já foram
+confirmadas em 19/08/2026. Detalhe em docs/13.
 
 COMO EU QUERO TRABALHAR
 Um passo por vez, com confirmação minha antes do próximo. Arquitetura e
