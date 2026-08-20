@@ -131,16 +131,16 @@ histórico. Trava o prompt 11.
 
 | Achado | Situação |
 |---|---|
-| **A-02** `test/rules` ausente | Fase D — CI tem job `rules`, mas ele só roda se o diretório existir; hoje passa com `::warning::`, sem cobertura nenhuma |
 | **M-03** `sections` sem regra explícita | Entra no prompt 11 |
 | **M-05** `bootstrap.sh` não idempotente | Baixa prioridade |
 | **B-01** 2 TODOs de `url_launcher` | Dívida consciente |
 
-Fechados: **C-01** (git), **A-01** (`.firebaserc`), **A-03**
-(`firebase_options.dart` sem placeholder, Fase C2), **A-04** (nenhum índice
-composto necessário para as queries atuais, Fase C4 — revisitar quando os
-prompts 10-14 implementarem novas coleções/filtros), **A-05** (doc 04),
-**M-01** (CI), **M-02** (`CLAUDE.md`), **M-04** (`.firebaserc` versionado).
+Fechados: **C-01** (git), **A-01** (`.firebaserc`), **A-02** (`test/rules`
+com 18 testes, Fase D), **A-03** (`firebase_options.dart` sem placeholder,
+Fase C2), **A-04** (nenhum índice composto necessário para as queries
+atuais, Fase C4 — revisitar quando os prompts 10-14 implementarem novas
+coleções/filtros), **A-05** (doc 04), **M-01** (CI), **M-02** (`CLAUDE.md`),
+**M-04** (`.firebaserc` versionado).
 
 ---
 
@@ -201,8 +201,9 @@ ESTADO
 
 PRÓXIMOS PASSOS, NESTA ORDEM
 1. Fase E: prompts 10, 13 e 14 já sem bloqueio técnico — podem entrar na
-   esteira em docs/prompts/
-2. Prompt 11 aguarda a reunião de D-27 (21/08/2026)
+   esteira em docs/prompts/. Para começar: ./scripts/prompt start 10
+2. Prompt 11 aguarda a reunião de D-27 (21/08/2026, 16h-17h — confirme se já
+   aconteceu antes de puxar esse prompt)
 3. Prompt 12 aguarda D-21 (Cloud Function de criação de tenant, ainda não
    implementada) — Fase D e D-18 já resolvidos
 
