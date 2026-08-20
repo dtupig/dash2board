@@ -29,13 +29,15 @@ firebase use --add    # repita para cada um, criando os aliases dev/stg/prd
 cat .firebaserc
 ```
 
-Cloud Functions, Storage e exportação agendada exigem **plano Blaze**. Ative no
-console e configure alerta de orçamento antes de qualquer deploy:
+Cloud Functions, Storage e exportação agendada exigem **plano Blaze**. Por
+decisão D-12, **dev e staging seguem no Spark** — Functions são exercitadas via
+`firebase emulators:start`, sem deploy ao vivo e sem custo. Ative Blaze **só no
+projeto `prd`**, com alerta de orçamento, antes do primeiro deploy real:
 
 ```bash
 gcloud billing budgets create \
   --billing-account=<SUA_CONTA> \
-  --display-name="Dash2Board DEV" \
+  --display-name="Dash2Board PRD" \
   --budget-amount=50BRL \
   --threshold-rule=percent=50 --threshold-rule=percent=90
 ```
