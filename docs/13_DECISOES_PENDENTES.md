@@ -20,6 +20,25 @@ externa · **[PODE ESPERAR]** não impede a próxima onda.
 | D-03 | Alçada de RFS | Técnico abre · CISO aprova · Board informado por fato relevante |
 | D-04 | Modelo da 4ª persona | Dimensão separada (`PrincipalKind` + `StaffRole` + tenants atribuídos) |
 
+## Confirmado em 19/08/2026
+
+Decisões tomadas em sessão de arquitetura para destravar os prompts 10, 13 e
+14, e as pré-condições dos prompts 11 e 12 (a implementação técnica de cada
+prompt ainda segue seu próprio portão em `docs/16_PLANO_DE_RETOMADA.md`).
+
+| # | Decisão | Valor confirmado |
+|---|---|---|
+| D-30 | SLA de resposta a RFS | Crise 2h · urgente 1 dia útil · planejado 5 dias úteis |
+| D-29 | Limite de fato relevante | 25% da receita do cliente, por tenant, sem teto adicional |
+| D-18 | Um build ou dois flavors | Dois flavors: `client` (lojas públicas) e `staff` (distribuição interna) |
+| D-05 | App guarda evidência ou só o registro de custódia | Só o registro de custódia + ponteiro para o cofre forense |
+| D-06 | Prazos de retenção da custódia | `CustodyRecord` 10 anos · evidência no cofre 12 meses pós-contrato |
+| D-07 | Como aplicar o prazo de custódia | `retentionUntil` + `legalHold` por registro — nunca TTL global |
+| D-12 | Plano de faturamento | Blaze, com alerta de orçamento (modelo: R$50, gatilhos 50%/90%) |
+| D-13 | Retenção de `audit_logs` | 5 anos |
+| D-27 | Validar os 8 modelos de relatório com as disciplinas | **Escopo definido, validação ainda pendente de agendar:** reunião de 1h com pentest, forense, GRC, AppSec lead e SOC/Threat Intel lead |
+
+
 ---
 
 ## A. Cadeia de custódia — 7 decisões
