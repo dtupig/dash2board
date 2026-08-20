@@ -34,7 +34,7 @@ prompt ainda segue seu próprio portão em `docs/16_PLANO_DE_RETOMADA.md`).
 | D-05 | App guarda evidência ou só o registro de custódia | Só o registro de custódia + ponteiro para o cofre forense |
 | D-06 | Prazos de retenção da custódia | `CustodyRecord` 10 anos · evidência no cofre 12 meses pós-contrato |
 | D-07 | Como aplicar o prazo de custódia | `retentionUntil` + `legalHold` por registro — nunca TTL global |
-| D-12 | Plano de faturamento | Blaze, com alerta de orçamento (modelo: R$50, gatilhos 50%/90%) |
+| D-12 | Plano de faturamento | **Spark** em dev/staging (Functions via emulador, sem deploy ao vivo) · **Blaze** em produção, com alerta de orçamento (modelo: R$50, gatilhos 50%/90%) |
 | D-13 | Retenção de `audit_logs` | 5 anos |
 | D-27 | Validar os 8 modelos de relatório com as disciplinas | **Escopo definido, validação ainda pendente de agendar:** reunião de 1h com pentest, forense, GRC, AppSec lead e SOC/Threat Intel lead |
 
@@ -117,7 +117,7 @@ lugar; invasivo se ligado por padrão.
 
 | # | Decisão | Recomendação | Status |
 |---|---|---|---|
-| D-12 | Plano de faturamento | **Blaze** nos três projetos, com alerta de orçamento | **[BLOQUEIA]** Functions, Storage e exportação |
+| D-12 | Plano de faturamento | **Spark** em dev/staging · **Blaze** só em produção, com alerta de orçamento | **[BLOQUEIA]** Functions, Storage e exportação **em produção** (dev/staging seguem via emulador, sem custo) |
 | D-13 | Retenção de `audit_logs` | 5 anos | **[BLOQUEIA prompt 14]** |
 | D-14 | Janela de PITR | 7 dias + exportação diária retida 14 dias | Confirmar |
 | D-15 | Residência de dados | Já resolvida por D-01; virar cláusula contratual | [PODE ESPERAR] |

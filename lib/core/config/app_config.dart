@@ -41,6 +41,12 @@ abstract final class AppConfig {
   static const String dataSource =
       String.fromEnvironment('DATA_SOURCE', defaultValue: 'auto');
 
+  /// Aponta Firestore e Auth para `firebase emulators:start` (portas de
+  /// `firebase.json`) em vez do projeto real. Sem isto, `DATA_SOURCE=firestore`
+  /// sozinho fala com o projeto de verdade — nunca com o emulador.
+  /// Uso: `flutter run --dart-define=DATA_SOURCE=firestore --dart-define=USE_EMULATOR=true`
+  static const bool useEmulator = bool.fromEnvironment('USE_EMULATOR');
+
   /// Regra única que decide a implementação de repositório a usar.
   static bool get useMockData =>
       dataSource == 'mock' || (dataSource == 'auto' && mockMode);

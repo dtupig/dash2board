@@ -30,7 +30,7 @@ regras do `CLAUDE.md` em 85 arquivos Dart · 18 arquivos de teste.
 |---|---|
 | Projeto Firebase | `elytron-d2b-dev` (alias `default`) |
 | Firestore | recriado em **`southamerica-east1`** (era `eur3`) |
-| Plano | Spark — **Functions, Storage e exportação exigem Blaze** |
+| Plano (dev) | Spark — intencional (D-12): Functions/Storage/exportação exigem Blaze e só serão ativados no projeto de produção |
 | Rules/índices | escritos no repositório, **nunca deployados** |
 | `firebase_options.dart` | **ainda é placeholder** — o app só roda em `MOCK=true` |
 
@@ -63,11 +63,21 @@ primeiro uso; modo de demonstração sem Firebase; security rules, índices,
 | # | Passo | Estado |
 |---|---|---|
 | C1 | Criar banco em `southamerica-east1` | ✅ feito |
-| C2 | `flutterfire configure --project=elytron-d2b-dev` | **próximo** |
-| C3 | Emuladores + seed + rodar com `DATA_SOURCE=firestore` | pendente |
-| C4 | Colher índices faltantes no console e comitar | pendente |
+| C2 | `flutterfire configure --project=elytron-d2b-dev` | ✅ feito — `firebase_options.dart` sem `PLACEHOLDER` |
+| C3 | Emuladores + seed + rodar com `DATA_SOURCE=firestore` | ✅ boot confirmado (20/08/2026) — app inicializa e renderiza igual ao mock. Login por persona não foi exercitado por gesto (sem `idb`/XCUITest no ambiente); pendente QA manual ou `integration_test` |
+| C4 | Colher índices faltantes no console e comitar | ✅ analisado (20/08/2026) — **nenhum índice composto é necessário hoje**: as 5 queries de `FirestoreStrategicRepository` usam no máximo um `where` ou um `orderBy` isolado (índice automático de campo único). Os 11 índices em `firestore.indexes.json` são especulativos, para coleções (`incidents`, `vulnerabilities`, `reports`, `members`) e filtros combinados que ainda não existem em código — revisar contra a query real quando os prompts 10-14 as implementarem, não antes |
 
-Fecha os achados **A-03** e **A-04**.
+Fecha o achado **A-03**. **A-04** revisado: não há índice faltante para o código atual, mas os índices declarados não correspondem a nenhuma query existente — ver nota C4.
+
+**Bug encontrado e corrigido nesta verificação:** `main.dart` não tinha nenhuma
+chamada `useFirestoreEmulator`/`useAuthEmulator` — `DATA_SOURCE=firestore`
+sozinho falava com o projeto real, nunca com o emulador. Criado o flag
+`AppConfig.useEmulator` (`--dart-define=USE_EMULATOR=true`). Também corrigido
+`scripts/seed/seed.ts`: o `require()` do `.firebaserc` (a) apontava para o
+caminho errado relativo ao JS compilado e (b) tentava usar `require` num
+arquivo sem extensão `.json`, que o Node compila como JS e quebra — trocado
+por leitura de arquivo + `JSON.parse`. O seed nunca tinha rodado com sucesso
+contra o build compilado até esta correção.
 
 ### Fase D · Rede de segurança
 
@@ -99,7 +109,7 @@ Detalhe completo em `docs/13_DECISOES_PENDENTES.md`.
 | D-05 | App guarda evidência forense ou só o registro de custódia? | **Só o registro** + ponteiro para o cofre | 13 |
 | D-06 | Prazos separados para registro e evidência? | **Sim**: registro 10 anos, evidência 12 meses pós-contrato | 14 |
 | D-07 | Como aplicar o prazo? | `retentionUntil` + `legalHold` por registro, **nunca TTL global** | 14 |
-| D-12 | Plano de faturamento | **Blaze** com alerta de orçamento | 14, Functions |
+| D-12 | Plano de faturamento | **Spark** em dev/staging · **Blaze** em produção, com alerta de orçamento | 14, Functions (produção) |
 | D-13 | Retenção de `audit_logs` | 5 anos | 14 |
 | D-18 | Um build ou dois flavors (cliente/staff)? | **Dois** | 12 |
 | D-27 | Validar os 8 modelos de relatório com as disciplinas | 1h com pentest, forense e GRC | **11** |
@@ -190,7 +200,8 @@ DECISÕES ABERTAS QUE TRAVAM
 D-30 (SLA de RFS) trava o prompt 10 · D-27 (validar os 8 modelos de relatório
 com as disciplinas) e D-29 (limite de fato relevante como % da receita) travam
 o 11 · D-18 (dois flavors) trava o 12 · D-05/06/07 (custódia) travam o 13 ·
-D-12 (Blaze) e D-13 (retenção) travam o 14. Detalhe em docs/13.
+D-12 (Spark em dev/staging, Blaze em produção) e D-13 (retenção) travam o 14.
+Detalhe em docs/13.
 
 COMO EU QUERO TRABALHAR
 Um passo por vez, com confirmação minha antes do próximo. Arquitetura e

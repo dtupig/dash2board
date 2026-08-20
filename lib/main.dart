@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,10 +33,18 @@ Future<void> main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
+      // `firebase emulators:start` (Fase C do plano de retomada) — precisa vir
+      // antes de qualquer leitura/escrita no Firestore ou Auth.
+      if (AppConfig.useEmulator) {
+        FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+        await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+      }
+
       // Cache offline: o executivo abre o app no avião/elevador e ainda vê o
       // último estado conhecido. O tamanho é limitado para não crescer sem fim.
+      // Contra o emulador, cache local só esconde dado obsoleto entre reinícios.
       FirebaseFirestore.instance.settings = const Settings(
-        persistenceEnabled: true,
+        persistenceEnabled: !AppConfig.useEmulator,
         cacheSizeBytes: 40 * 1024 * 1024,
       );
     } on Object catch (error) {

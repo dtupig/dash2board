@@ -40,7 +40,7 @@ Detalhe em `docs/13_DECISOES_PENDENTES.md`. O mínimo por prompt:
 | 11 | **D-27** modelos validados pelas disciplinas · **D-29** limite de fato relevante como % da receita |
 | 12 | **D-18** um build ou dois flavors |
 | 13 | **D-05/06/07** custódia: o app guarda evidência? prazos? `legalHold`? |
-| 14 | **D-12** Blaze · **D-13** retenção de `audit_logs` |
+| 14 | **D-12** Spark em dev/staging, Blaze em produção · **D-13** retenção de `audit_logs` |
 
 D-30 sai em dois minutos. D-27 é a que exige agenda: uma hora com pentest,
 forense e GRC revisando os 8 modelos. É o item de maior risco de retrabalho do
