@@ -65,3 +65,6 @@ audit-report.txt
 coverage/
 *.log
 lcov.info
+
+# Config local do Dart & Flutter DevTools (por máquina, não por projeto)
+devtools_options.yaml
