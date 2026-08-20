@@ -17,6 +17,8 @@
  */
 
 import * as admin from "firebase-admin";
+import * as fs from "fs";
+import * as path from "path";
 
 // ---------------------------------------------------------------------------
 // 0. Modo de execução
@@ -53,10 +55,18 @@ function readProjectId(): string {
     return projectArg.split("=")[1];
   }
   // Modo emulador: usa o projeto "default" declarado em .firebaserc, para
-  // não exigir uma flag extra no dia a dia.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const rc = require("../../.firebaserc");
-  return rc.projects?.default ?? "elytron-dash2board-dev";
+  // não exigir uma flag extra no dia a dia. `.firebaserc` não tem extensão
+  // .json, então require() tenta compilar como JS - lemos e parseamos à mão.
+  const rcPath = path.join(__dirname, "..", "..", "..", ".firebaserc");
+  const rc = JSON.parse(fs.readFileSync(rcPath, "utf8"));
+  const defaultProjectId = rc.projects?.default;
+  if (!defaultProjectId) {
+    throw new Error(
+      "[seed] .firebaserc não declara projects.default. Rode " +
+        "`firebase use --add` ou passe --project=<id>."
+    );
+  }
+  return defaultProjectId;
 }
 
 const projectId = readProjectId();
