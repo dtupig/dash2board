@@ -68,3 +68,7 @@ lcov.info
 
 # Config local do Dart & Flutter DevTools (por máquina, não por projeto)
 devtools_options.yaml
+
+# Relatórios reais de cliente (D-27) - dado confidencial de terceiro,
+# nunca versionar. Ver docs/13_DECISOES_PENDENTES.md.
+docs/Client_reports/

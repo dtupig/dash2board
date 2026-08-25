@@ -4,7 +4,7 @@ Documento de handoff. Serve para abrir uma conversa nova de arquitetura sem
 perder contexto, e para qualquer pessoa entender em cinco minutos onde o
 projeto está e o que vem a seguir.
 
-**Atualizado em:** 20/08/2026
+**Atualizado em:** 25/08/2026
 
 ---
 
@@ -119,11 +119,17 @@ pré-condições dos prompts 11 e 12:
 | D-29 | Limite de fato relevante | 25% da receita do cliente, por tenant | 11 |
 | D-30 | SLA de resposta a RFS | Crise 2h · urgente 1 dia · planejado 5 dias | 10 |
 
-**Ainda aberta — D-27.** Validar os 8 modelos de relatório com as
-disciplinas: escopo definido, falta agendar 1h com pentest, forense, GRC,
-AppSec lead e SOC/Threat Intel lead. **É o de maior risco de retrabalho do
-projeto** — campo errado num modelo de relatório contamina código, banco e
-histórico. Trava o prompt 11.
+**Ainda aberta — D-27.** A reunião de 21/08/2026 com pentest, forense, GRC,
+AppSec lead e SOC/Threat Intel lead aconteceu, mas não fechou a decisão: as
+disciplinas entregaram os templates reais em uso e pediram que os casos de
+teste do prompt 11 sejam construídos em cima de relatórios de clientes reais
+— não em abstrato — para dar um ponto de vista prático antes de chancelar.
+Os PDFs ficam em `docs/Client_reports/` (dado confidencial de terceiro,
+**fora do git** desde 25/08/2026 — a pasta não estava no `.gitignore` até
+esta sessão). **É o de maior risco de retrabalho do projeto** — campo errado
+num modelo de relatório contamina código, banco e histórico. Continua
+travando o prompt 11 até essa rodada prática ser feita e confirmada pelas
+disciplinas.
 
 ---
 
@@ -196,14 +202,16 @@ ESTADO
   roda no dia a dia com --dart-define=MOCK=true
 - Fase D fechada: test/rules com 18 testes (positivo e negativo por regra),
   fecha A-02 e D-26
-- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); D-27 tem
-  reunião agendada para 21/08/2026 16h-17h
+- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); D-27 teve
+  a reunião em 21/08/2026, mas segue aberta — ver abaixo
 
 PRÓXIMOS PASSOS, NESTA ORDEM
 1. Fase E: prompts 10, 13 e 14 já sem bloqueio técnico — podem entrar na
    esteira em docs/prompts/. Para começar: ./scripts/prompt start 10
-2. Prompt 11 aguarda a reunião de D-27 (21/08/2026, 16h-17h — confirme se já
-   aconteceu antes de puxar esse prompt)
+2. Prompt 11 segue bloqueado por D-27: as disciplinas entregaram templates
+   reais de cliente (`docs/Client_reports/`, fora do git, dado confidencial)
+   e pedem casos de teste construídos em cima deles antes de chancelar os 8
+   modelos — validação prática ainda não feita
 3. Prompt 12 aguarda D-21 (Cloud Function de criação de tenant, ainda não
    implementada) — Fase D e D-18 já resolvidos
 
@@ -216,8 +224,11 @@ domain/ em Dart puro, presentation/ sem Firebase, tenantId sempre explícito.
 DECISÃO ABERTA QUE TRAVA
 Só D-27 (validar os 8 modelos de relatório com as disciplinas) continua
 aberta — trava o prompt 11, e é a de maior risco de retrabalho do projeto.
-Todas as outras 8 decisões urgentes (D-05/06/07/12/13/18/29/30) já foram
-confirmadas em 19/08/2026. Detalhe em docs/13.
+A reunião de 21/08 aconteceu, mas as disciplinas pediram validação prática
+em cima de relatórios reais de cliente antes de chancelar (ver docs/13 e
+docs/Client_reports/, que fica fora do git). Todas as outras 8 decisões
+urgentes (D-05/06/07/12/13/18/29/30) já foram confirmadas em 19/08/2026.
+Detalhe em docs/13.
 
 COMO EU QUERO TRABALHAR
 Um passo por vez, com confirmação minha antes do próximo. Arquitetura e
@@ -269,3 +280,10 @@ branch por prompt.
 8. **`firebase-tools` recente exige JDK 21+ para o emulador do Firestore.**
    O runner padrão do GitHub Actions tem uma versão mais antiga; sem
    `actions/setup-java@v4` (Temurin 21), o job `rules` falha só nisso.
+9. **Dado real de cliente entra na pasta `docs/` sem aviso.** Em 25/08/2026,
+   `docs/Client_reports/` (6 relatórios reais de pentest/forense/vulnerabi-
+   lidade, entregues pelas disciplinas para D-27) apareceu sem entrada no
+   `.gitignore` — o próximo `git add -A` do ritual de prompt teria versionado
+   dado confidencial de terceiro num repositório com histórico permanente.
+   Checar `git status` para pastas novas antes de qualquer commit, não só
+   confiar no `.gitignore` existente.
