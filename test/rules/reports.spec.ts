@@ -90,23 +90,35 @@ describe('reports/sections - canSeeSection por sensibilidade', () => {
     await seedSection('rep-confidential', 'sec-narrative', { sensitivity: 'narrative' });
     await seedSection('rep-confidential', 'sec-exploit', { sensitivity: 'exploit_proof' });
     await seedSection('rep-confidential', 'sec-personal', { sensitivity: 'personal_data' });
+
+    // board só abre relatório com fato relevante (ou public_internal) - o
+    // teste de canSeeSection para board precisa de um relatório que ele
+    // consiga abrir, senão canOpenReport já barra tudo antes de chegar
+    // em canSeeSection.
+    await seedReport('rep-board-openable', {
+      classification: 'confidential',
+      materialFacts: [{ trigger: 'critical_internet_facing' }],
+    });
+    await seedSection('rep-board-openable', 'sec-narrative', { sensitivity: 'narrative' });
+    await seedSection('rep-board-openable', 'sec-exploit', { sensitivity: 'exploit_proof' });
+    await seedSection('rep-board-openable', 'sec-personal', { sensitivity: 'personal_data' });
   });
 
   it('board lê narrative mas NÃO lê exploit_proof nem personal_data', async () => {
     const bob = personaContext('bob', { tenantId: TENANT_A, role: 'board' });
     await assertSucceeds(
       getDoc(
-        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-confidential', 'sections', 'sec-narrative'),
+        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-board-openable', 'sections', 'sec-narrative'),
       ),
     );
     await assertFails(
       getDoc(
-        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-confidential', 'sections', 'sec-exploit'),
+        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-board-openable', 'sections', 'sec-exploit'),
       ),
     );
     await assertFails(
       getDoc(
-        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-confidential', 'sections', 'sec-personal'),
+        doc(bob.firestore(), 'tenants', TENANT_A, 'reports', 'rep-board-openable', 'sections', 'sec-personal'),
       ),
     );
   });
