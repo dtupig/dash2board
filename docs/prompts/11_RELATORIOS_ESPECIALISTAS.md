@@ -52,10 +52,15 @@ NÃO invente categoria, serviço nem classificação fora do catálogo.
 
 `ServiceReport` (base de todos): `id`, `tenantId`, `serviceKey`, `category`,
 `title`, `referencePeriod`, `deliveredAt`, `version`, `elytronLeadName`,
-`classification` (enum `ReportClassification`: `publicInternal`, `restricted`,
-`confidential`, `secret`), `executiveSummary` (3 a 5 frases, linguagem de
-negócio), `businessImpact`, `materialFacts` (List<MaterialFact>),
-`nextSteps` (List<ActionItem>), `attachments` (List<ReportAttachment>).
+`clientContactName` (nome do contato do cliente que recebe o relatório —
+valida contra 6/6 relatórios reais, D-27), `classification` (enum
+`ReportClassification`: `publicInternal`, `restricted`, `confidential`,
+`secret`), `deliveryKind` (enum `scheduled`/`interim` — `interim` para
+entrega antecipada de um achado único fora do ciclo normal, ex.: achado
+crítico entregue antes do relatório final; validado contra caso real, D-27),
+`executiveSummary` (3 a 5 frases, linguagem de negócio), `businessImpact`,
+`materialFacts` (List<MaterialFact>), `nextSteps` (List<ActionItem>),
+`attachments` (List<ReportAttachment>).
 
 `ReportSection`: `key`, `title`, `minimumRole` (a persona mais restrita que
 pode ver esta seção), `sensitivity` (enum `SectionSensitivity`: `narrative`,
@@ -74,11 +79,23 @@ que um campo significa no ofício, **pergunte em vez de inventar** — dado erra
 num relatório de segurança é pior que dado ausente.
 
 1. `pentest_report.dart` — `PentestReport`
-   `findings` (`PentestFinding`: `title`, `cvssVector`, `cvssScore`,
-   `severity`, `cweId`, `affectedAssets`, `businessConsequence`,
-   `reproductionSteps` **[exploitProof]**, `evidenceRefs` **[exploitProof]**,
-   `remediation`, `retestStatus`), `scopeCovered`, `methodology`
-   (PTES/OWASP/OSSTMM), `testWindow`, `retestSummary`.
+   `findings` (`PentestFinding`: `title`, `cvssVector` **opcional/nullable**
+   — nenhum dos 6 relatórios reais publica o vetor completo, só o score,
+   D-27 gap #5 —, `cvssScore`, `severity`, `cweId`, `cveId` **opcional**
+   (distinto de `cweId`, gap #2), `owaspCategory` (gap #1),
+   `technicalImpact` (distinto de `businessConsequence`, gap #3),
+   `references` (`List<String>`, links externos por achado, gap #4),
+   `environment` (enum `production`/`staging`/`homolog`, opcional — muda a
+   severidade percebida, gap #9), `affectedAssets`, `businessConsequence`,
+   `reproductionSteps` **[exploitProof]**, `evidenceRefs` **[exploitProof]**
+   — ambos aceitam a tag adicional **[personalData]** quando a evidência
+   carrega dado pessoal real incidental, ex.: CPF, cartão, hash de senha em
+   massa (gap #8) —, `remediation`, `retestStatus`), `scopeCovered`,
+   `methodology` (PTES/OWASP/OSSTMM — na prática frequentemente citados em
+   conjunto com Cyber Kill Chain, MITRE ATT&CK e NIST 800-115; aceite lista,
+   não valor único), `testWindow`, `retestSummary`,
+   `testingImpediments` (String?, nível relatório — seção de bloqueios de
+   execução que todo template real inclui, mesmo vazia, gap #6).
    Campos por serviço: `mobile` acrescenta plataformas e versão do app;
    `code_review` acrescenta repositórios, commit e cobertura;
    `reverse_engineering` acrescenta binário, hash e proteções encontradas;
@@ -99,10 +116,22 @@ num relatório de segurança é pior que dado ausente.
    `containmentAt`, `eradicationAt`, `iocs` **[technical]**,
    `chainOfCustody` **[chainOfCustody]**, `affectedDataSubjects`
    **[personalData]**, `regulatoryNotificationRequired` (bool),
-   `lessonsLearned`, `exerciseScore` (para tabletop/wargame/simulação).
+   `lessonsLearned`, `exerciseScore` (para tabletop/wargame/simulação),
+   `forensicStandardsApplied` (`List<String>` curta — ISO 27037,
+   NIST SP 800-86, RFC 3227, SWGDE, DFRWS etc.; presente em 100% dos
+   relatórios forenses reais examinados, gap #12).
    Campos por serviço: as coletas forenses acrescentam `deviceIdentifiers`,
-   `acquisitionHash`, `custodianName`, `acquisitionMethod`;
-   `forensics_uam` acrescenta `monitoredUsers` e a base legal do monitoramento.
+   `acquisitionHash`, `custodianName`, `acquisitionMethod` — **exceto
+   `forensics_cloud`**, onde `deviceIdentifiers` (vocabulário de dispositivo
+   físico: fabricante/modelo/serial/IMEI) não se aplica; use em vez disso um
+   identificador de recurso de nuvem (projeto/instância/zona/
+   snapshot — gap #13). Sem amostra real disponível hoje, os dados de mock e
+   de teste desses campos usam os templates genéricos em
+   `docs/templates/custody_record_generic_device.json` e
+   `docs/templates/custody_record_generic_cloud.json`
+   (`isGeneric: true` — nunca tratar como dado real; substituir quando D-32
+   permitir upload real pelo consultor). `forensics_uam` acrescenta
+   `monitoredUsers` e a base legal do monitoramento.
 
 5. `governance_report.dart` — `GovernanceReport`
    `framework`, `maturityByDomain`, `targetMaturity`, `gaps`,
@@ -119,7 +148,13 @@ num relatório de segurança é pior que dado ausente.
 8. `defense_report.dart` — `DefenseReport`
    `controlCoverage`, `detectionsByTactic` (MITRE ATT&CK), `tuningActions`,
    `falsePositiveReduction`, `phishingClickRate`, `credentialsFoundInLeaks`
-   **[personalData]**, `hardeningRecommendations`.
+   **[personalData]**, `hardeningRecommendations`,
+   `relatedSurfaceFindings` (`List<String>` opcional, resumo leve de
+   achados de reconhecimento de superfície — resolve o caso real de TI
+   disparada por incidente, que produz dado `AttackSurfaceReport`-shaped no
+   mesmo documento; decisão conservadora de D-27: bloco opcional aqui, não
+   sub-variante nem fusão de modelo. Reavaliar se o padrão se repetir com
+   volume).
 
 # PARTE 3 — PROTEÇÃO DE CONTEÚDO (o eixo crítico)
 
@@ -147,6 +182,14 @@ Regras, e elas são duras:
 - Seção suprimida **aparece como suprimida**, com o motivo em uma frase. Nunca
   simplesmente some: o leitor precisa saber que existe conteúdo que ele não
   está vendo — essa é a diferença entre redação e engano.
+- **Evidência em imagem é unidade atômica de sensibilidade (D-27, gap #10).**
+  `SectionSensitivity` se aplica a uma seção de texto inteira; uma captura de
+  tela não pode ser parcialmente redigida em tempo de renderização. Em 4 dos
+  6 relatórios reais examinados, uma mesma imagem misturava conteúdo de
+  sensibilidades diferentes (ex.: um campo redigido e outro aberto na mesma
+  captura). Regra: **redija a imagem antes de anexar** — a política de acesso
+  decide mostrar ou ocultar a imagem inteira, nunca borrar parte dela em
+  runtime. Documentar isso como orientação editorial obrigatória no prompt 13.
 
 Implementação obrigatória no visualizador:
 - Marca d'água diagonal contínua com `uid`, nome e data-hora em toda tela de
@@ -173,7 +216,7 @@ determinística implementada em `MaterialFactEvaluator.evaluate(report)`:
 
 | Gatilho | Dispara quando |
 |---|---|
-| `confirmedCompromise` | há evidência de comprometimento ativo |
+| `confirmedCompromise` | há evidência de comprometimento ativo — **inclui confirmação formal OU indício técnico objetivo corroborado** (ex.: log de acesso anômalo, escrita não autorizada observada, sessão/token de terceiro validado como funcional) associado à suspeita, mesmo sem confissão do agente (critério explícito decidido em D-27: fail-open para visibilidade do board — esconder um indício forte é pior que notificar de mais) |
 | `personalDataExposure` | dado pessoal exposto ou `regulatoryNotificationRequired` |
 | `criticalInternetFacing` | achado crítico em ativo exposto à internet |
 | `regulatoryDeadlineRisk` | prazo regulatório em risco nos próximos 90 dias |
@@ -232,6 +275,17 @@ uma demonstração: pelo menos dois com fato relevante (um
 `criticalInternetFacing`, um `personalDataExposure`), um `secret` (perícia
 forense) para exercitar o registro de leitura, e um com comparação contra
 entrega anterior.
+
+Inclua também, anonimizados:
+- Um relatório de pentest `deliveryKind: interim` com achado crítico + dado
+  pessoal real exposto + indício de comprometimento não confirmado
+  formalmente — cenário validado contra caso real em D-27, dispara
+  simultaneamente `personalDataExposure`, `criticalInternetFacing` e
+  `confirmedCompromise` (pelo critério explícito da seção acima).
+- O relatório `secret` de perícia forense usa os campos de custódia povoados
+  a partir de `docs/templates/custody_record_generic_device.json` (ou
+  `..._cloud.json` para um cenário de coleta em nuvem) — dado sintético,
+  `isGeneric: true`, nunca renderizado como se fosse real.
 
 Atualize `firestore.rules`: leitura de relatório governada por classificação +
 persona + `materialFact`, espelhando `ReportAccessPolicy`. A regra e a classe

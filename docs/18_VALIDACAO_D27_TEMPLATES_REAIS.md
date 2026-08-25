@@ -15,10 +15,11 @@ não reproduz literalmente segredo (credencial, chave, PoC completo) nem dado
 pessoal identificável de titular — descreve existência e natureza, não
 conteúdo.
 
-**Status: análise técnica concluída. D-27 continua aberta** — falta a
-chancela de fato das disciplinas sobre as mudanças de modelo propostas
-abaixo, e falta uma amostra real de relatório de **coleta** forense (ver
-seção 4).
+**Status: D-27 chancelada em 25/08/2026.** Os 13 ajustes da seção 2 e as 2
+decisões da seção 3 foram aprovados e aplicados em
+`docs/prompts/11_RELATORIOS_ESPECIALISTAS.md`. A pendência da seção 4 (falta
+de amostra real de coleta forense) foi resolvida com um template genérico —
+ver seção 6.
 
 ---
 
@@ -109,10 +110,36 @@ prompt 13.
 
 ---
 
-## 5. Próximo passo
+## 5. Resolução (25/08/2026)
 
-1. Levar a tabela da seção 2 e os 3 pontos da seção 3 às disciplinas para
-   chancela objetiva (aceitar/ajustar cada proposta).
-2. Pedir o exemplar de coleta forense (seção 4).
-3. Só depois de (1) e (2): aplicar os ajustes aprovados em
-   `docs/prompts/11_RELATORIOS_ESPECIALISTAS.md` e então abrir o prompt 11.
+- **Gaps da seção 2 (13 itens):** todos aprovados e aplicados em
+  `docs/prompts/11_RELATORIOS_ESPECIALISTAS.md`.
+- **Decisão 1 (CEEC cruza 3 modelos):** resolvida pela via conservadora —
+  `DefenseReport` ganha um bloco opcional de achados de superfície
+  (`relatedSurfaceFindings`), em vez de criar sub-variante ou fundir
+  modelos. Reavaliar se o padrão se repetir com volume.
+- **Decisão 2 (`confirmedCompromise` ambíguo):** definido explicitamente —
+  o gatilho dispara também com indício técnico objetivo corroborado (ex.:
+  log de acesso anômalo, escrita não autorizada observada, sessão de
+  terceiro validada como funcional), mesmo sem confissão/confirmação
+  formal do agente. Fail-open para visibilidade do board é a escolha mais
+  segura aqui — esconder um indício forte do board é pior que notificar de
+  mais.
+- **Decisão 3 (cenário JHSF no mock):** incorporada à PARTE 6 do prompt 11
+  como um dos cenários de demonstração (anonimizado).
+
+## 6. Pendência de coleta forense — resolvida com template genérico
+
+Sem amostra real disponível, e por decisão do usuário em 25/08/2026: os
+campos `deviceIdentifiers`/`acquisitionHash`/`custodianName`/
+`acquisitionMethod` (D-05/06/07) são povoados, por ora, com um **template
+genérico e sintético** — `docs/templates/custody_record_generic_device.json`
+e `docs/templates/custody_record_generic_cloud.json` (este último cobre o
+gap #13 da seção 2, identificadores de recurso de nuvem). Ambos marcam
+`"isGeneric": true` e um campo `provenance` explicando a origem — nunca
+devem ser tratados como dado real.
+
+**Substituição prevista:** quando D-32 (importação de JSON pelo consultor)
+entrar em produção, ou quando a disciplina de forense fornecer um exemplar
+real (mesmo anonimizado), o template genérico é substituído e este
+documento é atualizado.
