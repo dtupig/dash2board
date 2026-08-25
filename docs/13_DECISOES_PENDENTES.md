@@ -36,7 +36,7 @@ prompt ainda segue seu próprio portão em `docs/16_PLANO_DE_RETOMADA.md`).
 | D-07 | Como aplicar o prazo de custódia | `retentionUntil` + `legalHold` por registro — nunca TTL global |
 | D-12 | Plano de faturamento | **Spark** em dev/staging (Functions via emulador, sem deploy ao vivo) · **Blaze** em produção, com alerta de orçamento (modelo: R$50, gatilhos 50%/90%) |
 | D-13 | Retenção de `audit_logs` | 5 anos |
-| D-27 | Validar os 8 modelos de relatório com as disciplinas | **Reunião de 21/08/2026 realizada, mas não fecha a decisão.** As disciplinas não chancelaram os 8 modelos em abstrato: entregaram os templates reais em uso (`docs/Client_reports/`, fora do git — dado confidencial de terceiro) e pediram que os casos de teste do prompt 11 sejam construídos em cima desses relatórios de clientes reais, para dar um ponto de vista prático antes da chancela final. **Continua bloqueando o prompt 11** até essa rodada de validação prática acontecer e as disciplinas confirmarem os modelos resultantes. |
+| D-27 | Validar os 8 modelos de relatório com as disciplinas | **Reunião de 21/08/2026 realizada, análise técnica concluída em 25/08/2026, mas não fecha a decisão.** Os 6 templates reais em `docs/Client_reports/` (fora do git) foram comparados campo a campo contra os 8 modelos — resultado completo em `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md`: 13 ajustes de campo propostos, 2 decisões de produto pendentes, e 1 pendência (falta amostra real de relatório de *coleta* forense). **Continua bloqueando o prompt 11** até as disciplinas chancelarem os ajustes propostos em docs/18. |
 
 
 ---
@@ -153,7 +153,7 @@ lugar; invasivo se ligado por padrão.
 
 | # | Decisão | Recomendação | Status |
 |---|---|---|---|
-| D-27 | Validar os 8 modelos de relatório | **Cada disciplina revisa o seu, em cima de relatório real de cliente** (não em abstrato) antes do prompt 11 | **[BLOQUEIA prompt 11]** — reunião de 21/08 feita, validação prática em andamento |
+| D-27 | Validar os 8 modelos de relatório | **Cada disciplina revisa o seu, em cima de relatório real de cliente** (não em abstrato) antes do prompt 11 | **[BLOQUEIA prompt 11]** — reunião de 21/08 feita, análise técnica em `docs/18` concluída 25/08, aguardando chancela |
 | D-28 | Quem escreve os 44 `shortPitch` | Rascunho pelo agente, revisão comercial obrigatória | [PODE ESPERAR] |
 | D-29 | Limite de fato relevante | % da receita do cliente, não valor fixo — por tenant | **[BLOQUEIA prompt 11]** |
 | D-30 | SLA de resposta a RFS | Definir por urgência: crise 2h · urgente 1 dia · planejado 5 dias | **[BLOQUEIA prompt 10]** |

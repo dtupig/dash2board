@@ -119,17 +119,19 @@ pré-condições dos prompts 11 e 12:
 | D-29 | Limite de fato relevante | 25% da receita do cliente, por tenant | 11 |
 | D-30 | SLA de resposta a RFS | Crise 2h · urgente 1 dia · planejado 5 dias | 10 |
 
-**Ainda aberta — D-27.** A reunião de 21/08/2026 com pentest, forense, GRC,
-AppSec lead e SOC/Threat Intel lead aconteceu, mas não fechou a decisão: as
-disciplinas entregaram os templates reais em uso e pediram que os casos de
-teste do prompt 11 sejam construídos em cima de relatórios de clientes reais
-— não em abstrato — para dar um ponto de vista prático antes de chancelar.
-Os PDFs ficam em `docs/Client_reports/` (dado confidencial de terceiro,
-**fora do git** desde 25/08/2026 — a pasta não estava no `.gitignore` até
-esta sessão). **É o de maior risco de retrabalho do projeto** — campo errado
-num modelo de relatório contamina código, banco e histórico. Continua
-travando o prompt 11 até essa rodada prática ser feita e confirmada pelas
-disciplinas.
+**Ainda aberta — D-27.** A reunião de 21/08/2026 aconteceu, mas não fechou a
+decisão: as disciplinas entregaram os templates reais em uso e pediram
+validação prática antes de chancelar. Essa validação foi feita em
+25/08/2026 — os 6 relatórios reais em `docs/Client_reports/` (dado
+confidencial de terceiro, **fora do git** desde esta sessão — a pasta não
+estava no `.gitignore` até então) foram comparados campo a campo contra os
+8 modelos do prompt 11. Resultado completo em
+`docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md`: 13 ajustes de campo propostos,
+2 decisões de produto pendentes, e 1 pendência (falta amostra real de
+relatório de *coleta* forense, não só de investigação). **É o de maior
+risco de retrabalho do projeto** — campo errado num modelo de relatório
+contamina código, banco e histórico. Continua travando o prompt 11 até as
+disciplinas chancelarem os ajustes propostos em docs/18.
 
 ---
 
@@ -208,10 +210,10 @@ ESTADO
 PRÓXIMOS PASSOS, NESTA ORDEM
 1. Fase E: prompts 10, 13 e 14 já sem bloqueio técnico — podem entrar na
    esteira em docs/prompts/. Para começar: ./scripts/prompt start 10
-2. Prompt 11 segue bloqueado por D-27: as disciplinas entregaram templates
-   reais de cliente (`docs/Client_reports/`, fora do git, dado confidencial)
-   e pedem casos de teste construídos em cima deles antes de chancelar os 8
-   modelos — validação prática ainda não feita
+2. Prompt 11 segue bloqueado por D-27: a validação prática contra 6
+   relatórios reais de cliente foi feita (`docs/18_VALIDACAO_D27_TEMPLATES_
+   REAIS.md`, 13 ajustes de campo propostos) — falta a chancela das
+   disciplinas sobre esses ajustes, e um exemplar real de coleta forense
 3. Prompt 12 aguarda D-21 (Cloud Function de criação de tenant, ainda não
    implementada) — Fase D e D-18 já resolvidos
 
@@ -224,11 +226,12 @@ domain/ em Dart puro, presentation/ sem Firebase, tenantId sempre explícito.
 DECISÃO ABERTA QUE TRAVA
 Só D-27 (validar os 8 modelos de relatório com as disciplinas) continua
 aberta — trava o prompt 11, e é a de maior risco de retrabalho do projeto.
-A reunião de 21/08 aconteceu, mas as disciplinas pediram validação prática
-em cima de relatórios reais de cliente antes de chancelar (ver docs/13 e
-docs/Client_reports/, que fica fora do git). Todas as outras 8 decisões
-urgentes (D-05/06/07/12/13/18/29/30) já foram confirmadas em 19/08/2026.
-Detalhe em docs/13.
+A validação prática contra 6 relatórios reais de cliente já foi feita
+(docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md, 13 ajustes de campo propostos,
+2 decisões de produto pendentes) — falta a chancela das disciplinas sobre
+esses ajustes e um exemplar real de coleta forense. Todas as outras 8
+decisões urgentes (D-05/06/07/12/13/18/29/30) já foram confirmadas em
+19/08/2026. Detalhe em docs/13.
 
 COMO EU QUERO TRABALHAR
 Um passo por vez, com confirmação minha antes do próximo. Arquitetura e
@@ -255,6 +258,7 @@ branch por prompt.
 | `docs/14_AUDITORIA_QUALIDADE.md` | Relatório de auditoria e achados |
 | `docs/15_GIT_E_GITHUB.md` | Repositório, CI, fluxo de trabalho |
 | `docs/16_PLANO_DE_RETOMADA.md` | As 5 fases e o ritual |
+| `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md` | Os 8 modelos do prompt 11 comparados campo a campo contra 6 relatórios reais de cliente — base para chancela de D-27 |
 | `docs/prompts/00_INDICE.md` | Índice dos prompts 2 a 14 |
 
 ---
