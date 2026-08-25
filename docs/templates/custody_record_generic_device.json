@@ -1,0 +1,59 @@
+{
+  "isGeneric": true,
+  "provenance": "Template genérico gerado em 25/08/2026 (D-27/D-32). Não é dado real de cliente. Substituir quando a disciplina de forense fornecer um exemplar real ou quando D-32 (importação pelo consultor) entrar em produção.",
+  "recordId": "generic-device-001",
+  "serviceKey": "forensics_endpoint",
+  "status": "sealed",
+  "createdAt": "2026-01-10T09:15:00-03:00",
+  "sealedAt": "2026-01-10T11:40:00-03:00",
+  "legalBasis": "execucao_de_contrato",
+  "purpose": "Coleta forense de notebook corporativo para investigação de incidente de segurança conforme contrato de resposta a incidentes.",
+  "device": {
+    "deviceType": "notebook",
+    "manufacturer": "Fabricante Genérico",
+    "model": "Modelo-XYZ",
+    "serialNumber": "SN-GEN-000000",
+    "imei": null
+  },
+  "photos": [
+    {
+      "label": "Equipamento - vista frontal",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000aa",
+      "capturedAt": "2026-01-10T09:20:00-03:00"
+    },
+    {
+      "label": "Lacre aplicado",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000bb",
+      "capturedAt": "2026-01-10T09:25:00-03:00"
+    },
+    {
+      "label": "Etiqueta de identificação",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000cc",
+      "capturedAt": "2026-01-10T09:26:00-03:00"
+    }
+  ],
+  "custodian": {
+    "name": "Nome do Custodiante",
+    "document": "000.000.000-00",
+    "signatureRef": "signatures/generic-device-001.png"
+  },
+  "acquisition": {
+    "method": "imagem forense bit a bit",
+    "tool": "Ferramenta Genérica de Aquisição vX.Y",
+    "imageHash": {
+      "algorithm": "SHA-256",
+      "value": "0000000000000000000000000000000000000000000000000000000000dd"
+    },
+    "acquiredAt": "2026-01-10T10:00:00-03:00",
+    "geolocation": null
+  },
+  "vaultPointer": {
+    "vaultProvider": "cofre-forense-interno",
+    "reference": "vault://tenant-generico/case/generic-device-001",
+    "note": "Ponteiro apenas — a evidência bruta nunca entra no app (D-05)."
+  },
+  "retention": {
+    "retentionUntil": "2036-01-10",
+    "legalHold": false
+  }
+}

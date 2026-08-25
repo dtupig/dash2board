@@ -94,9 +94,9 @@ security rules" do CI passou a executar de verdade (antes só emitia
 | # | Prompt | Escopo | Bloqueado por |
 |---|---|---|---|
 | 10 | `10_CATALOGO_E_WIZARD` | Catálogo dos 44 serviços, bifurcação relatórios/demanda, wizard de RFS em 5 passos, `RequestPolicy` com a alçada técnico→CISO→board | ✅ feito (25/08/2026, PR #14) |
-| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | D-27 — validação técnica concluída (`docs/18`), aguardando chancela |
+| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | ✅ D-27 chancelada 25/08/2026 — **nenhum bloqueio, pronto para executar** |
 | 12 | `12_PERSONA_ESPECIALISTA_RETROFIT` | 4ª persona (staff Elytron), identidade cross-tenant, `TenantScope`, `StaffPolicy`, reescrita das rules | D-21 (Cloud Function de criação de tenant, ainda não implementada) — Fase D e D-18 já resolvidos |
-| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, redação, revisão, verificação de redação, publicação, **importação estruturada de JSON pelo consultor (D-32, novo em 25/08)** | Nenhum bloqueio técnico — D-05/06/07 já confirmados; a parte de importação JSON depende também do schema final de D-27 |
+| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, redação, revisão, verificação de redação, publicação, **importação estruturada de JSON pelo consultor (D-32)** | Nenhum bloqueio técnico para a parte de autoria — D-05/06/07 e agora D-27 confirmados; a parte de importação JSON (D-32) ainda depende da persona existir (D-21/prompt 12) |
 | 14 | `14_ESTRUTURA_DADOS_FIREBASE` | Schema, conversores, `TenantGuard`, rules das 4 personas, TTL, agregados, seed, RTDB de presença | Nenhum bloqueio técnico — D-12/13 já confirmados |
 
 ---
@@ -119,19 +119,17 @@ pré-condições dos prompts 11 e 12:
 | D-29 | Limite de fato relevante | 25% da receita do cliente, por tenant | 11 |
 | D-30 | SLA de resposta a RFS | Crise 2h · urgente 1 dia · planejado 5 dias | 10 |
 
-**Ainda aberta — D-27.** A reunião de 21/08/2026 aconteceu, mas não fechou a
-decisão: as disciplinas entregaram os templates reais em uso e pediram
-validação prática antes de chancelar. Essa validação foi feita em
-25/08/2026 — os 6 relatórios reais em `docs/Client_reports/` (dado
-confidencial de terceiro, **fora do git** desde esta sessão — a pasta não
-estava no `.gitignore` até então) foram comparados campo a campo contra os
-8 modelos do prompt 11. Resultado completo em
-`docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md`: 13 ajustes de campo propostos,
-2 decisões de produto pendentes, e 1 pendência (falta amostra real de
-relatório de *coleta* forense, não só de investigação). **É o de maior
-risco de retrabalho do projeto** — campo errado num modelo de relatório
-contamina código, banco e histórico. Continua travando o prompt 11 até as
-disciplinas chancelarem os ajustes propostos em docs/18.
+**D-27 chancelada em 25/08/2026.** A reunião de 21/08/2026 não fechou a
+decisão de saída — as disciplinas entregaram os templates reais em uso e
+pediram validação prática antes de chancelar. Essa validação (6 relatórios
+reais em `docs/Client_reports/`, dado confidencial de terceiro, fora do
+git) foi feita em 25/08/2026 e resultou em `docs/18_VALIDACAO_D27_
+TEMPLATES_REAIS.md`: 13 ajustes de campo e 2 decisões de produto, todos
+aprovados e já aplicados em `docs/prompts/11_RELATORIOS_ESPECIALISTAS.md`.
+A pendência de falta de amostra real de coleta forense foi resolvida com
+um template genérico (`docs/templates/`), a ser substituído por dado real
+via D-32 (importação pelo consultor) ou amostra futura das disciplinas.
+**O prompt 11 está destravado.**
 
 ---
 
@@ -204,18 +202,21 @@ ESTADO
   roda no dia a dia com --dart-define=MOCK=true
 - Fase D fechada: test/rules com 18 testes (positivo e negativo por regra),
   fecha A-02 e D-26
-- 8 das 9 decisões urgentes já confirmadas em 19/08/2026 (docs/13); D-27 teve
-  a reunião em 21/08/2026, mas segue aberta — ver abaixo
+- Todas as 9 decisões urgentes originais confirmadas (docs/13); D-27
+  chancelada em 25/08/2026 após validação prática contra 6 relatórios reais
+  de cliente (docs/18) — ajustes já aplicados em docs/prompts/11
+- Prompt 10 executado e mesclado (25/08/2026, PR #14): catálogo, wizard de
+  RFS, RequestPolicy
+- Nova decisão D-32 (25/08/2026): persona `consultor` (a mesma 4ª persona
+  de docs/09) poderá importar JSON estruturado que popula o relatório
+  inteiro — depende de D-21/prompt 12 para existir de fato
 
 PRÓXIMOS PASSOS, NESTA ORDEM
-1. Fase E: prompts 10, 13 e 14 já sem bloqueio técnico — podem entrar na
-   esteira em docs/prompts/. Para começar: ./scripts/prompt start 10
-2. Prompt 11 segue bloqueado por D-27: a validação prática contra 6
-   relatórios reais de cliente foi feita (`docs/18_VALIDACAO_D27_TEMPLATES_
-   REAIS.md`, 13 ajustes de campo propostos) — falta a chancela das
-   disciplinas sobre esses ajustes, e um exemplar real de coleta forense
+1. Prompt 11 está destravado (D-27 chancelada) — pronto para executar
+2. Prompts 13 e 14 já sem bloqueio técnico
 3. Prompt 12 aguarda D-21 (Cloud Function de criação de tenant, ainda não
-   implementada) — Fase D e D-18 já resolvidos
+   implementada) — Fase D e D-18 já resolvidos. D-32 (importação JSON) só
+   entra depois disso
 
 REGRAS DO PROJETO
 Estão em CLAUDE.md e são inegociáveis: flutter analyze em "No issues found!",
@@ -224,14 +225,11 @@ CardTheme em ThemeData, Riverpod só com APIs estáveis, nunca pumpAndSettle,
 domain/ em Dart puro, presentation/ sem Firebase, tenantId sempre explícito.
 
 DECISÃO ABERTA QUE TRAVA
-Só D-27 (validar os 8 modelos de relatório com as disciplinas) continua
-aberta — trava o prompt 11, e é a de maior risco de retrabalho do projeto.
-A validação prática contra 6 relatórios reais de cliente já foi feita
-(docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md, 13 ajustes de campo propostos,
-2 decisões de produto pendentes) — falta a chancela das disciplinas sobre
-esses ajustes e um exemplar real de coleta forense. Todas as outras 8
-decisões urgentes (D-05/06/07/12/13/18/29/30) já foram confirmadas em
-19/08/2026. Detalhe em docs/13.
+Nenhuma decisão urgente trava mais o prompt 11 — D-27 foi chancelada em
+25/08/2026 (docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md, ajustes já aplicados
+em docs/prompts/11). Só D-21 segue travando o prompt 12 (e, por
+consequência, a parte de importação JSON da nova decisão D-32). Detalhe em
+docs/13.
 
 COMO EU QUERO TRABALHAR
 Um passo por vez, com confirmação minha antes do próximo. Arquitetura e
@@ -258,7 +256,8 @@ branch por prompt.
 | `docs/14_AUDITORIA_QUALIDADE.md` | Relatório de auditoria e achados |
 | `docs/15_GIT_E_GITHUB.md` | Repositório, CI, fluxo de trabalho |
 | `docs/16_PLANO_DE_RETOMADA.md` | As 5 fases e o ritual |
-| `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md` | Os 8 modelos do prompt 11 comparados campo a campo contra 6 relatórios reais de cliente — base para chancela de D-27 |
+| `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md` | Os 8 modelos do prompt 11 comparados campo a campo contra 6 relatórios reais de cliente — chancela de D-27, ajustes já aplicados |
+| `docs/templates/` | Dados sintéticos genéricos (coleta forense) usados até haver amostra real ou D-32 |
 | `docs/prompts/00_INDICE.md` | Índice dos prompts 2 a 14 |
 
 ---

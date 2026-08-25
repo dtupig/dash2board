@@ -36,7 +36,7 @@ prompt ainda segue seu próprio portão em `docs/16_PLANO_DE_RETOMADA.md`).
 | D-07 | Como aplicar o prazo de custódia | `retentionUntil` + `legalHold` por registro — nunca TTL global |
 | D-12 | Plano de faturamento | **Spark** em dev/staging (Functions via emulador, sem deploy ao vivo) · **Blaze** em produção, com alerta de orçamento (modelo: R$50, gatilhos 50%/90%) |
 | D-13 | Retenção de `audit_logs` | 5 anos |
-| D-27 | Validar os 8 modelos de relatório com as disciplinas | **Reunião de 21/08/2026 realizada, análise técnica concluída em 25/08/2026, mas não fecha a decisão.** Os 6 templates reais em `docs/Client_reports/` (fora do git) foram comparados campo a campo contra os 8 modelos — resultado completo em `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md`: 13 ajustes de campo propostos, 2 decisões de produto pendentes, e 1 pendência (falta amostra real de relatório de *coleta* forense). **Continua bloqueando o prompt 11** até as disciplinas chancelarem os ajustes propostos em docs/18. |
+| D-27 | Validar os 8 modelos de relatório com as disciplinas | **Chancelada em 25/08/2026.** Os 13 ajustes de campo e as 2 decisões de produto propostos em `docs/18_VALIDACAO_D27_TEMPLATES_REAIS.md` foram aprovados e aplicados em `docs/prompts/11_RELATORIOS_ESPECIALISTAS.md`. A pendência de falta de amostra real de coleta forense foi resolvida com um **template genérico** (`docs/templates/`), a ser substituído por dado real quando o consultor puder subir relatórios via D-32. **Destrava o prompt 11.** |
 
 
 ---
@@ -153,12 +153,12 @@ lugar; invasivo se ligado por padrão.
 
 | # | Decisão | Recomendação | Status |
 |---|---|---|---|
-| D-27 | Validar os 8 modelos de relatório | **Cada disciplina revisa o seu, em cima de relatório real de cliente** (não em abstrato) antes do prompt 11 | **[BLOQUEIA prompt 11]** — reunião de 21/08 feita, análise técnica em `docs/18` concluída 25/08, aguardando chancela |
+| D-27 | Validar os 8 modelos de relatório | **Cada disciplina revisa o seu, em cima de relatório real de cliente** (não em abstrato) antes do prompt 11 | ✅ Chancelada 25/08/2026 — destrava o prompt 11 |
 | D-28 | Quem escreve os 44 `shortPitch` | Rascunho pelo agente, revisão comercial obrigatória | [PODE ESPERAR] |
 | D-29 | Limite de fato relevante | % da receita do cliente, não valor fixo — por tenant | **[BLOQUEIA prompt 11]** |
 | D-30 | SLA de resposta a RFS | Definir por urgência: crise 2h · urgente 1 dia · planejado 5 dias | **[BLOQUEIA prompt 10]** |
 | D-31 | Consentimento para benchmark setorial | Cláusula no contrato-padrão, com k-anonimato mínimo | [PODE ESPERAR] |
-| D-32 | Importação estruturada de relatório (JSON) pelo consultor | Anexar JSON validado contra o schema do modelo (prompt 11), populando o relatório inteiro como `draft`, sujeito ao ciclo normal de revisão/aprovação — nunca publicação direta | **[BLOQUEIA a parte de importação do prompt 13]** — decidido em 25/08/2026: é a persona `staff`/especialista já especificada em `docs/09` (não uma persona nova); depende do schema final de D-27 e da persona existir (D-21/prompt 12) |
+| D-32 | Importação estruturada de relatório (JSON) pelo consultor | Anexar JSON validado contra o schema do modelo (prompt 11), populando o relatório inteiro como `draft`, sujeito ao ciclo normal de revisão/aprovação — nunca publicação direta | **[BLOQUEIA a parte de importação do prompt 13]** — schema de D-27 já chancelado; falta só a persona existir (D-21/prompt 12). Até lá, a coleta forense usa o template genérico de `docs/templates/`, substituído por dado real quando D-32 entrar em produção |
 
 ---
 

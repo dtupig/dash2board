@@ -1,0 +1,43 @@
+{
+  "isGeneric": true,
+  "provenance": "Template genérico gerado em 25/08/2026 (D-27/D-32, gap #13). Não é dado real de cliente. Substituir quando a disciplina de forense fornecer um exemplar real ou quando D-32 (importação pelo consultor) entrar em produção.",
+  "recordId": "generic-cloud-001",
+  "serviceKey": "forensics_cloud",
+  "status": "sealed",
+  "createdAt": "2026-01-12T14:00:00-03:00",
+  "sealedAt": "2026-01-12T16:30:00-03:00",
+  "legalBasis": "execucao_de_contrato",
+  "purpose": "Coleta forense de recursos de nuvem para investigação de incidente de segurança conforme contrato de resposta a incidentes.",
+  "cloudResource": {
+    "provider": "gcp",
+    "projectId": "projeto-generico-prd",
+    "resourceType": "compute_instance",
+    "resourceId": "instance-generica-000000",
+    "region": "southamerica-east1",
+    "snapshotId": "snapshot-generico-000000"
+  },
+  "custodian": {
+    "name": "Nome do Custodiante",
+    "document": "000.000.000-00",
+    "signatureRef": "signatures/generic-cloud-001.png"
+  },
+  "acquisition": {
+    "method": "snapshot de disco + exportação de logs de auditoria",
+    "tool": "Ferramenta Genérica de Aquisição em Nuvem vX.Y",
+    "imageHash": {
+      "algorithm": "SHA-256",
+      "value": "0000000000000000000000000000000000000000000000000000000000ee"
+    },
+    "acquiredAt": "2026-01-12T15:00:00-03:00",
+    "geolocation": null
+  },
+  "vaultPointer": {
+    "vaultProvider": "cofre-forense-interno",
+    "reference": "vault://tenant-generico/case/generic-cloud-001",
+    "note": "Ponteiro apenas — a evidência bruta nunca entra no app (D-05)."
+  },
+  "retention": {
+    "retentionUntil": "2036-01-12",
+    "legalHold": false
+  }
+}
