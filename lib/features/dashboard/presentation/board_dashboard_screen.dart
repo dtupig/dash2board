@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/providers.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -307,6 +308,25 @@ class _BoardBody extends ConsumerWidget {
                 ownerName: profile.ownerFor(risk.businessUnit),
               ),
             ),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Atalho para o módulo de serviços (prompt 10) - para o board, é
+        // somente leitura das solicitações que já viraram fato relevante.
+        SurfaceCard(
+          onTap: () => context.go('/servicos'),
+          semanticLabel: 'Serviços. Você é informado quando uma solicitação '
+              'vira fato relevante. Toque para abrir.',
+          child: const ExcludeSemantics(
+            child: Row(
+              children: <Widget>[
+                Icon(Icons.design_services_outlined),
+                SizedBox(width: AppSpacing.md),
+                Expanded(child: Text('Serviços - só fato relevante')),
+                Icon(Icons.chevron_right_rounded),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

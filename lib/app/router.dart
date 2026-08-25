@@ -14,6 +14,10 @@ import '../features/dashboard/presentation/operational_dashboard_screen.dart';
 import '../features/dashboard/presentation/strategic_dashboard_screen.dart';
 import '../features/dev/chart_gallery_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate.dart';
+import '../features/services/presentation/request_inbox_screen.dart';
+import '../features/services/presentation/service_catalog_screen.dart';
+import '../features/services/presentation/services_hub_screen.dart';
+import '../features/services/presentation/wizard/request_wizard_screen.dart';
 import '../features/strategic/presentation/compliance_screen.dart';
 import '../features/strategic/presentation/executive_briefing_screen.dart';
 import '../features/strategic/presentation/insights_screen.dart';
@@ -28,6 +32,12 @@ abstract final class AppRoute {
   static const String operational = '/operacao';
   static const String strategic = '/estrategia';
   static const String board = '/board';
+
+  /// Bifurcação do módulo de serviços - relatórios ou demanda de RFS.
+  /// Acessível pelas três personas, fora da árvore de nenhum dashboard.
+  static const String services = '/servicos';
+  static const String servicesCatalog = '/servicos/catalogo';
+  static const String servicesInbox = '/servicos/solicitacoes';
 
   /// Compliance por framework, com evidência - filha de [strategic].
   /// Aceita `?framework=` e `?domain=` para o drill-down do painel.
@@ -211,6 +221,34 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
           role: UserRole.board,
           child: BoardDashboardScreen(),
         ),
+      ),
+      GoRoute(
+        path: AppRoute.services,
+        name: 'services',
+        builder: (BuildContext context, GoRouterState state) =>
+            const ServicesHubScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.servicesCatalog,
+        name: 'servicesCatalog',
+        builder: (BuildContext context, GoRouterState state) =>
+            ServiceCatalogScreen(
+          mode: CatalogMode.fromWire(state.uri.queryParameters['modo']),
+        ),
+      ),
+      GoRoute(
+        path: '/servicos/demanda/:serviceKey',
+        name: 'requestWizard',
+        builder: (BuildContext context, GoRouterState state) =>
+            RequestWizardScreen(
+          serviceKey: state.pathParameters['serviceKey']!,
+        ),
+      ),
+      GoRoute(
+        path: AppRoute.servicesInbox,
+        name: 'servicesInbox',
+        builder: (BuildContext context, GoRouterState state) =>
+            const RequestInboxScreen(),
       ),
       // Só existe em modo de demonstração: nenhum build de produção enxerga
       // esta rota, mesmo lendo o código-fonte publicado.

@@ -7,6 +7,11 @@ abstract final class AppConfig {
   static const String appName = 'Elytron Dash2Board';
   static const String companyName = 'Elytron Security';
   static const String supportEmail = 'suporte@elytronsecurity.com';
+
+  /// Plantão de resposta a incidente - mostrado quando o usuário marca uma
+  /// solicitação como `crisis` no wizard de demanda. Uma RFS não substitui
+  /// este acionamento (docs/prompts/10_CATALOGO_E_WIZARD.md).
+  static const String dfirEmergencyPhone = '+55 11 4000-0000';
   static const String privacyUrl = 'https://elytronsecurity.com/privacidade';
   static const String termsUrl = 'https://elytronsecurity.com/termos';
 

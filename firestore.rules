@@ -203,6 +203,45 @@ service cloud.firestore {
                                      'acceptedAt', 'boardNote', 'updatedAt']);
       }
 
+      // -------------------------------------------------------------
+      // Catálogo de demanda (prompt 10)
+      // -------------------------------------------------------------
+      match /contracted_services/{serviceKey} {
+        allow read: if inTenant(tenantId) &&
+                       hasAnyRole(['operational', 'strategic', 'board']);
+        allow write: if false;
+      }
+
+      match /service_requests/{requestId} {
+        allow get, list: if inTenant(tenantId) &&
+                       (isStrategic() ||
+                        (isOperational() &&
+                         resource.data.requestedByUid == request.auth.uid) ||
+                        (isBoard() &&
+                         resource.data.get('materialFact', false) == true));
+
+        // Alçada: operacional abre (nasce pendingApproval), strategic abre
+        // e já se auto-aprova (nasce approved) - RequestPolicy espelhado.
+        allow create: if inTenant(tenantId) &&
+                       (isOperational() || isStrategic()) &&
+                       request.resource.data.requestedByUid ==
+                         request.auth.uid &&
+                       ((isOperational() &&
+                         request.resource.data.status == 'pending_approval') ||
+                        (isStrategic() &&
+                         request.resource.data.status == 'approved'));
+
+        // Aprovar/rejeitar/cancelar é sempre um ato do CISO sobre a
+        // solicitação - só ele grava aprovação, e só nesses três campos.
+        allow update: if inTenant(tenantId) &&
+                         isStrategic() &&
+                         request.resource.data.diff(resource.data)
+                           .affectedKeys()
+                           .hasOnly(['status', 'approval', 'updatedAt']);
+
+        allow delete: if false;
+      }
+
       match /reports/{reportId} {
         allow read: if inTenant(tenantId) &&
                        hasAnyRole(['operational', 'strategic', 'board']) &&
