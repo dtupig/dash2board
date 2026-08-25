@@ -33,6 +33,10 @@ class StrategicDashboardScreen extends StatelessWidget {
     context.go('/estrategia/insights');
   }
 
+  void _openServices(BuildContext context) {
+    context.go('/servicos');
+  }
+
   void _viewBriefing(BuildContext context) {
     // Mesmo motivo do caminho literal acima - mantenha em sincronia com
     // `AppRoute.strategicBriefing`.
@@ -85,6 +89,51 @@ class StrategicDashboardScreen extends StatelessWidget {
               ],
             );
           },
+        ),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Atalho para o módulo de serviços (prompt 10): relatórios por
+        // serviço contratado e catálogo para demandar um novo serviço.
+        SurfaceCard(
+          accent: role.accent,
+          onTap: () => _openServices(context),
+          semanticLabel:
+              'Serviços. Relatórios contratados, catálogo completo e fila '
+              'de aprovação de solicitações. Toque para abrir.',
+          child: ExcludeSemantics(
+            child: Row(
+              children: <Widget>[
+                Icon(Icons.design_services_outlined, color: role.accent),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text(
+                        'Serviços',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        'Relatórios contratados, catálogo completo e fila '
+                        'de aprovação de solicitações.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
         ),
         const SizedBox(height: AppSpacing.xl),
 

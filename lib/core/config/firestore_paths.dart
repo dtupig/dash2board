@@ -70,4 +70,16 @@ abstract final class FirestorePaths {
   /// Preferências de UI por usuário dentro do tenant.
   static String preferences(String tenantId, String uid) =>
       '${tenant(tenantId)}/preferences/$uid';
+
+  /// Serviços que o tenant efetivamente contratou (prompt 10).
+  static String contractedServices(String tenantId) =>
+      '${tenant(tenantId)}/contracted_services';
+  static String contractedService(String tenantId, String serviceKey) =>
+      '${contractedServices(tenantId)}/$serviceKey';
+
+  /// Solicitações de serviço (RFS) abertas pelo tenant (prompt 10).
+  static String serviceRequests(String tenantId) =>
+      '${tenant(tenantId)}/service_requests';
+  static String serviceRequest(String tenantId, String requestId) =>
+      '${serviceRequests(tenantId)}/$requestId';
 }
