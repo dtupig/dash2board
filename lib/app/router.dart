@@ -14,6 +14,8 @@ import '../features/dashboard/presentation/operational_dashboard_screen.dart';
 import '../features/dashboard/presentation/strategic_dashboard_screen.dart';
 import '../features/dev/chart_gallery_screen.dart';
 import '../features/onboarding/presentation/onboarding_gate.dart';
+import '../features/reports/presentation/report_viewer_screen.dart';
+import '../features/reports/presentation/reports_list_screen.dart';
 import '../features/services/presentation/request_inbox_screen.dart';
 import '../features/services/presentation/service_catalog_screen.dart';
 import '../features/services/presentation/services_hub_screen.dart';
@@ -38,6 +40,9 @@ abstract final class AppRoute {
   static const String services = '/servicos';
   static const String servicesCatalog = '/servicos/catalogo';
   static const String servicesInbox = '/servicos/solicitacoes';
+
+  /// Lista de relatórios recebidos - agrupada por serviço contratado.
+  static const String reportsList = '/relatorios';
 
   /// Compliance por framework, com evidência - filha de [strategic].
   /// Aceita `?framework=` e `?domain=` para o drill-down do painel.
@@ -249,6 +254,20 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
         name: 'servicesInbox',
         builder: (BuildContext context, GoRouterState state) =>
             const RequestInboxScreen(),
+      ),
+      GoRoute(
+        path: AppRoute.reportsList,
+        name: 'reportsList',
+        builder: (BuildContext context, GoRouterState state) =>
+            const ReportsListScreen(),
+      ),
+      GoRoute(
+        path: '/relatorios/:reportId',
+        name: 'reportViewer',
+        builder: (BuildContext context, GoRouterState state) =>
+            ReportViewerScreen(
+          reportId: state.pathParameters['reportId']!,
+        ),
       ),
       // Só existe em modo de demonstração: nenhum build de produção enxerga
       // esta rota, mesmo lendo o código-fonte publicado.

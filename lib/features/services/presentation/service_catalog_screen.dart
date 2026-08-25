@@ -10,7 +10,6 @@ import '../domain/service_category.dart';
 import '../domain/service_catalog.dart';
 import '../domain/service_offering.dart';
 import 'widgets/catalog_category_group.dart';
-import 'widgets/reports_stub_sheet.dart';
 
 /// Modo de exibição do catálogo - só o contratado, ou os 44 completos.
 enum CatalogMode {
@@ -49,12 +48,7 @@ class _ServiceCatalogScreenState extends ConsumerState<ServiceCatalogScreen> {
 
   void _openService(ServiceOffering offering, ContractedService? contract) {
     if (widget.mode == CatalogMode.reports) {
-      showModalBottomSheet<void>(
-        context: context,
-        showDragHandle: true,
-        builder: (BuildContext sheetContext) =>
-            ReportsStubSheet(offering: offering, contract: contract),
-      );
+      context.push('/relatorios');
       return;
     }
     context.push('/servicos/demanda/${offering.serviceKey}');

@@ -61,6 +61,27 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // Espelha ReportAccessPolicy.canOpen (prompt 11).
+    function canOpenReport(classification, isMaterialFact) {
+      return isStrategic() ||
+        (isOperational() && classification != 'secret') ||
+        (isBoard() && (isMaterialFact || classification == 'public_internal'));
+    }
+
+    // Espelha ReportAccessPolicy.canSeeSection (prompt 11). `board` só
+    // enxerga narrativa; `operational` nunca vê personalData/
+    // chainOfCustody e só vê exploitProof fora de `secret`; `strategic`
+    // vê tudo.
+    function canSeeSection(sensitivity, classification) {
+      return isStrategic() ||
+        (isBoard() && sensitivity == 'narrative') ||
+        (isOperational() && (
+          sensitivity == 'narrative' || sensitivity == 'technical' ||
+          (sensitivity == 'exploit_proof' &&
+            (classification == 'restricted' || classification == 'confidential'))
+        ));
+    }
+
     // Campos que o próprio usuário pode alterar no seu perfil.
     function onlyProfileFieldsChanged() {
       return request.resource.data.diff(resource.data).affectedKeys()
@@ -242,11 +263,30 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Relatórios especialistas (prompt 11) - espelha
+      // `ReportAccessPolicy.canOpen`/`canSeeSection` do app. Regra e classe
+      // Dart precisam concordar; divergência entre as duas é falha de
+      // segurança, não detalhe.
       match /reports/{reportId} {
-        allow read: if inTenant(tenantId) &&
-                       hasAnyRole(['operational', 'strategic', 'board']) &&
-                       resource.data.get('audience', 'strategic') == userRole();
+        allow get, list: if inTenant(tenantId) && canOpenReport(
+          resource.data.get('classification', 'secret'),
+          resource.data.get('materialFacts', []).size() > 0
+        );
         allow write: if false;
+
+        match /sections/{sectionId} {
+          allow get, list: if inTenant(tenantId) && canOpenReport(
+            get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
+              .data.get('classification', 'secret'),
+            get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
+              .data.get('materialFacts', []).size() > 0
+          ) && canSeeSection(
+            resource.data.get('sensitivity', 'exploit_proof'),
+            get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
+              .data.get('classification', 'secret')
+          );
+          allow write: if false;
+        }
       }
 
       // -------------------------------------------------------------
