@@ -93,10 +93,10 @@ security rules" do CI passou a executar de verdade (antes só emitia
 
 | # | Prompt | Escopo | Bloqueado por |
 |---|---|---|---|
-| 10 | `10_CATALOGO_E_WIZARD` | Catálogo dos 44 serviços, bifurcação relatórios/demanda, wizard de RFS em 5 passos, `RequestPolicy` com a alçada técnico→CISO→board | Nenhum bloqueio técnico — D-30 já confirmado |
-| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | D-27 (agendado para 21/08/2026) |
+| 10 | `10_CATALOGO_E_WIZARD` | Catálogo dos 44 serviços, bifurcação relatórios/demanda, wizard de RFS em 5 passos, `RequestPolicy` com a alçada técnico→CISO→board | ✅ feito (25/08/2026, PR #14) |
+| 11 | `11_RELATORIOS_ESPECIALISTAS` | 8 modelos por categoria, visualizador em 3 profundidades, `ReportAccessPolicy`, 8 gatilhos de fato relevante | D-27 — validação técnica concluída (`docs/18`), aguardando chancela |
 | 12 | `12_PERSONA_ESPECIALISTA_RETROFIT` | 4ª persona (staff Elytron), identidade cross-tenant, `TenantScope`, `StaffPolicy`, reescrita das rules | D-21 (Cloud Function de criação de tenant, ainda não implementada) — Fase D e D-18 já resolvidos |
-| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, revisão, verificação de redação, publicação | Nenhum bloqueio técnico — D-05/06/07 já confirmados |
+| 13 | `13_MODULO_AUTORIA_RELATORIOS` | Cadeia de custódia offline, redação, revisão, verificação de redação, publicação, **importação estruturada de JSON pelo consultor (D-32, novo em 25/08)** | Nenhum bloqueio técnico — D-05/06/07 já confirmados; a parte de importação JSON depende também do schema final de D-27 |
 | 14 | `14_ESTRUTURA_DADOS_FIREBASE` | Schema, conversores, `TenantGuard`, rules das 4 personas, TTL, agregados, seed, RTDB de presença | Nenhum bloqueio técnico — D-12/13 já confirmados |
 
 ---

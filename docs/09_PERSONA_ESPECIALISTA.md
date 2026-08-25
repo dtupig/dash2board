@@ -135,6 +135,17 @@ resposta e histórico.
 Por cliente atribuído: entregas no prazo, achados críticos em aberto sem
 tratativa, RFS paradas, retainer consumido.
 
+### CU-09 — Importação estruturada de relatório (D-32)
+O especialista (`analyst`) anexa um único arquivo JSON, validado contra o
+schema do modelo da categoria contratada (os 8 modelos do prompt 11),
+populando o relatório inteiro de uma vez — alternativa ao editor seção a
+seção do prompt 13 quando o conteúdo já existe estruturado (ex.: saída de
+ferramenta, migração de relatório anterior). Campos derivados do servidor
+(`tenantId`, `elytronLeadName`, `id`) nunca vêm do arquivo enviado. JSON que
+não valida é rejeitado com o campo e o motivo, nunca aceito parcialmente. O
+relatório importado entra como `draft` e segue o mesmo ciclo de CU-05/CU-06 —
+a importação não pula revisão nem aprovação.
+
 ---
 
 ## 4. Requisitos não funcionais e proteções
