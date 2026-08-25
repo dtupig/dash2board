@@ -158,6 +158,7 @@ lugar; invasivo se ligado por padrão.
 | D-29 | Limite de fato relevante | % da receita do cliente, não valor fixo — por tenant | **[BLOQUEIA prompt 11]** |
 | D-30 | SLA de resposta a RFS | Definir por urgência: crise 2h · urgente 1 dia · planejado 5 dias | **[BLOQUEIA prompt 10]** |
 | D-31 | Consentimento para benchmark setorial | Cláusula no contrato-padrão, com k-anonimato mínimo | [PODE ESPERAR] |
+| D-32 | Importação estruturada de relatório (JSON) pelo consultor | Anexar JSON validado contra o schema do modelo (prompt 11), populando o relatório inteiro como `draft`, sujeito ao ciclo normal de revisão/aprovação — nunca publicação direta | **[BLOQUEIA a parte de importação do prompt 13]** — decidido em 25/08/2026: é a persona `staff`/especialista já especificada em `docs/09` (não uma persona nova); depende do schema final de D-27 e da persona existir (D-21/prompt 12) |
 
 ---
 

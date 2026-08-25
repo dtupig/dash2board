@@ -103,7 +103,17 @@ Editor **estruturado por seções**, não um editor de texto livre:
 - Campos curtos com contador e orientação editorial embutida (o que uma boa
   consequência de negócio contém, por exemplo).
 - Lista de achados com edição individual.
-- Importação: colar Markdown ou anexar arquivo para popular seções longas.
+- Importação por seção: colar Markdown ou anexar arquivo para popular uma
+  seção longa.
+- **Importação estruturada (todo o relatório):** o `consultor`/`analyst`
+  pode anexar um único arquivo JSON, validado contra o schema do modelo da
+  categoria (prompt 11 — `ServiceReport` + subtipo), populando o relatório
+  inteiro de uma vez. Campos derivados do servidor (`tenantId`,
+  `elytronLeadName`, `id`) nunca vêm do JSON enviado — sempre do contexto da
+  sessão de staff. JSON que não valida contra o schema é rejeitado com o
+  campo e o motivo, nunca aceito parcialmente. O relatório importado entra
+  como `draft`, sujeito ao mesmo ciclo de revisão/aprovação da seção D — a
+  importação não pula `reviewer`/`StaffPolicy.canApprove`.
 - Salvamento automático a cada 5 segundos, com indicador de estado.
 - **Ao classificar uma seção**, o editor mostra em tempo real quais personas do
   cliente vão enxergá-la. Consequência visível na hora da escolha, não depois.
