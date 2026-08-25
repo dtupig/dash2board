@@ -42,8 +42,14 @@ abstract final class FirestorePaths {
   /// Itens de compliance por framework (ISO 27001, NIST CSF, LGPD, PCI).
   static String compliance(String tenantId) => '${tenant(tenantId)}/compliance';
 
-  /// Relatórios publicados (PDF/painel) por período.
+  /// Relatórios especialistas publicados (prompt 11).
   static String reports(String tenantId) => '${tenant(tenantId)}/reports';
+  static String report(String tenantId, String reportId) =>
+      '${reports(tenantId)}/$reportId';
+
+  /// Seções de um relatório - subcoleção por documento.
+  static String reportSections(String tenantId, String reportId) =>
+      '${report(tenantId, reportId)}/sections';
 
   /// Insights e tendências curados pela Elytron.
   static String insights(String tenantId) => '${tenant(tenantId)}/insights';
