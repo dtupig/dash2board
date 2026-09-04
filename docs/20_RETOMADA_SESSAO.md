@@ -88,12 +88,21 @@ converter.
    documento, query ou rule) virou
    `reports: [audienceRoles CONTAINS, deliveredAt DESC]`, o índice composto
    que a nova query realmente exige.
-4. **`scripts/audit.sh` valida menos que o `CLAUDE.md` exige** — não checa
-   `CardTheme(`, `pageTransitionsTheme`, `ColorScheme.background` isolado, as
-   fronteiras de camada, nem o limite de 250 linhas (há **14 arquivos** acima
-   dele no `main`, o maior com 744). *Correção ao texto anterior:* o
-   `audit.sh` **já** checa `pumpAndSettle` desde o commit inicial — a menção
-   anterior a essa lacuna estava errada.
+4. ~~**`scripts/audit.sh` valida menos que o `CLAUDE.md` exige.**~~
+   **Checagens adicionadas** (4a): `CardTheme(`, `DialogTheme(`,
+   `TabBarTheme(`, `pageTransitionsTheme`, `ColorScheme.background` isolado,
+   fronteiras de camada (`domain/` sem Flutter/Firebase, `presentation/` sem
+   `cloud_firestore`/`firebase_auth`) e o limite de 250 linhas. Bug encontrado
+   e corrigido no processo: o filtro de comentário de `check_absent` nunca
+   funcionava (`grep -rn` prefixa `arquivo:linha:`, então `^\s*//` nunca
+   ancorava no início do código real) — afetava todas as checagens antigas,
+   não só as novas. **4b, não feito nesta rodada:** ainda há **14 arquivos**
+   acima de 250 linhas no `main` (o maior com 744) — a checagem agora
+   *detecta* isso (`audit.sh` reprova), mas os arquivos não foram
+   refatorados; é um esforço maior, separado, a decidir se entra antes da
+   demo. *Correção ao texto anterior:* o `audit.sh` **já** checava
+   `pumpAndSettle` desde o commit inicial — a menção anterior a essa lacuna
+   estava errada.
 5. **Novo — `watchSections` tem o mesmo bug de lista do item 1.** A regra de
    `list` em `reports/{reportId}/sections/{sectionId}` decide por
    `canSeeSection(resource.data.sensitivity, ...)`, variável por documento e

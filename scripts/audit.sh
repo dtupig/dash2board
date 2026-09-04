@@ -69,7 +69,13 @@ fi
 # --------------------------------------------------------------------------
 head1 "6. CONFORMIDADE DE CÓDIGO"
 check_absent() { # padrão, rótulo
-  n=$(grep -rn --include='*.dart' -F "$1" lib test 2>/dev/null | grep -v '^\s*//' | grep -v '///' | wc -l | tr -d ' ')
+  # `grep -rn` prefixa "arquivo:linha:" antes do conteúdo - por isso o
+  # filtro de comentário precisa remover esse prefixo antes de ancorar
+  # `^\s*//` no início da linha de código real, senão a âncora nunca bate.
+  n=$(grep -rn --include='*.dart' -F "$1" lib test 2>/dev/null \
+      | sed -E 's/^[^:]*:[0-9]+://' \
+      | grep -vE '^\s*(//|///)' \
+      | wc -l | tr -d ' ')
   [ "$n" -eq 0 ] && ok "$2: 0 ocorrência" || bad "$2: $n ocorrência(s)"
 }
 check_absent "withOpacity"        "Color.withOpacity"
@@ -78,10 +84,36 @@ check_absent "surfaceVariant"     "ColorScheme.surfaceVariant"
 check_absent "onBackground"       "ColorScheme.onBackground"
 check_absent "StateNotifier"      "StateNotifier"
 check_absent "AutoDispose"        "AutoDispose*Notifier"
+check_absent "CardTheme("         "CardTheme( em ThemeData"
+check_absent "DialogTheme("       "DialogTheme( em ThemeData"
+check_absent "TabBarTheme("       "TabBarTheme( em ThemeData"
+check_absent "pageTransitionsTheme" "pageTransitionsTheme"
+n=$(grep -rEn --include='*.dart' "(^|[^\.[:alnum:]_])[Cc]olorScheme\.background\b" lib test 2>/dev/null \
+    | sed -E 's/^[^:]*:[0-9]+://' | grep -vE '^\s*(//|///)' | wc -l | tr -d ' ')
+[ "$n" -eq 0 ] && ok "ColorScheme.background: 0 ocorrência" || bad "ColorScheme.background: $n ocorrência(s)"
 n=$(grep -rn --include='*.dart' "pumpAndSettle(" test 2>/dev/null | wc -l | tr -d ' ')
 [ "$n" -eq 0 ] && ok "pumpAndSettle(): 0 chamada" || bad "pumpAndSettle(): $n chamada(s) — animação contínua trava o teste"
 n=$(grep -rn "brandGreen\|brandCyan\|brandViolet" lib/core/widgets/charts/ 2>/dev/null | wc -l | tr -d ' ')
 [ "$n" -eq 0 ] && ok "acento de marca fora dos gráficos" || bad "$n uso(s) de acento de marca em gráfico"
+
+# Fronteiras de arquitetura (CLAUDE.md): domain/ é Dart puro; presentation/
+# nunca fala com o Firebase diretamente.
+n=$(grep -rlE "^import 'package:flutter|^import 'package:firebase|^import 'package:cloud_" \
+    --include='*.dart' lib 2>/dev/null | grep '/domain/' | wc -l | tr -d ' ')
+[ "$n" -eq 0 ] && ok "domain/ sem import de Flutter/Firebase" || bad "domain/ importando Flutter/Firebase em $n arquivo(s)"
+n=$(grep -rlE "^import 'package:(cloud_firestore|firebase_auth)" \
+    --include='*.dart' lib 2>/dev/null | grep '/presentation/' | wc -l | tr -d ' ')
+[ "$n" -eq 0 ] && ok "presentation/ sem cloud_firestore/firebase_auth" || bad "presentation/ importando Firebase em $n arquivo(s)"
+
+# Limite de 250 linhas por arquivo (regra 10).
+over="$(find lib -name '*.dart' -exec wc -l {} \; 2>/dev/null | awk '$1>250 {print}' | sort -rn)"
+n=$(printf '%s' "$over" | grep -c . || true)
+if [ -z "$over" ]; then
+  ok "nenhum arquivo .dart acima de 250 linhas"
+else
+  bad "$n arquivo(s) .dart acima de 250 linhas"
+  printf '%s\n' "$over" | sed 's/^/         /' | tee -a "$OUT" >/dev/null
+fi
 
 # --------------------------------------------------------------------------
 head1 "7. CONFIGURAÇÃO FIREBASE"
