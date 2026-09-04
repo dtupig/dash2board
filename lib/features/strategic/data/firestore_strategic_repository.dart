@@ -7,17 +7,19 @@ import '../domain/insight_item.dart';
 import '../domain/posture_index.dart';
 import '../domain/posture_snapshot.dart';
 import '../domain/risk_item.dart';
-import '../domain/security_domain.dart';
 import '../domain/survey.dart';
 import '../domain/tenant_profile.dart';
+import 'firestore_strategic_mappers.dart';
 import 'strategic_repository.dart';
 
 /// Implementação de produção sobre Cloud Firestore.
 ///
-/// Único ponto do app que converte `Timestamp` para [DateTime]: o domínio
-/// não conhece o Firestore. Qualquer exceção do SDK vira [AppFailure] antes
-/// de chegar à UI — nunca deixamos uma `FirebaseException` vazar pelo
-/// `AsyncValue.error` de um `StreamProvider`.
+/// Qualquer exceção do SDK vira [AppFailure] antes de chegar à UI — nunca
+/// deixamos uma `FirebaseException` vazar pelo `AsyncValue.error` de um
+/// `StreamProvider`. As funções de mapeamento (e a conversão de `Timestamp`
+/// para [DateTime], único ponto do módulo que conhece o Firestore) vivem em
+/// `firestore_strategic_mappers.dart`, para manter este arquivo abaixo do
+/// limite de 250 linhas.
 class FirestoreStrategicRepository implements StrategicRepository {
   FirestoreStrategicRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -33,7 +35,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
     return _firestore
         .doc(FirestorePaths.metric(tenantId, _postureIndexMetricId))
         .snapshots()
-        .map(_mapPostureIndex)
+        .map(mapPostureIndex)
         .handleError(_rethrowAsFailure);
   }
 
@@ -48,7 +50,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
         .limit(months)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) => snapshot.docs
-            .map(_mapPostureSnapshot)
+            .map(mapPostureSnapshot)
             .toList(growable: false)
             .reversed
             .toList(growable: false))
@@ -68,7 +70,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
     return query
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>
-            snapshot.docs.map(_mapComplianceControl).toList(growable: false))
+            snapshot.docs.map(mapComplianceControl).toList(growable: false))
         .handleError(_rethrowAsFailure);
   }
 
@@ -80,7 +82,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
         .limit(limit)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>
-            snapshot.docs.map(_mapRiskItem).toList(growable: false))
+            snapshot.docs.map(mapRiskItem).toList(growable: false))
         .handleError(_rethrowAsFailure);
   }
 
@@ -91,7 +93,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
         .orderBy('annualLossExpectancy', descending: true)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>
-            snapshot.docs.map(_mapRiskItem).toList(growable: false))
+            snapshot.docs.map(mapRiskItem).toList(growable: false))
         .handleError(_rethrowAsFailure);
   }
 
@@ -100,7 +102,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
     return _firestore
         .doc(FirestorePaths.tenant(tenantId))
         .snapshots()
-        .map(_mapTenantProfile)
+        .map(mapTenantProfile)
         .handleError(_rethrowAsFailure);
   }
 
@@ -137,7 +139,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
         .limit(limit)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>
-            snapshot.docs.map(_mapInsightItem).toList(growable: false))
+            snapshot.docs.map(mapInsightItem).toList(growable: false))
         .handleError(_rethrowAsFailure);
   }
 
@@ -158,7 +160,7 @@ class FirestoreStrategicRepository implements StrategicRepository {
           await _firestore
               .doc(FirestorePaths.surveyResponse(tenantId, surveyDoc.id, uid))
               .get();
-      return _mapSurvey(surveyDoc, responseDoc);
+      return mapSurvey(surveyDoc, responseDoc);
     }).handleError(_rethrowAsFailure);
   }
 
@@ -179,103 +181,6 @@ class FirestoreStrategicRepository implements StrategicRepository {
     } on FirebaseException catch (error, stackTrace) {
       _rethrowAsFailure(error, stackTrace);
     }
-  }
-
-  Survey _mapSurvey(
-    QueryDocumentSnapshot<Map<String, dynamic>> surveyDoc,
-    DocumentSnapshot<Map<String, dynamic>> responseDoc,
-  ) {
-    final Map<String, Object?> data = <String, Object?>{
-      ...surveyDoc.data(),
-      'id': surveyDoc.id,
-    };
-    final Map<String, dynamic>? responseData = responseDoc.data();
-    final Map<String, String>? yourAnswers = responseData == null
-        ? null
-        : (responseData['answers'] as Map<String, dynamic>? ??
-                const <String, dynamic>{})
-            .map(
-            (String key, Object? value) =>
-                MapEntry<String, String>(key, value as String? ?? ''),
-          );
-    return Survey.fromMap(data, yourAnswers: yourAnswers);
-  }
-
-  PostureIndex _mapPostureIndex(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final Map<String, Object?> data = doc.data() ?? const <String, Object?>{};
-    final Map<String, dynamic> byDomainRaw =
-        (data['byDomain'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
-    final Map<SecurityDomain, int> byDomain = <SecurityDomain, int>{
-      for (final MapEntry<String, dynamic> entry in byDomainRaw.entries)
-        SecurityDomain.fromWire(entry.key): (entry.value as num?)?.toInt() ?? 0,
-    };
-    final Map<String, dynamic> byDomainDelta30dRaw =
-        (data['byDomainDelta30d'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
-    final Map<SecurityDomain, int> byDomainDelta30d = <SecurityDomain, int>{
-      for (final MapEntry<String, dynamic> entry in byDomainDelta30dRaw.entries)
-        SecurityDomain.fromWire(entry.key): (entry.value as num?)?.toInt() ?? 0,
-    };
-    return PostureIndex(
-      overallScore: (data['overallScore'] as num?)?.toInt() ?? 0,
-      previousScore: (data['previousScore'] as num?)?.toInt() ?? 0,
-      capturedAt: _toDateTime(data['capturedAt']),
-      byDomain: byDomain,
-      peerMedian: (data['peerMedian'] as num?)?.toInt() ?? 0,
-      byDomainDelta30d: byDomainDelta30d,
-    );
-  }
-
-  PostureSnapshot _mapPostureSnapshot(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    final Map<String, dynamic> data = doc.data();
-    return PostureSnapshot.fromMap(<String, Object?>{
-      ...data,
-      'capturedAt': _toDateTime(data['capturedAt']),
-    });
-  }
-
-  ComplianceControl _mapComplianceControl(
-    QueryDocumentSnapshot<Map<String, dynamic>> doc,
-  ) {
-    final Map<String, dynamic> data = doc.data();
-    return ComplianceControl.fromMap(<String, Object?>{
-      ...data,
-      'controlId': data['controlId'] ?? doc.id,
-      'lastReviewedAt': _toDateTime(data['lastReviewedAt']),
-    });
-  }
-
-  RiskItem _mapRiskItem(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-    final Map<String, dynamic> data = doc.data();
-    return RiskItem.fromMap(<String, Object?>{
-      ...data,
-      'id': data['id'] ?? doc.id,
-      'reviewDueAt': _toDateTime(data['reviewDueAt']),
-    });
-  }
-
-  InsightItem _mapInsightItem(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
-    final Map<String, dynamic> data = doc.data();
-    return InsightItem.fromMap(<String, Object?>{
-      ...data,
-      'id': data['id'] ?? doc.id,
-      'publishedAt': _toDateTime(data['publishedAt']),
-    });
-  }
-
-  TenantProfile _mapTenantProfile(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final Map<String, Object?> data = doc.data() ?? const <String, Object?>{};
-    return TenantProfile.fromMap(data);
-  }
-
-  DateTime _toDateTime(Object? value) {
-    if (value is Timestamp) {
-      return value.toDate();
-    }
-    return DateTime.fromMillisecondsSinceEpoch(0, isUtc: true);
   }
 
   /// Converte qualquer erro do SDK em [AppFailure] antes de repassar ao
