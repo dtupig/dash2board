@@ -268,10 +268,23 @@ service cloud.firestore {
       // Dart precisam concordar; divergência entre as duas é falha de
       // segurança, não detalhe.
       match /reports/{reportId} {
-        allow get, list: if inTenant(tenantId) && canOpenReport(
+        allow get: if inTenant(tenantId) && canOpenReport(
           resource.data.get('classification', 'secret'),
           resource.data.get('materialFacts', []).size() > 0
         );
+
+        // `list` precisa ser decidível por documento sem `get()` extra, e a
+        // query do cliente precisa replicar a mesma condição via `where` -
+        // senão um único documento que reprove a regra derruba a query
+        // inteira (achado 1, docs/20_RETOMADA_SESSAO.md). Por isso usa o
+        // campo desnormalizado `audienceRoles`, não `canOpenReport`
+        // diretamente. Quem grava o relatório (autoria, prompt 13) é
+        // responsável por manter `audienceRoles` consistente com
+        // `ReportAccessPolicy.canOpen` e por recalculá-lo sempre que
+        // `materialFacts` mudar.
+        allow list: if inTenant(tenantId) &&
+          hasAnyRole(resource.data.get('audienceRoles', []));
+
         allow write: if false;
 
         match /sections/{sectionId} {

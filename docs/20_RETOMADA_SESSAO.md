@@ -55,26 +55,45 @@ converter.
 
 ## 4. Achados técnicos abertos (do PR #18)
 
-1. **A lista de relatórios quebra no Firestore real.** `watchReports` faz query
-   de coleção sem `where`, e as rules decidem por documento — se um documento
-   reprovar, a query inteira retorna `permission-denied`. Um usuário
-   `operational` num tenant com qualquer relatório `secret` não vê lista
-   nenhuma, e cai na tela de "acesso não provisionado". Invisível hoje porque o
-   dia a dia roda com `MOCK=true` e **nenhum teste de rules usa query** (zero
-   `getDocs` em todo `test/rules/`).
-   *Correção:* desnormalizar `audienceRoles` no documento e filtrar por
-   `array-contains` na query — o parâmetro `roleWire`, hoje ignorado pela
-   implementação Firestore, passa a ter uso.
+1. ~~**A lista de relatórios quebra no Firestore real.**~~ **Corrigido.**
+   `watchReports` fazia query de coleção sem `where`, e as rules decidiam por
+   documento — um documento reprovado derrubava a query inteira. Corrigido
+   desnormalizando `audienceRoles` no documento e filtrando por
+   `array-contains` na query (`roleWire`, antes ignorado pela implementação
+   Firestore, agora tem uso); `firestore.rules` passa a decidir `list` por
+   `audienceRoles`, mantendo `get` em `canOpenReport`. Novo teste de rules com
+   `getDocs` prova as duas pontas (query sem `where` falha, query com `where`
+   retorna só o subconjunto visível) — cobertura que não existia (zero
+   `getDocs` em todo `test/rules/` antes desta correção). **Pendência
+   herdada:** não existe hoje nenhum caminho de escrita para `reports` (nem
+   seed, nem Cloud Function) — quem gravar `audienceRoles` na origem é o
+   módulo de autoria (prompt 13, ver nota em
+   `docs/prompts/13_MODULO_AUTORIA_RELATORIOS.md`). **Achado novo, descoberto
+   ao investigar este:** `watchSections` tem exatamente o mesmo problema
+   (query de coleção sem `where`, `canSeeSection` decidindo por
+   `resource.data.sensitivity`) — não corrigido nesta rodada, ver item 5.
 2. **`recordReadReceipt` é um no-op.** O invariante "relatório `secret` exige
    registro de leitura antes de renderizar" não é cumprido: falta a Cloud
    Function. `functions/src/index.ts` já tem o helper `writeAudit`.
-3. **Índice defasado.** `firestore.indexes.json` declara
-   `reports: ['audience','publishedAt']`; o código abandonou `audience` e
-   ordena por `deliveredAt`.
+3. ~~**Índice defasado.**~~ **Corrigido junto com o item 1** — o índice morto
+   `reports: ['audience','publishedAt']` (campos que não existem em nenhum
+   documento, query ou rule) virou
+   `reports: [audienceRoles CONTAINS, deliveredAt DESC]`, o índice composto
+   que a nova query realmente exige.
 4. **`scripts/audit.sh` valida menos que o `CLAUDE.md` exige** — não checa
-   `pumpAndSettle`, `CardTheme(`, `pageTransitionsTheme`, as fronteiras de
-   camada, nem o limite de 250 linhas (há **14 arquivos** acima dele no `main`,
-   o maior com 744).
+   `CardTheme(`, `pageTransitionsTheme`, `ColorScheme.background` isolado, as
+   fronteiras de camada, nem o limite de 250 linhas (há **14 arquivos** acima
+   dele no `main`, o maior com 744). *Correção ao texto anterior:* o
+   `audit.sh` **já** checa `pumpAndSettle` desde o commit inicial — a menção
+   anterior a essa lacuna estava errada.
+5. **Novo — `watchSections` tem o mesmo bug de lista do item 1.** A regra de
+   `list` em `reports/{reportId}/sections/{sectionId}` decide por
+   `canSeeSection(resource.data.sensitivity, ...)`, variável por documento e
+   sem `where` correspondente na query (`firestore_reports_repository.dart`,
+   `watchSections`). Mesma correção do item 1 se aplica: desnormalizar um
+   `visibleRoles` por seção e filtrar por `array-contains`. Não corrigido
+   nesta rodada para manter o PR do item 1 revisável; mesma pendência de
+   "quem grava" (prompt 13).
 
 ## 5. Ambiente
 
