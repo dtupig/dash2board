@@ -76,8 +76,8 @@ Nada disso é trabalho perdido, mas **confira antes de commitar**:
 
 | Arquivo | Origem |
 |---|---|
-| `ios/Runner/GoogleService-Info.plist`, `android/app/google-services.json` | gerados — gitignored, não entram em commit |
-| `ios/Podfile`, `ios/Podfile.lock` | gerados — **não** estão no `.gitignore`, aparecem como untracked |
+| `ios/Runner/GoogleService-Info.plist`, `android/app/google-services.json` | gerados, mas **podem** ser commitados (decisão do PO em 03/09/2026 — chave de cliente Firebase, não segredo) |
+| `ios/Podfile`, `ios/Podfile.lock` | gerados e versionados normalmente — confira se o `pod install` não regrediu a versão de algum pod da família Firebase (ver Dívida item 2, abaixo) |
 | `firebase.json` | reescrito pelo `flutterfire configure` |
 | `lib/firebase_options.dart` | reescrito (costuma ser só espaçamento) |
 | `ios/Flutter/{Debug,Release}.xcconfig`, `project.pbxproj`, `contents.xcworkspacedata` | reescritos pelo `pod install` |
@@ -107,17 +107,35 @@ Code não tiver Acessibilidade concedida em Ajustes do Sistema → Privacidade e
 Segurança → Acessibilidade. Sem isso, dá para buildar, lançar e tirar
 screenshot, mas não navegar — peça ao usuário para tocar, ou peça a permissão.
 
-## Dívida que este skill contorna
+## Dívida que este skill contornava — resolvida em 04/09/2026
 
-O contorno acima é necessário **toda vez** numa máquina nova. As correções de
-raiz, ainda não feitas:
+O contorno do bloqueio do `GoogleService-Info.plist` ainda existe (é uma
+exigência do Xcode em tempo de build), mas as três correções de raiz que
+esta seção listava como pendentes já foram feitas:
 
-1. Decidir a política da config nativa. `lib/firebase_options.dart` é
-   versionado com o comentário *"as chaves do Firebase não são segredo"*,
-   enquanto o `GoogleService-Info.plist` — que carrega a mesma `apiKey` e o
-   mesmo `appId` — é tratado como segredo por um guardrail da CI
-   (`.github/workflows/ci.yaml`, job `guardrails`, passo "Segredos não
-   versionados"). As duas posturas não podem estar certas.
-2. Adicionar à CI um job `flutter build ios --simulator --no-codesign`. Sem
-   ele, "CI verde" nunca prova que o app compila.
-3. Versionar `ios/Podfile` (projeto Flutter normalmente versiona).
+1. ~~Decidir a política da config nativa~~ — resolvido em 03/09/2026:
+   `GoogleService-Info.plist` e `google-services.json` passaram a ser
+   versionados, mesma postura de `lib/firebase_options.dart` (chave de
+   cliente Firebase, não segredo).
+2. ~~Adicionar à CI um job `flutter build ios --simulator --no-codesign`~~ —
+   resolvido em 04/09/2026 (`build-ios` em `.github/workflows/ci.yaml`,
+   junto com `build-android`). Ao implementar, esse job pegou um bug real:
+   a família de pacotes Firebase (`firebase_core`/`firebase_auth`/
+   `cloud_firestore`/`cloud_functions`) estava com versões defasadas e
+   mutuamente incompatíveis - `ios/Podfile.lock` travado numa versão de
+   `Firebase/CoreOnly` que o `firebase_core` resolvido não aceitava mais.
+   Detalhe em `docs/20_RETOMADA_SESSAO.md`, seção Ambiente. **Lição para a
+   próxima vez que isso quebrar:** `flutter pub get` não avança versão
+   sozinho mesmo com constraint `^` permissiva — só `flutter pub upgrade`
+   faz isso, e os quatro pacotes Firebase precisam subir **juntos** (são
+   lançados como família; um sozinho na versão nova causa conflito de
+   símbolo Swift/ObjC no build iOS).
+3. ~~Versionar `ios/Podfile`~~ — resolvido em 03/09/2026, junto com o item 1.
+
+## Dívida que este skill ainda contorna
+
+O contorno do `GoogleService-Info.plist` (seção "O bloqueio", acima)
+continua necessário numa máquina nova — é o Xcode exigindo o arquivo em
+tempo de build, `--dart-define` não ajuda. Não é algo que dê para resolver
+sem mudar a exigência do `project.pbxproj`, e não há indício de que valha a
+pena mudar isso.

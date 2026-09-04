@@ -126,10 +126,28 @@ converter.
 - **O clone limpo não compila.** Causa e contorno em
   [`.claude/skills/rodar-o-app/SKILL.md`](../.claude/skills/rodar-o-app/SKILL.md)
   — o skill é carregado sozinho quando se pede para rodar o app.
-- A CI tem 3 jobs e **nenhum roda `flutter build`**.
+- ~~A CI tem 3 jobs e nenhum roda `flutter build`.~~ **Corrigido em
+  04/09/2026** (S2, docs/21_BACKLOG_ACHADOS_TECNICOS.md item 3): dois jobs
+  novos, `build-android` (`flutter build apk --debug`, assinatura de debug,
+  sem secret) e `build-ios` (`flutter build ios --simulator --no-codesign`,
+  runner macOS, sem assinatura). Ao implementar, o build iOS local
+  **quebrou de verdade**: `ios/Podfile.lock` estava em `Firebase/CoreOnly
+  12.17.0`, incompatível com o que `firebase_core` exige hoje (12.18.0), e
+  a família inteira (`firebase_auth`, `cloud_firestore`, `cloud_functions`)
+  estava com versões defasadas no `pubspec.lock` mesmo com constraints
+  `^` permissivas — `flutter pub get` não avança versão sozinho, só
+  `flutter pub upgrade`. Corrigido subindo os quatro pacotes juntos (são
+  lançados como família pelo FlutterFire; atualizar um sem os outros causa
+  conflito de símbolo Swift/ObjC) e regenerando `ios/Podfile.lock`. Build
+  validado local (`flutter build ios --simulator --no-codesign` e `flutter
+  run` com screenshot) antes de confiar na CI. Ver
+  `docs/22_INSIGHTS_BUILD_NATIVO.md` para o caminho até um build assinado de
+  verdade e `docs/23_TRACKER_ANDROID_LOCAL.md` para o tracker do emulador
+  Android local (ainda não configurado nesta máquina).
 - Config nativa regenerada em 03/09/2026 via
   `flutterfire configure --project=elytron-d2b-dev --platforms=ios,android`.
-- App validado rodando no simulador iPhone 17 / iOS 26.5 em 03/09/2026.
+- App validado rodando no simulador iPhone 17 / iOS 26.5 em 03/09/2026 e de
+  novo em 04/09/2026 após o upgrade da família Firebase.
 
 ## 6. Pendências fora do código
 
