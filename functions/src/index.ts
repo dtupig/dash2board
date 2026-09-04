@@ -356,3 +356,99 @@ export const claimInvite = onCall(async (request) => {
 
   return {ok: true, role: invite.role, tenantId: invite.tenantId};
 });
+
+// ---------------------------------------------------------------------------
+// 5. Callable: registro de leitura de relatório sigiloso
+// ---------------------------------------------------------------------------
+
+interface ReportDoc {
+  classification?: string;
+  materialFacts?: unknown[];
+}
+
+/**
+ * Espelha `ReportAccessPolicy.canOpen` (Dart) e `canOpenReport`
+ * (firestore.rules) - as três precisam concordar; divergência entre elas é
+ * falha de segurança, não detalhe.
+ */
+function canOpenReport(
+  role: Role,
+  classification: string,
+  isMaterialFact: boolean
+): boolean {
+  switch (role) {
+    case "strategic":
+      return true;
+    case "operational":
+      return classification !== "secret";
+    case "board":
+      return isMaterialFact || classification === "public_internal";
+    case "pending":
+    default:
+      return false;
+  }
+}
+
+interface RecordReadReceiptRequest {
+  reportId?: string;
+}
+
+/**
+ * O cliente nunca escreve em `audit_logs` (regra fail-closed do projeto) -
+ * esta function grava o registro de leitura de um relatório antes de o
+ * conteúdo ser exibido (`ReportAccessPolicy.requiresReadReceipt`, hoje só
+ * `secret`). Recalcula o acesso a partir do documento real via Admin SDK
+ * em vez de confiar em qualquer coisa que o cliente afirme.
+ */
+export const recordReadReceipt = onCall<RecordReadReceiptRequest>(
+  async (request) => {
+    const auth = request.auth;
+
+    if (!auth) {
+      throw new HttpsError("unauthenticated", "Sessão inválida.");
+    }
+
+    const tenantId = (auth.token.tenantId as string | undefined) ?? "";
+    const role: Role = isRole(auth.token.role) ? auth.token.role : "pending";
+
+    if (!tenantId) {
+      throw new HttpsError(
+        "permission-denied",
+        "Sua conta ainda não tem organização associada."
+      );
+    }
+
+    const {reportId} = request.data;
+
+    if (!reportId) {
+      throw new HttpsError("invalid-argument", "Relatório inválido.");
+    }
+
+    const reportSnap = await db
+      .doc(`tenants/${tenantId}/reports/${reportId}`)
+      .get();
+
+    if (!reportSnap.exists) {
+      throw new HttpsError("not-found", "Relatório não encontrado.");
+    }
+
+    const report = reportSnap.data() as ReportDoc;
+    const classification = report.classification ?? "secret";
+    const isMaterialFact =
+      Array.isArray(report.materialFacts) && report.materialFacts.length > 0;
+
+    if (!canOpenReport(role, classification, isMaterialFact)) {
+      throw new HttpsError(
+        "permission-denied",
+        "Seu perfil não tem acesso a este relatório."
+      );
+    }
+
+    await writeAudit(tenantId, "report.read_receipt", auth.uid, {
+      reportId,
+      classification,
+    });
+
+    return {ok: true};
+  }
+);

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../../../core/config/firestore_paths.dart';
 import '../../../core/errors/app_failure.dart';
@@ -20,11 +21,18 @@ import 'reports_repository.dart';
 /// documento sem overhead de `get()` - sem esse `where`, um único
 /// relatório que o papel não alcance derruba a query inteira com
 /// `permission-denied` (achado 1, docs/20_RETOMADA_SESSAO.md).
+///
+/// `recordReadReceipt` invoca a Cloud Function homônima em vez de escrever
+/// direto - o cliente nunca escreve em `audit_logs` (achado 2).
 class FirestoreReportsRepository implements ReportsRepository {
-  FirestoreReportsRepository({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirestoreReportsRepository({
+    FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _functions = functions ?? FirebaseFunctions.instance;
 
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
   @override
   Stream<List<ServiceReport>> watchReports({
@@ -69,13 +77,23 @@ class FirestoreReportsRepository implements ReportsRepository {
     required String uid,
   }) async {
     // O client SDK não escreve em `audit_logs` (regra fail-closed do
-    // projeto) - o registro de leitura de `secret` é gravado por Cloud
-    // Function acionada por este mesmo evento de abertura, fora do escopo
-    // deste app cliente.
-    return;
+    // projeto) - quem grava o registro de leitura é a Cloud Function
+    // `recordReadReceipt`, que recalcula o acesso a partir do documento
+    // real via Admin SDK em vez de confiar no que o cliente afirma.
+    try {
+      await _functions.httpsCallable('recordReadReceipt').call<void>(
+        <String, Object?>{'reportId': reportId},
+      );
+    } on FirebaseFunctionsException catch (error, stackTrace) {
+      _rethrowAsFailure(error, stackTrace);
+    }
   }
 
   Never _rethrowAsFailure(Object error, StackTrace stackTrace) {
+    if (error is FirebaseFunctionsException &&
+        (error.code == 'permission-denied' || error.code == 'not-found')) {
+      throw const AppFailure.accessNotProvisioned();
+    }
     if (error is FirebaseException && error.code == 'permission-denied') {
       throw const AppFailure.accessNotProvisioned();
     }
