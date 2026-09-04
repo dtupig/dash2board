@@ -62,7 +62,18 @@ class MockReportsRepository implements ReportsRepository {
   }
 
   @override
-  Stream<List<ReportSection>> watchSections(String tenantId, String reportId) {
+  Stream<List<ReportSection>> watchSections(
+    String tenantId,
+    String reportId, {
+    required String roleWire,
+  }) {
+    // Ao contrário de `watchReports`, aqui não filtra por papel: mantém
+    // todas as seções para que `ReportSectionTile` mostre o aviso de
+    // supressão na demonstração. `roleWire` só existe pela paridade com a
+    // assinatura de `ReportsRepository` (o Firestore precisa dele para o
+    // `where` de `visibleRoles` - achado 5, docs/20_RETOMADA_SESSAO.md).
+    // Ver docs/21_BACKLOG_ACHADOS_TECNICOS.md sobre a divergência que isso
+    // cria entre demonstração e produção.
     return _afterDelay(() {
       for (final ServiceReport r in _reports) {
         if (r.id == reportId) {

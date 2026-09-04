@@ -19,8 +19,16 @@ abstract interface class ReportsRepository {
   Stream<ServiceReport?> watchReport(String tenantId, String reportId);
 
   /// Seções do relatório - subcoleção separada porque o conteúdo pode ser
-  /// grande e nem toda seção é lida em toda visita.
-  Stream<List<ReportSection>> watchSections(String tenantId, String reportId);
+  /// grande e nem toda seção é lida em toda visita. [roleWire] filtra pela
+  /// mesma alçada de [watchReports] (espelhando `ReportAccessPolicy.
+  /// canSeeSection`), pelo mesmo motivo: a implementação Firestore precisa
+  /// de um `where` que replique a regra de segurança para não derrubar a
+  /// lista inteira quando uma única seção estiver fora do alcance do papel.
+  Stream<List<ReportSection>> watchSections(
+    String tenantId,
+    String reportId, {
+    required String roleWire,
+  });
 
   /// Grava o registro de leitura exigido antes de renderizar um relatório
   /// `secret` (`ReportAccessPolicy.requiresReadReceipt`). No mock, fica só

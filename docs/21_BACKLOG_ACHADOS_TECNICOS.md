@@ -5,7 +5,8 @@ backlog dos 4 itens que o PO pediu para tratar em sequência em 04/09/2026,
 como histórias com critério de aceite, e os pontos onde a decisão é de
 negócio, não técnica.
 
-Itens 1 (parcial) e 3 têm pergunta de negócio em aberto — ver cada seção.
+Item 1 (Bucket B) e item 3 tiveram decisão de negócio já tomada pelo PO —
+ver cada seção. Itens 1 (Bucket A) e 2 concluídos.
 
 ---
 
@@ -74,7 +75,26 @@ ler.
 continua em `canSeeSection`), índice composto correspondente, teste de rules
 com `getDocs` provando o bug e a correção.
 
-**Status:** não iniciado.
+> **Achado de UX/segurança encontrado ao implementar:** o mock de seções
+> devolve todas sem filtrar, e `ReportSectionTile` mostra um aviso de "seção
+> suprimida" para quem não pode ver o conteúdo (`redactionNotice`, "nunca
+> some em silêncio"). Mas com a correção deste achado, uma seção fora de
+> `visibleRoles` nunca chega ao cliente Firestore — fica fora da lista, sem
+> aviso algum. Esse aviso só é alcançável hoje na demonstração (`MOCK=true`),
+> nunca em produção. Não é regressão desta correção (o `get()` individual já
+> bloqueava a seção com `permission-denied` antes desta mudança, sem chegar a
+> renderizar o aviso) — é um gap de design pré-existente que a correção só
+> tornou visível. Documentado como decisão do módulo de autoria (prompt 13):
+> investir num "stub" de seção redigida (título + motivo, sem corpo) que
+> sobreviva ao filtro de `list` para o aviso funcionar também em produção, ou
+> aceitar que é só recurso de demonstração. Não é escopo desta história —
+> fica registrado para quando o módulo de autoria (prompt 13) for
+> implementado.
+
+**Status:** ✅ concluído. Índice composto **não** foi necessário — um único
+`where(arrayContains)` sem `orderBy` adicional não exige índice composto no
+Firestore (diferente do achado 1, que combinava `array-contains` com
+`orderBy`).
 
 ---
 

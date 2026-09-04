@@ -201,3 +201,48 @@ describe('reports/sections - canSeeSection por sensibilidade', () => {
     );
   });
 });
+
+// Achado 5 (docs/20_RETOMADA_SESSAO.md): mesmo bug do achado 1, mas em
+// `reports/{reportId}/sections` - uma query de lista sem `where`
+// correspondente à regra derruba a query inteira se qualquer seção
+// individual reprovar `canSeeSection`. Os dois testes abaixo provam o bug
+// (query sem `where`) e a correção (query com
+// `where('visibleRoles', 'array-contains', ...)`).
+describe('reports/sections - list via visibleRoles (achado 5)', () => {
+  beforeEach(async () => {
+    await seedReport('rep-list-secoes', { classification: 'confidential', materialFacts: [] });
+    await seedSection('rep-list-secoes', 'sec-narrative', {
+      sensitivity: 'narrative',
+      visibleRoles: ['operational', 'strategic', 'board'],
+    });
+    await seedSection('rep-list-secoes', 'sec-personal', {
+      sensitivity: 'personal_data',
+      visibleRoles: ['strategic'],
+    });
+  });
+
+  it('operational lista só as seções com seu papel em visibleRoles', async () => {
+    const alice = personaContext('alice', { tenantId: TENANT_A, role: 'operational' });
+    const q = query(
+      collection(
+        alice.firestore(), 'tenants', TENANT_A, 'reports', 'rep-list-secoes', 'sections',
+      ),
+      where('visibleRoles', 'array-contains', 'operational'),
+    );
+    const snapshot = await assertSucceeds(getDocs(q));
+    assert.deepStrictEqual(
+      snapshot.docs.map((d) => d.id),
+      ['sec-narrative'],
+    );
+  });
+
+  it('a mesma subcoleção SEM o where derruba a query inteira (o bug do achado 5)', async () => {
+    const alice = personaContext('alice', { tenantId: TENANT_A, role: 'operational' });
+    const qSemWhere = query(
+      collection(
+        alice.firestore(), 'tenants', TENANT_A, 'reports', 'rep-list-secoes', 'sections',
+      ),
+    );
+    await assertFails(getDocs(qSemWhere));
+  });
+});
