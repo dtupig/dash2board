@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "398845168370",
+    "project_id": "elytron-d2b-dev",
+    "storage_bucket": "elytron-d2b-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398845168370:android:c64b436b29b89a35291e6b",
+        "android_client_info": {
+          "package_name": "com.elytronsecurity.elytron_dash2board"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC67gKcL8eDjTLcj4UpzucUToTe5bqUojI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

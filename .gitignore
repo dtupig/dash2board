@@ -27,18 +27,17 @@ ios/Runner/GeneratedPluginRegistrant.*
 android/.gradle/
 android/local.properties
 android/key.properties
-android/app/google-services.json
 **/*.keystore
 **/*.jks
 
 # ---------------------------------------------------------------------------
 # SEGREDOS - nunca versionar
 # ---------------------------------------------------------------------------
-# Obs.: lib/firebase_options.dart PODE ser versionado (as chaves do Firebase
-# para cliente são públicas por design; a proteção real está nas
-# security rules e no App Check). Já os arquivos abaixo, não:
-ios/Runner/GoogleService-Info.plist
-android/app/google-services.json
+# Obs.: lib/firebase_options.dart, ios/Runner/GoogleService-Info.plist e
+# android/app/google-services.json PODEM ser versionados (as chaves do
+# Firebase para cliente são públicas por design; a proteção real está nas
+# security rules e no App Check). Decisão do PO em 03/09/2026 — ver
+# docs/20_RETOMADA_SESSAO.md. Os arquivos abaixo continuam proibidos:
 .env
 .env.*
 service-account*.json

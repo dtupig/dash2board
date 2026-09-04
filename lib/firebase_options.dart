@@ -56,7 +56,6 @@ class DefaultFirebaseOptions {
     projectId: 'elytron-d2b-dev',
     storageBucket: 'elytron-d2b-dev.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCu75Zl_Z0OWxiFKZlco7-QYvYg9f3OtVQ',
     appId: '1:398845168370:ios:a91dea4ab9255a45291e6b',
@@ -65,7 +64,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'elytron-d2b-dev.firebasestorage.app',
     iosBundleId: 'com.elytronsecurity.elytronDash2board',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCu75Zl_Z0OWxiFKZlco7-QYvYg9f3OtVQ',
     appId: '1:398845168370:ios:b3559863b19be6cb291e6b',
