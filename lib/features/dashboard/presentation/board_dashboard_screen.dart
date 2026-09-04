@@ -313,7 +313,9 @@ class _BoardBody extends ConsumerWidget {
         // Atalho para o módulo de serviços (prompt 10) - para o board, é
         // somente leitura das solicitações que já viraram fato relevante.
         SurfaceCard(
-          onTap: () => context.go('/servicos'),
+          // `push`, não `go` - senão a tela de destino fica sem botão de
+          // voltar (achado de teste manual, 04/09/2026).
+          onTap: () => context.push('/servicos'),
           semanticLabel: 'Serviços. Você é informado quando uma solicitação '
               'vira fato relevante. Toque para abrir.',
           child: const ExcludeSemantics(

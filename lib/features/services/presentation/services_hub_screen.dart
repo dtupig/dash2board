@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../auth/domain/user_role.dart';
 import '../../auth/presentation/persona_visuals.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/services_providers.dart';
 import '../domain/contracted_service.dart';
 import '../domain/request_policy.dart';
@@ -44,7 +45,10 @@ class ServicesHubScreen extends ConsumerWidget {
         RequestPolicy.blockReason(role, RequestAction.open);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Serviços')),
+      appBar: AppBar(
+        leading: const BackOrHomeButton(),
+        title: const Text('Serviços'),
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),

@@ -33,9 +33,11 @@ class DomainDetailSheet extends ConsumerWidget {
     // Fecha a folha antes de navegar - caminho literal em vez de importar
     // `app/router.dart` (mesmo motivo do restante do painel: evita import
     // circular entre o roteador e as telas que ele registra). Mantenha em
-    // sincronia com `AppRoute.strategicCompliance`.
+    // sincronia com `AppRoute.strategicCompliance`. `push`, não `go` - senão
+    // a tela de destino fica sem botão de voltar (achado de teste manual,
+    // 04/09/2026).
     Navigator.of(context).pop();
-    context.go('/estrategia/compliance?domain=${domain.wireValue}');
+    context.push('/estrategia/compliance?domain=${domain.wireValue}');
   }
 
   String _peerSentence() {

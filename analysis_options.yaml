@@ -28,6 +28,13 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    # functions/ e test/rules/ são projetos Node/TypeScript (npm), não Dart -
+    # o `.dart` que aparece aqui é um template bundled dentro do pacote
+    # firebase-tools (achado de teste manual, 04/09/2026: flutter analyze
+    # passou a listar erros vindos de node_modules).
+    - "**/node_modules/**"
+    - functions/**
+    - test/rules/**
 
 linter:
   rules:

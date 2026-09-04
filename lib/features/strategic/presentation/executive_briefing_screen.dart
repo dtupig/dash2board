@@ -13,6 +13,7 @@ import '../../../core/widgets/charts/chart_frame.dart';
 import '../../../core/widgets/charts/delta_badge.dart';
 import '../../../core/widgets/charts/kpi_tile.dart';
 import '../../../core/widgets/elytron_logo.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/strategic_providers.dart';
 import '../domain/compliance_control.dart';
 import '../domain/posture_index.dart';
@@ -132,7 +133,10 @@ class _ExecutiveBriefingScreenState
         (body is _BriefingPreview) ? body.data : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Briefing executivo')),
+      appBar: AppBar(
+        leading: const BackOrHomeButton(),
+        title: const Text('Briefing executivo'),
+      ),
       body: SafeArea(bottom: false, child: body),
       bottomNavigationBar: shareableData == null
           ? null
