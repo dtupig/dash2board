@@ -24,8 +24,32 @@ class MockServicesRepository implements ServicesRepository {
   int _requestCounter = 0;
 
   late final List<ServiceRequest> _requests = mockServiceRequests(_anchor);
-  late final List<ContractedService> _contracted =
-      mockContractedServices(_anchor);
+
+  // Os 2 últimos itens (`maturity_assessment`, `digital_investigation`)
+  // existem para o prompt 11 exercitar as categorias `governance` e
+  // `response` (perícia forense) na demonstração - inline aqui porque
+  // `mock_services_data.dart` já está no limite de 250 linhas.
+  late final List<ContractedService> _contracted = <ContractedService>[
+    ...mockContractedServices(_anchor),
+    ContractedService(
+      serviceKey: 'maturity_assessment',
+      contractId: 'ctr-010',
+      startedAt: _anchor.subtract(const Duration(days: 120)),
+      endsAt: _anchor.add(const Duration(days: 245)),
+      status: ContractStatus.active,
+      lastDeliveryAt: _anchor.subtract(const Duration(days: 60)),
+      deliveriesCount: 1,
+    ),
+    ContractedService(
+      serviceKey: 'digital_investigation',
+      contractId: 'ctr-011',
+      startedAt: _anchor.subtract(const Duration(days: 45)),
+      endsAt: _anchor.add(const Duration(days: 320)),
+      status: ContractStatus.active,
+      lastDeliveryAt: _anchor.subtract(const Duration(days: 30)),
+      deliveriesCount: 1,
+    ),
+  ];
 
   @override
   Stream<List<ContractedService>> watchContractedServices(String tenantId) {
