@@ -27,15 +27,15 @@ comportamento (`flutter analyze` limpo, `flutter test` verde, sem diff visual
 | 670 | `lib/features/dashboard/presentation/board_dashboard_screen.dart` | **B** | Extrair cards/seções para `widgets/` | parqueado |
 | 648 | `lib/features/strategic/presentation/compliance_screen.dart` | **B** | Extrair tabela de controles e filtros para `widgets/` | parqueado |
 | 564 | `lib/core/widgets/charts/trend_line_chart.dart` | A | Separar builder de série/eixo/tooltip do widget principal | ✅ 193 linhas (+4 arquivos auxiliares) |
-| 549 | `lib/features/auth/presentation/welcome_screen.dart` | A | Extrair seções (hero, proposta de valor, CTA) para `widgets/` | pendente |
+| 549 | `lib/features/auth/presentation/welcome_screen.dart` | A | Extrair seções (hero, proposta de valor, CTA) para `widgets/` | ✅ 194 linhas (+4 arquivos auxiliares) |
 | 520 | `lib/features/strategic/presentation/executive_briefing_screen.dart` | **B** | Extrair seções do briefing para `widgets/` | parqueado |
 | 468 | `lib/features/strategic/presentation/survey_screen.dart` | **B** | Extrair perguntas/etapas para `widgets/` | parqueado |
-| 466 | `lib/features/auth/presentation/sign_in_screen.dart` | A | Extrair formulário e estados de erro para `widgets/` | pendente |
-| 463 | `lib/features/strategic/presentation/briefing_pdf_builder.dart` | A | Dividir por seção do PDF (é builder puro, sem UI reativa) | pendente |
+| 466 | `lib/features/auth/presentation/sign_in_screen.dart` | A | Extrair formulário e estados de erro para `widgets/` | ✅ 218 linhas (+4 arquivos auxiliares) |
+| 463 | `lib/features/strategic/presentation/briefing_pdf_builder.dart` | A | Dividir por seção do PDF (é builder puro, sem UI reativa) | ✅ 139 linhas (+3 arquivos auxiliares, +1 teste novo) |
 | 382 | `lib/features/strategic/presentation/insights_screen.dart` | **B** | Extrair cards de insight para `widgets/` | parqueado |
 | 309 | `lib/core/widgets/charts/domain_bar_chart.dart` | A | Separar builder de barra/legenda | ✅ 172 linhas (+1 arquivo auxiliar) |
 | 296 | `lib/core/widgets/charts/chart_frame.dart` | A | Extrair header/legenda do frame | ✅ 112 linhas (+1 arquivo auxiliar) |
-| 295 | `lib/app/router.dart` | A | Agrupar rotas por feature em `router_*.dart` | pendente |
+| 295 | `lib/app/router.dart` | A | Agrupar rotas por feature em `router_*.dart` | ✅ 198 linhas (+2 arquivos auxiliares) |
 | 290 | `lib/features/strategic/data/firestore_strategic_repository.dart` | A | Extrair mappers, mesmo padrão de `firestore_reports_mappers.dart` | ✅ 195 linhas (+1 arquivo auxiliar) |
 
 **Bucket A** (9 arquivos - repositórios, gráficos, router, telas de auth): sem
@@ -54,8 +54,10 @@ em widgets internos hoje, S4 pode reagrupar esses mesmos widgets num grid de
 > reagrupar o mesmo código em poucas semanas. `./scripts/prompt check` vai
 > continuar reprovando nesses 5 arquivos até lá; é esperado, não é regressão.
 
-**Status:** Bucket A em execução. Bucket B parqueado (decisão do PO,
-04/09/2026) — revisitar quando o S4 definir o layout de tela larga.
+**Status:** Bucket A **concluído** (9/9 arquivos). Bucket B parqueado (decisão
+do PO, 04/09/2026) — revisitar quando o S4 definir o layout de tela larga.
+`./scripts/prompt check` só reprova mais nos 5 arquivos do Bucket B, como
+esperado.
 
 ---
 
