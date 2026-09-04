@@ -288,7 +288,7 @@ service cloud.firestore {
         allow write: if false;
 
         match /sections/{sectionId} {
-          allow get, list: if inTenant(tenantId) && canOpenReport(
+          allow get: if inTenant(tenantId) && canOpenReport(
             get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
               .data.get('classification', 'secret'),
             get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
@@ -298,6 +298,19 @@ service cloud.firestore {
             get(/databases/$(database)/documents/tenants/$(tenantId)/reports/$(reportId))
               .data.get('classification', 'secret')
           );
+
+          // Mesmo motivo do `list` de `reports` acima (achado 5,
+          // docs/20_RETOMADA_SESSAO.md): `canSeeSection` decide por
+          // `resource.data.sensitivity`, que varia por seção sem `where`
+          // correspondente - um único documento fora do alcance do papel
+          // derrubaria a query de `watchSections` inteira. `visibleRoles`
+          // já combina os dois gates (`canOpenReport` do relatório pai e
+          // `canSeeSection` da própria seção); quem grava a seção (autoria,
+          // prompt 13) é responsável por mantê-lo consistente com as duas
+          // funções e por recalculá-lo sempre que `materialFacts` mudar.
+          allow list: if inTenant(tenantId) &&
+            hasAnyRole(resource.data.get('visibleRoles', []));
+
           allow write: if false;
         }
       }

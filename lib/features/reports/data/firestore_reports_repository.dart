@@ -21,6 +21,7 @@ import 'reports_repository.dart';
 /// documento sem overhead de `get()` - sem esse `where`, um único
 /// relatório que o papel não alcance derruba a query inteira com
 /// `permission-denied` (achado 1, docs/20_RETOMADA_SESSAO.md).
+/// `watchSections` filtra por `visibleRoles` pelo mesmo motivo (achado 5).
 ///
 /// `recordReadReceipt` invoca a Cloud Function homônima em vez de escrever
 /// direto - o cliente nunca escreve em `audit_logs` (achado 2).
@@ -61,9 +62,14 @@ class FirestoreReportsRepository implements ReportsRepository {
   }
 
   @override
-  Stream<List<ReportSection>> watchSections(String tenantId, String reportId) {
+  Stream<List<ReportSection>> watchSections(
+    String tenantId,
+    String reportId, {
+    required String roleWire,
+  }) {
     return _firestore
         .collection(FirestorePaths.reportSections(tenantId, reportId))
+        .where('visibleRoles', arrayContains: roleWire)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>
             snapshot.docs.map(mapReportSectionDoc).toList(growable: false))

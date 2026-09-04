@@ -103,14 +103,23 @@ converter.
    demo. *Correção ao texto anterior:* o `audit.sh` **já** checava
    `pumpAndSettle` desde o commit inicial — a menção anterior a essa lacuna
    estava errada.
-5. **Novo — `watchSections` tem o mesmo bug de lista do item 1.** A regra de
-   `list` em `reports/{reportId}/sections/{sectionId}` decide por
-   `canSeeSection(resource.data.sensitivity, ...)`, variável por documento e
-   sem `where` correspondente na query (`firestore_reports_repository.dart`,
-   `watchSections`). Mesma correção do item 1 se aplica: desnormalizar um
-   `visibleRoles` por seção e filtrar por `array-contains`. Não corrigido
-   nesta rodada para manter o PR do item 1 revisável; mesma pendência de
-   "quem grava" (prompt 13).
+5. ~~**`watchSections` tem o mesmo bug de lista do item 1.**~~ **Corrigido.**
+   Mesmo padrão: `visibleRoles` desnormalizado por seção (combina
+   `canOpenReport` do relatório pai com `canSeeSection` da própria seção),
+   `firestore.rules` decide `list` por esse campo mantendo `get` em
+   `canSeeSection`, `watchSections` ganhou parâmetro `roleWire` e
+   `.where('visibleRoles', arrayContains: roleWire)`. Novo teste de rules com
+   `getDocs` prova as duas pontas, mesmo molde do item 1. **Pendência
+   herdada:** mesma de "quem grava" do item 1, agora para `visibleRoles`
+   (prompt 13). **Achado de UX/segurança descoberto ao investigar este:** o
+   mock de seções devolve todas sem filtrar e `ReportSectionTile` mostra um
+   aviso de "seção suprimida" para quem não pode ver — mas essa seção nunca
+   chega ao cliente Firestore (fica fora da lista, sem aviso). O aviso só é
+   alcançável na demonstração, nunca em produção. Documentado em
+   `docs/prompts/13_MODULO_AUTORIA_RELATORIOS.md` como decisão do módulo de
+   autoria: investir num "stub" de seção redigida (título + motivo, sem
+   corpo) que sobreviva ao filtro de `list`, ou aceitar que o aviso é só
+   recurso de demonstração.
 
 ## 5. Ambiente
 

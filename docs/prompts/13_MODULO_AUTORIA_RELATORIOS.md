@@ -173,6 +173,23 @@ papel. É esse campo que a regra de `list` em `firestore.rules` usa (não
 perder acesso a um relatório que deveria ver, ou pior, manter acesso a um
 que não deveria mais ver.
 
+**Mesmo requisito para cada seção (correção do achado 5,
+docs/20_RETOMADA_SESSAO.md):** todo `write` em
+`reports/{reportId}/sections/{sectionId}` precisa gravar/recalcular
+`visibleRoles: string[]`, combinando `ReportAccessPolicy.canOpen` do
+relatório pai com `canSeeSection` da própria seção para cada papel. A regra
+de `list` de `sections` usa esse campo, não `canSeeSection` diretamente -
+mesmo risco de dessincronia do parágrafo acima, agora por seção.
+**Atenção:** o app hoje mostra um aviso de "seção suprimida" para uma seção
+individualmente inacessível (`ReportSectionTile`, "nunca some em
+silêncio"), mas esse aviso só é alcançável no mock (que devolve todas as
+seções sem filtrar). Em Firestore, uma seção fora de `visibleRoles` nunca
+chega ao cliente - ela simplesmente não aparece na lista, sem aviso. Se este
+módulo de autoria for redesenhar o fluxo de leitura, vale decidir com o PO
+se o produto quer investir em um "stub" de seção redigida (título + motivo,
+sem corpo) que sobreviva ao filtro de `list`, para o aviso funcionar também
+em produção.
+
 O mock precisa de: um relatório em `draft`, um em `inReview` com comentários,
 um `approved` pronto para publicar (com **uma violação plantada** na visão do
 board, para a varredura ter o que encontrar) e um `published` com errata.

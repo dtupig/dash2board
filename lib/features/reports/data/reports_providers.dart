@@ -49,8 +49,11 @@ final reportProvider =
 final reportSectionsProvider =
     StreamProvider.family<List<ReportSection>, String>((ref, reportId) {
   final String? tenantId = _watchTenantId(ref);
-  if (tenantId == null) {
+  final String? roleWire = ref.watch(appUserProvider).value?.role.wireValue;
+  if (tenantId == null || roleWire == null) {
     return Stream<List<ReportSection>>.value(const <ReportSection>[]);
   }
-  return ref.watch(reportsRepositoryProvider).watchSections(tenantId, reportId);
+  return ref
+      .watch(reportsRepositoryProvider)
+      .watchSections(tenantId, reportId, roleWire: roleWire);
 });
