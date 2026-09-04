@@ -12,6 +12,7 @@ import '../../../core/widgets/charts/chart_frame.dart';
 import '../../../core/widgets/charts/kpi_tile.dart';
 import '../../../core/widgets/charts/severity_chip.dart';
 import '../../../core/widgets/charts/stacked_status_bar.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/strategic_providers.dart';
 import '../domain/compliance_control.dart';
 import '../domain/security_domain.dart';
@@ -195,6 +196,7 @@ class _ComplianceScreenState extends ConsumerState<ComplianceScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: const BackOrHomeButton(),
         title: const Text('Compliance'),
         actions: <Widget>[
           Tooltip(

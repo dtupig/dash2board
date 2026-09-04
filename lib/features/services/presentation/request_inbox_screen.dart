@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/charts/chart_frame.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/services_providers.dart';
 import '../domain/approval_record.dart';
 import '../domain/request_status.dart';
@@ -70,7 +71,10 @@ class RequestInboxScreen extends ConsumerWidget {
         ref.watch(serviceRequestsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Solicitações')),
+      appBar: AppBar(
+        leading: const BackOrHomeButton(),
+        title: const Text('Solicitações'),
+      ),
       body: SafeArea(
         child: requestsAsync.when(
           loading: () => const Padding(

@@ -29,18 +29,20 @@ class StrategicDashboardScreen extends StatelessWidget {
   void _viewInsights(BuildContext context) {
     // Caminho literal em vez de importar `app/router.dart` (evita import
     // circular entre o roteador e as telas que ele registra). Mantenha em
-    // sincronia com `AppRoute.strategicInsights`.
-    context.go('/estrategia/insights');
+    // sincronia com `AppRoute.strategicInsights`. `push`, não `go` - senão
+    // a tela de destino fica sem botão de voltar (achado de teste manual,
+    // 04/09/2026).
+    context.push('/estrategia/insights');
   }
 
   void _openServices(BuildContext context) {
-    context.go('/servicos');
+    context.push('/servicos');
   }
 
   void _viewBriefing(BuildContext context) {
-    // Mesmo motivo do caminho literal acima - mantenha em sincronia com
-    // `AppRoute.strategicBriefing`.
-    context.go('/estrategia/briefing');
+    // Mesmo motivo do caminho literal e do `push` acima - mantenha em
+    // sincronia com `AppRoute.strategicBriefing`.
+    context.push('/estrategia/briefing');
   }
 
   @override

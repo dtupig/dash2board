@@ -39,6 +39,12 @@ class ChartFrame extends StatelessWidget {
   void _openTable(BuildContext context) {
     showModalBottomSheet<void>(
       context: context,
+      // Sem isso, a folha modal trava a altura em ~9/16 da tela - o
+      // conteúdo (altura fixa, ex. a tabela de "Onde está o risco") não
+      // cabe nesse limite e a coluna interna do modal estoura por baixo
+      // (achado de teste manual, 04/09/2026: "Bottom overflowed by 77
+      // pixels"). Mesmo ajuste que as outras folhas do app já usam.
+      isScrollControlled: true,
       showDragHandle: true,
       builder: (BuildContext sheetContext) {
         return SafeArea(

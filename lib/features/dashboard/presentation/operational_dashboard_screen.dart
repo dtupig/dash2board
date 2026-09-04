@@ -14,8 +14,10 @@ class OperationalDashboardScreen extends StatelessWidget {
 
   void _openServices(BuildContext context) {
     // Caminho literal em vez de importar `app/router.dart` (evita import
-    // circular entre o roteador e as telas que ele registra).
-    context.go('/servicos');
+    // circular entre o roteador e as telas que ele registra). `push`, não
+    // `go` - preserva o dashboard na pilha, senão a tela de destino fica
+    // sem botão de voltar (achado de teste manual, 04/09/2026).
+    context.push('/servicos');
   }
 
   @override

@@ -6,6 +6,7 @@ import '../../../core/theme/chart_tokens.dart';
 import '../../../core/widgets/charts/chart_frame.dart';
 import '../../../core/widgets/charts/severity_chip.dart';
 import '../../../core/widgets/surface_card.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/strategic_providers.dart';
 import '../domain/insight_item.dart';
 import '../domain/survey.dart';
@@ -54,7 +55,10 @@ class _InsightsScreenState extends ConsumerState<InsightsScreen> {
     final AsyncValue<Survey?> surveyAsync = ref.watch(surveyProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Insights e pesquisas')),
+      appBar: AppBar(
+        leading: const BackOrHomeButton(),
+        title: const Text('Insights e pesquisas'),
+      ),
       body: SafeArea(
         child: insightsAsync.when(
           loading: () => const _InsightsLoadingBody(),
