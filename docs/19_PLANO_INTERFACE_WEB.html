@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Épico E-W — Interface Web do Elytron Dash2Board: 24 histórias de usuário, premissas, decisões abertas e definição de pronto.">
+  <meta name="author" content="Elytron Security">
+  <title>Épico E-W · Interface Web</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <style>
+    html{-webkit-text-size-adjust:100%}
+    img{max-width:100%}
+    [hidden]{display:none!important}
+  </style>
+  <style>
+  :root{
+    --ground:#F4F6F6;
+    --surface:#FFFFFF;
+    --surface-2:#EAEEEF;
+    --ink:#101619;
+    --ink-2:#3D4B50;
+    --muted:#6B7A80;
+    --line:#DCE3E4;
+    --line-strong:#C3CDCF;
+    --accent:#0E6E7E;
+    --accent-soft:#D8ECEF;
+    --op:#0E8FA8;
+    --st:#118A5E;
+    --bo:#7A5BD6;
+    --staff:#B4623A;
+    --warn:#9A6B12;
+    --warn-soft:#F6EBD3;
+    --radius:10px;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0C1113;
+      --surface:#131A1D;
+      --surface-2:#1A2327;
+      --ink:#EAF0F1;
+      --ink-2:#BCC9CC;
+      --muted:#87969B;
+      --line:#243033;
+      --line-strong:#33454A;
+      --accent:#4CC3D4;
+      --accent-soft:#12333A;
+      --op:#21C7E8;
+      --st:#00E08A;
+      --bo:#A98BFF;
+      --staff:#E2915F;
+      --warn:#E0B565;
+      --warn-soft:#2C2415;
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C1113;
+    --surface:#131A1D;
+    --surface-2:#1A2327;
+    --ink:#EAF0F1;
+    --ink-2:#BCC9CC;
+    --muted:#87969B;
+    --line:#243033;
+    --line-strong:#33454A;
+    --accent:#4CC3D4;
+    --accent-soft:#12333A;
+    --op:#21C7E8;
+    --st:#00E08A;
+    --bo:#A98BFF;
+    --staff:#E2915F;
+    --warn:#E0B565;
+    --warn-soft:#2C2415;
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 72px}
+  h1,h2,h3{font-family:Archivo,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+  /* header */
+  header{border-bottom:1px solid var(--line);background:var(--surface)}
+  .head-inner{max-width:1120px;margin:0 auto;padding:36px 24px 28px;display:flex;flex-direction:column;gap:18px}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(28px,4vw,40px);font-weight:700;letter-spacing:-.015em;line-height:1.1}
+  .sub{color:var(--ink-2);max-width:62ch;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 28px;font-size:13px;color:var(--muted)}
+  .meta b{color:var(--ink);font-weight:600}
+
+  .ac{
+    display:flex;gap:14px;align-items:flex-start;
+    border-left:3px solid var(--accent);
+    background:var(--accent-soft);
+    padding:14px 16px;border-radius:0 var(--radius) var(--radius) 0;
+  }
+  .ac .k{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);white-space:nowrap;padding-top:2px}
+  .ac p{margin:0;font-size:14px;color:var(--ink)}
+
+  /* filter bar */
+  .bar{position:sticky;top:0;z-index:5;background:var(--ground);border-bottom:1px solid var(--line);padding:12px 0;margin-bottom:8px}
+  .bar-inner{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  button.f{
+    font:inherit;font-size:13px;cursor:pointer;
+    background:var(--surface);color:var(--ink-2);
+    border:1px solid var(--line-strong);border-radius:999px;padding:5px 13px;
+  }
+  button.f:hover{border-color:var(--accent);color:var(--ink)}
+  button.f[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+  button.f:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .bar .sep{flex:1}
+  .count{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted)}
+
+  /* sprint block */
+  .sprint{margin-top:40px}
+  .sprint-head{display:flex;align-items:baseline;gap:14px;padding-bottom:10px;border-bottom:1px solid var(--line-strong)}
+  .sprint-head h2{font-size:17px;font-weight:600;letter-spacing:-.005em}
+  .sprint-head .tag{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--accent);letter-spacing:.08em}
+  .sprint-head .pts{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .cond{font-size:12px;color:var(--warn);background:var(--warn-soft);padding:2px 8px;border-radius:999px}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-top:16px}
+  article{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 17px;display:flex;flex-direction:column;gap:10px;
+  }
+  .id-row{display:flex;align-items:center;gap:10px}
+  .id{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);letter-spacing:.02em}
+  .pill{font-size:11px;font-weight:500;padding:2px 8px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+  .p-op{color:var(--op)} .p-st{color:var(--st)} .p-bo{color:var(--bo)} .p-staff{color:var(--staff)} .p-all{color:var(--muted)}
+  .pts-badge{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink);background:var(--surface-2);border-radius:6px;padding:1px 8px;font-variant-numeric:tabular-nums}
+  h3{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+  .story{margin:0;font-size:13.5px;color:var(--ink-2);border-left:2px solid var(--line-strong);padding-left:11px}
+  ul.ac-list{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+  ul.ac-list li{font-size:13px;color:var(--ink-2);padding-left:16px;position:relative}
+  ul.ac-list li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border:1px solid var(--accent);border-radius:1px}
+  .foot{margin-top:auto;padding-top:9px;border-top:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+  .sec{color:var(--staff)}
+
+  /* tables */
+  section.block{margin-top:52px}
+  section.block h2{font-size:20px;font-weight:600;letter-spacing:-.01em}
+  section.block > p{color:var(--ink-2);max-width:64ch}
+  .tablewrap{overflow-x:auto;margin-top:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:560px;font-size:13.5px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--surface-2)}
+  tbody tr:last-child td{border-bottom:none}
+  td.k{font-family:"IBM Plex Mono",monospace;color:var(--accent);white-space:nowrap}
+
+  ol.dod{counter-reset:d;list-style:none;padding:0;margin:14px 0 0;display:flex;flex-direction:column;gap:9px}
+  ol.dod li{counter-increment:d;position:relative;padding-left:34px;font-size:14px;color:var(--ink-2)}
+  ol.dod li::before{content:counter(d);position:absolute;left:0;top:1px;width:22px;height:22px;border:1px solid var(--line-strong);border-radius:5px;display:grid;place-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted)}
+  ol.dod li.key{color:var(--ink);font-weight:500}
+  ol.dod li.key::before{border-color:var(--accent);color:var(--accent)}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 20px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="eyebrow">Elytron Dash2Board · Épico E-W · strawman de planning · 03/09/2026</div>
+    <h1>Interface Web — todos os casos de uso</h1>
+    <p class="sub">Vinte e quatro histórias que levam o app Flutter para o navegador com paridade de caso de uso — não de pixel — preservando as invariantes de tenant, persona e classificação que o produto já garante no celular.</p>
+    <div class="meta">
+      <span><b>Persona</b> todas (operational · strategic · board · staff · pending)</span>
+      <span><b>Pontos</b> 141 <span style="color:var(--muted)">(115 sem o sprint W5)</span></span>
+      <span><b>Sprints</b> 6</span>
+    </div>
+    <div class="ac">
+      <span class="k">Critério de aceitação do épico</span>
+      <p>Executar um <b>novo ciclo de auditoria</b>: <span class="mono">./scripts/audit.sh</span> estendido com o bloco Web, terminando com <b>zero <span class="mono">[FALHA]</span></b> e <span class="mono">audit-report.txt</span> anexado ao PR de fechamento.</p>
+    </div>
+  </div>
+</header>
+
+<nav class="bar" aria-label="Filtros">
+  <div class="bar-inner">
+    <button class="f" data-p="all" aria-pressed="true">Todas as personas</button>
+    <button class="f" data-p="op" aria-pressed="false">Operational</button>
+    <button class="f" data-p="st" aria-pressed="false">Strategic</button>
+    <button class="f" data-p="bo" aria-pressed="false">Board</button>
+    <button class="f" data-p="staff" aria-pressed="false">Staff</button>
+    <span class="sep"></span>
+    <span class="count" id="count"></span>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div id="board"></div>
+
+  <section class="block">
+    <h2>Premissas assumidas</h2>
+    <p>Marcadas porque mudam o tamanho do épico. Confirmar ou derrubar em planning — o default vale se ninguém decidir.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>#</th><th>Premissa</th><th>Se for derrubada</th></tr></thead>
+        <tbody>
+          <tr><td class="k">P-1</td><td>Web é o <b>mesmo código Flutter</b>, alvo <span class="mono">web</span> — não um front separado</td><td>Projeto novo, ~4× o esforço, camada de política duplicada</td></tr>
+          <tr><td class="k">P-2</td><td>Paridade de <b>caso de uso</b>, não de pixel: 3 colunas na web onde o app tem 1</td><td>Espelho visual mata o ganho de tela larga</td></tr>
+          <tr><td class="k">P-3</td><td>Renderer <b>CanvasKit</b>, com <span class="mono">--wasm</span> avaliado</td><td>HTML renderer degrada <span class="mono">ChartFrame</span> e reprova a banda de luminosidade</td></tr>
+          <tr><td class="k">P-4</td><td><b>Firebase Hosting</b> em <span class="mono">elytron-d2b-dev</span> — cabe no Spark, D-12 não muda</td><td>Outra CDN traz seu próprio ciclo de CSP e deploy</td></tr>
+          <tr><td class="k">P-5</td><td>Sem push e sem offline na v1</td><td>Service Worker + FCM Web: +1 sprint</td></tr>
+          <tr><td class="k">P-6</td><td>FirebaseAuth com custom claims; sessão expira em 12 h de inatividade</td><td>SSO/SAML corporativo vira épico próprio</td></tr>
+          <tr><td class="k">P-7</td><td><span class="mono">staff</span> e relatórios entram na web <b>quando existirem no app</b> (prompts 11-13)</td><td>Sprint W5 sai do escopo e vira Fase 2 (−26 pontos)</td></tr>
+          <tr><td class="k">P-8</td><td>Breakpoints Material 3: 600 / 840 / 1200</td><td>Outra grade obriga a refazer o shell</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:14px;font-size:13.5px"><b>Fato do repositório, não premissa:</b> não existe pasta <span class="mono">web/</span> hoje — o alvo web nunca foi habilitado. HU-W-01 é o primeiro commit possível.</p>
+  </section>
+
+  <section class="block">
+    <h2>Decisões que o épico abre</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>#</th><th>Decisão</th><th>Proposta do PO (default)</th></tr></thead>
+        <tbody>
+          <tr><td class="k">D-33</td><td>Domínio de publicação</td><td><span class="mono">app.elytronsecurity.com</span> · dev <span class="mono">d2b-dev.web.app</span></td></tr>
+          <tr><td class="k">D-34</td><td>Web para cliente, para staff, ou dois builds (ecoa D-18)</td><td><b>Dois builds</b>, coerente com D-18</td></tr>
+          <tr><td class="k">D-35</td><td>Exportação de PDF no cliente ou no servidor</td><td>Cliente — evita Blaze em dev</td></tr>
+          <tr><td class="k">D-36</td><td>Orçamento de bundle</td><td>≤ 3,5 MB comprimido no primeiro carregamento útil</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2>Definição de pronto do épico</h2>
+    <ol class="dod">
+      <li><span class="mono">flutter analyze</span> em "No issues found!" e <span class="mono">flutter test</span> verde</li>
+      <li><span class="mono">flutter build web --release</span> conclui dentro do orçamento de D-36</li>
+      <li>Todo caso de uso dos sprints W2 a W4 acessível por URL própria</li>
+      <li>Nenhuma das 12 regras do <span class="mono">CLAUDE.md</span> violada nos arquivos novos</li>
+      <li>Testes de isolamento entre tenants passando também no alvo web</li>
+      <li class="key"><span class="mono">./scripts/audit.sh</span> com o bloco Web executado, <b>zero <span class="mono">[FALHA]</span></b>, laudo anexado ao PR</li>
+      <li><span class="mono">docs/17_PONTO_DE_RETOMADA.md</span> atualizado com o estado pós-web</li>
+    </ol>
+  </section>
+
+  <section class="block">
+    <h2>Fora de escopo, declarado</h2>
+    <p>Push notification e uso offline (P-5) · SSO/SAML corporativo (P-6) · editor de dashboard pelo cliente · administração de tenant pela web · internacionalização além de pt-BR · app de desktop empacotado.</p>
+  </section>
+
+  <footer>
+    <span>Fonte no repositório: <span class="mono">docs/19_HISTORIAS_INTERFACE_WEB.md</span></span>
+    <span>Escala Fibonacci</span>
+    <span>Commits de política levam prefixo <span class="mono">sec(...)</span></span>
+  </footer>
+</div>
+
+<script>
+const SPRINTS = [
+  {id:"W1", nome:"Fundação web", pts:26},
+  {id:"W2", nome:"Jornada de entrada", pts:13},
+  {id:"W3", nome:"Painéis das três personas", pts:34},
+  {id:"W4", nome:"Serviços e RFS", pts:21},
+  {id:"W5", nome:"Especialista e relatórios", pts:26, cond:"condicional a P-7"},
+  {id:"W6", nome:"Transversais e auditoria", pts:21}
+];
+
+const S = [
+ {id:"HU-W-01",s:"W1",p:["all"],pl:"Time de dev",pts:5,t:"Habilitar o alvo web sem quebrar o mobile",
+  h:"Como time de desenvolvimento, quero o alvo web habilitado no mesmo repositório, para publicar a web sem manter dois códigos.",
+  ac:["<b>Build web release</b> conclui e <span class='mono'>flutter analyze</span> segue em \"No issues found!\"","<span class='mono'>flutter test</span> continua verde e nenhum arquivo de <span class='mono'>presentation/</span> importa <span class='mono'>dart:io</span>","<span class='mono'>index.html</span> versionado com título, manifest, favicon e cor da marca — não o boilerplate"],
+  d:"—",r:"Plugins mobile-only (printing, share_plus) exigem kIsWeb"},
+ {id:"HU-W-02",s:"W1",p:["all"],pl:"Todas",pts:8,t:"Shell adaptativo por breakpoint",
+  h:"Como qualquer persona, quero a navegação se adaptar à janela, para usar a mesma conta no celular e no monitor sem reaprender o produto.",
+  ac:["&lt;600: navegação inferior idêntica ao app · 600–1199: rail recolhido · ≥1200: rail expandido e até 3 colunas","Redimensionar a janela não causa overflow nem perde estado de tela","O layout vive em classe testável no shell, nunca <span class='mono'>if (largura)</span> espalhado em widget"],
+  d:"HU-W-01"},
+ {id:"HU-W-03",s:"W1",p:["all"],pl:"Todas",pts:5,t:"Roteamento por URL e link profundo",
+  h:"Como qualquer persona, quero URL própria por tela, para favoritar, usar voltar/avançar e mandar link a um colega do mesmo tenant.",
+  ac:["<span class='mono'>/operacao</span>, <span class='mono'>/estrategia</span>, <span class='mono'>/board</span>, <span class='mono'>/servicos</span>, <span class='mono'>/relatorios</span> carregam direto","Link sem permissão: negativa explícita e retorno ao painel — nunca conteúdo parcial nem tela branca","Voltar do navegador respeita a ordem dos drill-downs"],
+  d:"HU-W-02"},
+ {id:"HU-W-04",s:"W1",p:["all"],pl:"Todas",pts:5,t:"Sessão persistente e saída limpa",
+  h:"Como qualquer persona, quero continuar logado ao reabrir a aba e sair de forma limpa, para não relogar o tempo todo nem deixar sessão aberta.",
+  ac:["Reabrir a aba em até 12 h mantém a sessão, com papel vindo de <b>custom claims</b>","12 h de inatividade leva ao login com aviso de expiração","Sair não deixa dado de tenant em localStorage, sessionStorage ou IndexedDB"],
+  d:"HU-W-01",r:"Papel desconhecido vira pending (fail-closed)"},
+ {id:"HU-W-05",s:"W1",p:["all"],pl:"Produto",pts:3,t:"Entrega web endurecida",sec:true,
+  h:"Como CISO responsável pelo produto, quero que a própria web resista a uma avaliação de segurança, porque vendemos cibersegurança.",
+  ac:["CSP sem <span class='mono'>unsafe-eval</span> além do exigido pelo CanvasKit, <span class='mono'>frame-ancestors 'none'</span>, HSTS, Referrer-Policy","Bundle sem chave de serviço, endpoint interno ou log de dado de tenant","Cabeçalhos vêm de <span class='mono'>firebase.json</span> no repositório, não do console"],
+  d:"HU-W-01"},
+
+ {id:"HU-W-06",s:"W2",p:["all"],pl:"Todas",pts:5,t:"Boas-vindas e login no navegador",
+  h:"Como usuário convidado, quero entrar pela web com a mesma credencial do app, para não ter duas contas.",
+  ac:["Boas-vindas com fundo aurora a 60 fps na large; roteamento por persona após autenticar","Credencial inválida sempre com a <b>mesma</b> mensagem — sem enumeração de usuário","Autofill de gerenciador de senha funciona e Enter submete"],
+  d:"HU-W-03 · HU-W-04"},
+ {id:"HU-W-07",s:"W2",p:["all"],pl:"Pending",pts:3,t:"Acesso pendente na web",
+  h:"Como usuário sem papel atribuído, quero uma tela honesta, para saber que falta liberação em vez de olhar um painel vazio.",
+  ac:["Conta sem claim vê a tela dedicada com \"verificar liberação agora\" e \"sair\"","Liberação concedida roteia ao painel correto sem novo login"],
+  d:"HU-W-06"},
+ {id:"HU-W-08",s:"W2",p:["all"],pl:"Todas",pts:5,t:"Onboarding adaptado à tela larga",
+  h:"Como persona nova, quero o onboarding aproveitar a tela grande, para entender o produto em menos passos.",
+  ac:["Na large, passo e ilustração lado a lado, com o mesmo conteúdo do mobile","Concluído em uma plataforma, não se repete na outra (mesma flag por usuário)"],
+  d:"HU-W-02"},
+
+ {id:"HU-W-09",s:"W3",p:["op"],pl:"Operational",pts:8,t:"Painel operacional na web",
+  h:"Como analista de SOC, quero a fila em tela larga, para triar mais rápido que no celular.",
+  ac:["≥1200: lista e detalhe lado a lado (master–detail) sem perder a posição da lista","Triagem grava status, responsável, severidade e nota — e <b>nada além disso</b> é possível","Ordenação por exploração ativa segue a mesma regra de priorização do app"],
+  d:"HU-W-02 · HU-W-03"},
+ {id:"HU-W-10",s:"W3",p:["st"],pl:"Strategic",pts:8,t:"Painel estratégico na web",
+  h:"Como CISO, quero postura, tendência de 12 meses e risco por domínio em uma tela só, para abrir no telão da reunião.",
+  ac:["≥1200: os três blocos aparecem sem rolagem","Todo gráfico sai de <span class='mono'>ChartFrame</span>, cor só de <span class='mono'>ChartTokens</span>, nunca dois eixos Y, máx. 3 séries","Tooltip de valor e data no hover — comportamento novo, exclusivo da web"],
+  d:"HU-W-02"},
+ {id:"HU-W-11",s:"W3",p:["st"],pl:"Strategic",pts:5,t:"Compliance com drill-down e evidência",
+  h:"Como CISO, quero abrir framework → controle → evidência sem perder o contexto, para responder auditoria com a tela aberta.",
+  ac:["Drill-down em painel lateral na large e tela cheia na compact, com URL própria","Evidência exibida ou baixada respeitando a classificação da seção"],
+  d:"HU-W-10"},
+ {id:"HU-W-12",s:"W3",p:["st"],pl:"Strategic",pts:5,t:"Insights, detalhe e pesquisa",
+  h:"Como CISO, quero ler insights e responder pesquisa pelo navegador, para fazer isso entre reuniões, no computador.",
+  ac:["Texto respeita medida de leitura (~72 caracteres), não a largura da janela","Envio de pesquisa grava uma vez só, mesmo com duplo clique, e persiste ao recarregar"],
+  d:"HU-W-03"},
+ {id:"HU-W-13",s:"W3",p:["st"],pl:"Strategic",pts:5,t:"Briefing executivo exportável",
+  h:"Como CISO, quero gerar o briefing pela web, para levar o PDF ao board sem passar pelo celular.",
+  ac:["PDF gerado no navegador (D-35) com o mesmo conteúdo e marca do app","<span class='mono'>Ctrl/Cmd+P</span> usa folha de impressão: sem navegação, gráficos legíveis em preto e branco"],
+  d:"HU-W-10",r:"printing na web exige caminho separado por kIsWeb"},
+ {id:"HU-W-14",s:"W3",p:["bo"],pl:"Board",pts:8,t:"Painel do board e aceite de risco",sec:true,
+  h:"Como membro do board, quero exposição financeira e decisões pendentes sem sigla, para decidir em cinco minutos.",
+  ac:["ALE em moeda e como % da receita, impacto por unidade com dono nomeado, decisões pendentes","Aceite de risco grava <span class='mono'>acceptance</span> e <span class='mono'>boardNote</span> com trilha de auditoria — a única escrita executiva","<span class='mono'>exploitProof</span>, <span class='mono'>personalData</span> e <span class='mono'>chainOfCustody</span> nunca aparecem, <b>nem ocultos no DOM</b>"],
+  d:"HU-W-02"},
+
+ {id:"HU-W-15",s:"W4",p:["op","st"],pl:"Cliente",pts:5,t:"Catálogo dos 44 serviços em tela larga",
+  h:"Como cliente, quero navegar o catálogo com filtro e busca, para achar o serviço sem rolar 44 cartões.",
+  ac:["≥1200: grade de 3 colunas com filtro por categoria persistido na URL","Busca por nome e sinônimo, com estado vazio explicando o que não achou"],
+  d:"HU-W-02"},
+ {id:"HU-W-16",s:"W4",p:["op","st"],pl:"Cliente",pts:8,t:"Wizard de RFS em cinco passos",
+  h:"Como cliente, quero abrir uma solicitação pela web, para anexar arquivo do computador e escrever com teclado de verdade.",
+  ac:["Trilha lateral com os 5 passos na large, validação por passo e rascunho preservado ao recarregar","Anexo por arrastar-e-soltar, com limite de tipo e tamanho explícito","SLA de D-30 aplicado (crise 2 h · urgente 1 dia · planejado 5 dias) e status inicial conforme a <span class='mono'>RequestPolicy</span>"],
+  d:"HU-W-15"},
+ {id:"HU-W-17",s:"W4",p:["st"],pl:"Strategic",pts:8,t:"Caixa de aprovação com alçada",sec:true,
+  h:"Como CISO, quero aprovar ou recusar solicitações pela web, para despachar a fila em lote no computador.",
+  ac:["Vejo apenas o que <b>eu</b> posso aprovar pela alçada técnico→CISO→board","Aprovação muda só <span class='mono'>status</span>, <span class='mono'>approval</span> e campos permitidos, e vai para <span class='mono'>audit_logs</span>"],
+  d:"HU-W-16"},
+
+ {id:"HU-W-18",s:"W5",p:["op","st","bo"],pl:"Cliente",pts:8,t:"Visualizador em três profundidades",
+  h:"Como cliente, quero ler o relatório em resumo, gerencial ou técnico, para escolher o nível conforme quem está na sala.",
+  ac:["Alternar profundidade troca o conteúdo sem recarregar; a URL registra a profundidade","Rascunho é negado — cliente nunca lê relatório em rascunho","Proteção de conteúdo idêntica à do app em seção protegida"],
+  d:"prompt 11 concluído"},
+ {id:"HU-W-19",s:"W5",p:["staff"],pl:"Staff",pts:8,t:"Console do especialista Elytron",sec:true,
+  h:"Como especialista Elytron, quero trabalhar na web, porque meu trabalho de fato acontece no computador.",
+  ac:["Vejo apenas os tenants aos quais <b>fui atribuído</b>, com o tenant em foco sempre visível","Trocar de tenant descarta todo o estado anterior — nenhuma visualização agrega dois clientes"],
+  d:"prompt 12 · bloqueado por D-21"},
+ {id:"HU-W-20",s:"W5",p:["staff"],pl:"Staff",pts:13,t:"Autoria e publicação de relatório",
+  h:"Como especialista, quero redigir, revisar e publicar pela web, para abandonar o ciclo de Word e e-mail.",
+  ac:["Salvar seção grava <span class='mono'>custody_records</span> append-only e ilegível pelo app","Publicação passa pela verificação de redação antes de o cliente enxergar"],
+  d:"HU-W-19 · prompt 13"},
+
+ {id:"HU-W-21",s:"W6",p:["all"],pl:"Todas",pts:8,t:"Acessibilidade e uso por teclado",
+  h:"Como qualquer persona, quero operar pelo teclado e com leitor de tela, para o produto servir a todo o time e passar em RFP pública.",
+  ac:["Ordem de foco lógica, foco visível, sem armadilha em diálogo","Cada gráfico expõe resumo textual; cada botão, rótulo semântico em pt-BR","Contraste ≥ 4,5:1 em texto e ≥ 3:1 em elemento gráfico, nos dois temas"],
+  d:"sprints W3 e W4"},
+ {id:"HU-W-22",s:"W6",p:["st","bo"],pl:"Todas",pts:5,t:"Gráfico que respira em tela larga",
+  h:"Como CISO, quero o gráfico usar a tela grande sem virar outra linguagem visual, para a demo não parecer dois produtos.",
+  ac:["≥1200 aumenta densidade de eixo e rótulo, mantendo tokens, ordem fixa de série e cor de severidade reservada","Hover e clique dão realce e drill-down; no toque, o comportamento do app é preservado"],
+  d:"HU-W-10"},
+ {id:"HU-W-23",s:"W6",p:["all"],pl:"Todas",pts:5,t:"Isolamento de tenant também na web",sec:true,
+  h:"Como responsável pelo produto, quero prova de que a web não vaza dado entre clientes, porque isso é falha crítica.",
+  ac:["Teste dedicado cobre troca de tenant, link profundo para tenant alheio e recarga com claim de outro tenant — todos negados","Toda requisição carrega <span class='mono'>tenantId</span> explícito; não existe consulta \"de todos os tenants\" no cliente"],
+  d:"HU-W-03 · HU-W-04"},
+ {id:"HU-W-24",s:"W6",p:["all"],pl:"Tech Lead",pts:3,t:"Novo ciclo de auditoria com o bloco Web",key:true,
+  h:"Como Tech Lead, quero um ciclo de auditoria que enxergue a web, para que \"pronto\" continue significando a mesma coisa em duas plataformas.",
+  ac:["Bloco <b>\"10. WEB\"</b> em <span class='mono'>audit.sh</span>: build release, orçamento de D-36, <span class='mono'>flutter test --platform chrome</span>, zero <span class='mono'>dart:io</span> em presentation, cabeçalhos de segurança, zero segredo no bundle","As 12 regras do <span class='mono'>CLAUDE.md</span> varrem também os arquivos novos da web","4º job de CI \"Build e auditoria web\", obrigatório para o merge em <span class='mono'>main</span>","<span class='mono'>audit-report.txt</span> fecha com zero <span class='mono'>[FALHA]</span> e vira a evidência do épico"],
+  d:"todas as demais"}
+];
+
+const board = document.getElementById("board");
+const countEl = document.getElementById("count");
+
+function card(s){
+  const pills = s.p.map(x => `<span class="pill p-${x}">${x==="all"?s.pl:s.pl}</span>`).slice(0,1).join("");
+  const foot = [`dep: ${s.d}`, s.r?`risco: ${s.r}`:null, s.sec?`<span class="sec">commit sec(...)</span>`:null].filter(Boolean).join(" ");
+  return `<article data-p="${s.p.join(' ')}" ${s.key?'style="border-color:var(--accent)"':''}>
+    <div class="id-row"><span class="id">${s.id}</span>${pills}<span class="pts-badge">${s.pts} pt</span></div>
+    <h3>${s.t}</h3>
+    <p class="story">${s.h}</p>
+    <ul class="ac-list">${s.ac.map(a=>`<li>${a}</li>`).join("")}</ul>
+    <div class="foot">${foot}</div>
+  </article>`;
+}
+
+function render(filter){
+  board.innerHTML = SPRINTS.map(sp => {
+    const items = S.filter(s => s.s===sp.id && (filter==="all" || s.p.includes(filter) || s.p.includes("all")));
+    if(!items.length) return "";
+    return `<section class="sprint">
+      <div class="sprint-head">
+        <span class="tag">${sp.id}</span>
+        <h2>${sp.nome}</h2>
+        ${sp.cond?`<span class="cond">${sp.cond}</span>`:""}
+        <span class="pts">${sp.pts} pontos</span>
+      </div>
+      <div class="grid">${items.map(card).join("")}</div>
+    </section>`;
+  }).join("");
+  const n = board.querySelectorAll("article").length;
+  const pts = SPRINTS.reduce((a,sp)=>a,0);
+  countEl.textContent = `${n} de ${S.length} histórias`;
+}
+
+document.querySelectorAll("button.f").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll("button.f").forEach(o => o.setAttribute("aria-pressed", String(o===b)));
+    render(b.dataset.p);
+  });
+});
+render("all");
+</script>
+
+</body>
+</html>
