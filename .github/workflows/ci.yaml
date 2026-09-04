@@ -85,7 +85,11 @@ jobs:
       - name: Segredos não versionados
         run: |
           set -e
-          for f in android/app/google-services.json ios/Runner/GoogleService-Info.plist functions/.env; do
+          # android/app/google-services.json e ios/Runner/GoogleService-Info.plist
+          # PODEM ser versionados desde 03/09/2026 (decisão do PO, ver
+          # docs/20_RETOMADA_SESSAO.md): são chaves de cliente Firebase,
+          # públicas por design, protegidas por security rules e App Check.
+          for f in functions/.env; do
             if git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
               echo "::error::segredo versionado: $f"; exit 1
             fi
