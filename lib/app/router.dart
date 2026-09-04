@@ -23,65 +23,17 @@ import '../features/services/presentation/wizard/request_wizard_screen.dart';
 import '../features/strategic/presentation/compliance_screen.dart';
 import '../features/strategic/presentation/executive_briefing_screen.dart';
 import '../features/strategic/presentation/insights_screen.dart';
+import 'app_route.dart';
 import 'providers.dart';
+import 'router_redirect.dart';
 
-/// Rotas nomeadas do aplicativo.
-abstract final class AppRoute {
-  static const String splash = '/';
-  static const String welcome = '/boas-vindas';
-  static const String signIn = '/entrar';
-  static const String pendingAccess = '/aguardando-acesso';
-  static const String operational = '/operacao';
-  static const String strategic = '/estrategia';
-  static const String board = '/board';
-
-  /// Bifurcação do módulo de serviços - relatórios ou demanda de RFS.
-  /// Acessível pelas três personas, fora da árvore de nenhum dashboard.
-  static const String services = '/servicos';
-  static const String servicesCatalog = '/servicos/catalogo';
-  static const String servicesInbox = '/servicos/solicitacoes';
-
-  /// Lista de relatórios recebidos - agrupada por serviço contratado.
-  static const String reportsList = '/relatorios';
-
-  /// Compliance por framework, com evidência - filha de [strategic].
-  /// Aceita `?framework=` e `?domain=` para o drill-down do painel.
-  static const String strategicCompliance = '/estrategia/compliance';
-
-  /// Feed de insights, tendências e pesquisas - filha de [strategic].
-  static const String strategicInsights = '/estrategia/insights';
-
-  /// Briefing executivo de uma página, pronto para compartilhar - filha de
-  /// [strategic].
-  static const String strategicBriefing = '/estrategia/briefing';
-
-  /// Galeria de gráficos - só existe quando `AppConfig.mockMode` é
-  /// verdadeiro. Nunca referenciada fora de contexto de demonstração.
-  static const String devChartGallery = '/dev/graficos';
-
-  /// Rotas acessíveis sem sessão autenticada.
-  static const Set<String> publicRoutes = <String>{
-    splash,
-    welcome,
-    signIn,
-  };
-
-  /// Rotas de "entrada" das quais um usuário já liberado deve sair.
-  static const Set<String> entryRoutes = <String>{
-    splash,
-    welcome,
-    signIn,
-    pendingAccess,
-  };
-
-  static String forRole(UserRole role) => role.landingRoute;
-}
+export 'app_route.dart' show AppRoute;
 
 /// GoRouter reativo ao estado de autenticação.
 ///
-/// O redirect é a única guarda de navegação do app. Ele é *fail-closed*:
-/// enquanto o estado do usuário não estiver resolvido, o usuário fica no
-/// splash; qualquer inconsistência leva de volta à tela de boas-vindas.
+/// As rotas nomeadas vivem em `app_route.dart` e a guarda de navegação em
+/// `router_redirect.dart`, ambos reexportados/usados aqui, para manter este
+/// arquivo abaixo do limite de 250 linhas.
 final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
   final ValueNotifier<AsyncValue<AppUser?>> authState =
       ValueNotifier<AsyncValue<AppUser?>>(const AsyncValue<AppUser?>.loading());
@@ -99,56 +51,7 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoute.splash,
     refreshListenable: authState,
-    redirect: (BuildContext context, GoRouterState state) {
-      final AsyncValue<AppUser?> snapshot = authState.value;
-      final String location = state.matchedLocation;
-
-      // 1. Ainda resolvendo a sessão -> mantém o splash.
-      if (snapshot.isLoading) {
-        return location == AppRoute.splash ? null : AppRoute.splash;
-      }
-
-      // 2. Falha ao resolver a sessão -> volta para a entrada pública.
-      final AppUser? user = snapshot.value;
-      if (snapshot.hasError || user == null) {
-        return AppRoute.publicRoutes.contains(location) &&
-                location != AppRoute.splash
-            ? null
-            : AppRoute.welcome;
-      }
-
-      // 3. Autenticado, mas sem papel/tenant provisionado.
-      if (!user.canEnterDashboard) {
-        return location == AppRoute.pendingAccess
-            ? null
-            : AppRoute.pendingAccess;
-      }
-
-      // 4. Autenticado e liberado: sai das rotas de entrada.
-      final String home = AppRoute.forRole(user.role);
-      if (AppRoute.entryRoutes.contains(location)) {
-        return home;
-      }
-
-      // 5. Impede acesso ao dashboard de outra persona - e a QUALQUER rota
-      // filha dele (ex.: `/estrategia/compliance`), não só ao path exato.
-      // Comparar por prefixo aqui é o que faz o guard valer para subrotas
-      // futuras sem precisar listá-las uma a uma.
-      const Set<String> dashboards = <String>{
-        AppRoute.operational,
-        AppRoute.strategic,
-        AppRoute.board,
-      };
-      for (final String dashboard in dashboards) {
-        final bool isUnderDashboard =
-            location == dashboard || location.startsWith('$dashboard/');
-        if (isUnderDashboard && dashboard != home) {
-          return home;
-        }
-      }
-
-      return null;
-    },
+    redirect: buildRedirect(authState),
     routes: <RouteBase>[
       GoRoute(
         path: AppRoute.splash,
