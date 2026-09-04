@@ -8,6 +8,10 @@ Firebase, multi-tenant, com quatro personas.
 `docs/02_PERSONAS.md`, `docs/11_MODELO_FISICO_DADOS.md`,
 `docs/13_DECISOES_PENDENTES.md`.
 
+**`RETOMAR D2B`** — quando esta palavra-chave aparecer na conversa, leia
+`docs/20_RETOMADA_SESSAO.md` (estado atual, decisões do PO e plano vigente)
+antes de responder qualquer coisa.
+
 ## Regras de código — inegociáveis
 
 1. `flutter analyze` precisa terminar em **"No issues found!"**.

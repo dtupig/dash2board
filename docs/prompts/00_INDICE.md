@@ -35,6 +35,7 @@ git add -A && git commit -m "prompt 0X: <resumo>"
 | 12 | [`12_PERSONA_ESPECIALISTA_RETROFIT.md`](12_PERSONA_ESPECIALISTA_RETROFIT.md) | **Retrofit** da 4ª persona (Especialista Elytron): identidade de staff, escopo por tenant, políticas, rules e roteamento | 10, 11 |
 | 13 | [`13_MODULO_AUTORIA_RELATORIOS.md`](13_MODULO_AUTORIA_RELATORIOS.md) | Autoria e entrega: cadeia de custódia offline, revisão, verificação de redação e publicação | 12 |
 | 14 | [`14_ESTRUTURA_DADOS_FIREBASE.md`](14_ESTRUTURA_DADOS_FIREBASE.md) | **Estrutura física**: schema, conversores, regras das 4 personas, índices, TTL, agregados, seed determinístico e presença em RTDB | 12, 13 |
+| 15 | [`15_INTERFACE_WEB.md`](15_INTERFACE_WEB.md) | **Interface Web** — histórias em `../19_HISTORIAS_INTERFACE_WEB.md` (épico E-W, 24 HUs, 141 pontos) | 14 |
 
 Os prompts 10 e 11 dependem da fundação (2 e 3), mas **não** dependem dos
 painéis 4 a 9: dá para intercalá-los assim que o kit de visualização existir.
