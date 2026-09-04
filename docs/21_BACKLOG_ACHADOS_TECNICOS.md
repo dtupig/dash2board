@@ -6,7 +6,7 @@ como histórias com critério de aceite, e os pontos onde a decisão é de
 negócio, não técnica.
 
 Item 1 (Bucket B) e item 3 tiveram decisão de negócio já tomada pelo PO —
-ver cada seção. Itens 1 (Bucket A) e 2 concluídos.
+ver cada seção. Itens 1 (Bucket A), 2 e 3 concluídos.
 
 ---
 
@@ -111,8 +111,23 @@ depois, no clone de alguém.
 > build assinado de verdade (exige certificado e provisioning profile como
 > secret da CI). Qual escopo faz sentido agora: só Android (runner Linux,
 > sem custo extra), só iOS `--no-codesign`, ou os dois?
+>
+> **Decisão do PO em 04/09/2026:** os dois, como build de simulação
+> (`--debug`/`--no-codesign`, sem assinatura real) — ver
+> `docs/22_INSIGHTS_BUILD_NATIVO.md` para o caminho até a distribuição real
+> e `docs/23_TRACKER_ANDROID_LOCAL.md` para o tracker do emulador Android
+> local, pedido junto com a decisão.
 
-**Status:** não iniciado — aguardando decisão de escopo.
+**Status:** ✅ concluído. Dois jobs novos em `.github/workflows/ci.yaml`:
+`build-android` (`flutter build apk --debug`) e `build-ios` (`flutter build
+ios --simulator --no-codesign`, runner macOS). Achado ao implementar: o
+build iOS estava genuinamente quebrado em `main` por uma família de pacotes
+Firebase (`firebase_core`/`firebase_auth`/`cloud_firestore`/
+`cloud_functions`) com versões defasadas e mutuamente incompatíveis no
+`pubspec.lock`/`ios/Podfile.lock` - corrigido subindo a família inteira
+junto (detalhe em `docs/20_RETOMADA_SESSAO.md`, seção Ambiente). Validado
+local com `flutter build ios --simulator --no-codesign` e `flutter run` com
+screenshot antes de confiar só na CI.
 
 ---
 

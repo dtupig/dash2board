@@ -118,3 +118,52 @@ jobs:
           else
             echo "::warning::test/rules ainda não existe (achado A-02 da auditoria)"
           fi
+
+  build-android:
+    # S2 (docs/21_BACKLOG_ACHADOS_TECNICOS.md, item 3): builda de verdade em
+    # vez de só analisar/testar, para pegar erro de build nativo no PR. Usa
+    # a assinatura de debug já configurada em android/app/build.gradle.kts
+    # (não exige keystore nem secret de CI) - build "de simulação", não o
+    # artefato assinado que a distribuição real vai exigir.
+    name: Build Android (debug)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Build APK debug
+        run: flutter build apk --debug
+
+  build-ios:
+    # Mesmo racional do build-android, mas em runner macOS (obrigatório para
+    # build iOS) e sem assinatura: `--no-codesign` valida a compilação do
+    # projeto Xcode sem exigir certificado/provisioning profile como secret
+    # de CI. Ver docs/22_INSIGHTS_BUILD_NATIVO.md para o caminho até um
+    # build assinado de verdade.
+    name: Build iOS (simulador, --no-codesign)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Dependências
+        run: flutter pub get
+
+      - name: Build iOS para simulador
+        run: flutter build ios --simulator --no-codesign
