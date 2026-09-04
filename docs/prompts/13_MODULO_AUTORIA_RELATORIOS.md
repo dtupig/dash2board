@@ -163,6 +163,16 @@ Coleções: `/tenants/{tid}/reports/{rid}` (com `status`, `version`,
 `firestore.rules`: rascunho só para staff atribuído; `custody_records` sem
 update e sem delete para ninguém; publicação só por `deliveryLead`.
 
+**Requisito herdado da correção do achado 1** (docs/20_RETOMADA_SESSAO.md):
+todo `write` em `reports/{reportId}` — publicação, errata, ou qualquer
+avaliação do `MaterialFactEvaluator` que mude `materialFacts` — precisa
+gravar/recalcular o campo `audienceRoles: string[]`, consistente com
+`ReportAccessPolicy.canOpen(classification, isMaterialFact)` para cada
+papel. É esse campo que a regra de `list` em `firestore.rules` usa (não
+`canOpenReport` diretamente); se ficar desatualizado, uma persona pode
+perder acesso a um relatório que deveria ver, ou pior, manter acesso a um
+que não deveria mais ver.
+
 O mock precisa de: um relatório em `draft`, um em `inReview` com comentários,
 um `approved` pronto para publicar (com **uma violação plantada** na visão do
 board, para a varredura ter o que encontrar) e um `published` com errata.

@@ -2,7 +2,17 @@
 // classificação + persona + fato relevante, espelhando
 // ReportAccessPolicy em Dart. Regra e classe precisam concordar.
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { strict as assert } from 'node:assert';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore';
 import {
   assertFails,
   assertSucceeds,
@@ -81,6 +91,51 @@ describe('reports - canOpen por classificação e persona', () => {
         classification: 'restricted',
       }),
     );
+  });
+});
+
+// Achado 1 (docs/20_RETOMADA_SESSAO.md): uma query de lista sem `where`
+// correspondente à regra derruba a query inteira se qualquer documento
+// reprovar - diferente de `getDoc`, que só afeta o próprio documento. Os
+// dois testes abaixo provam o bug (query sem `where`) e a correção (query
+// com `where('audienceRoles', 'array-contains', ...)`).
+describe('reports - list via audienceRoles (achado 1)', () => {
+  beforeEach(async () => {
+    await seedReport('rep-list-visivel', {
+      classification: 'confidential',
+      materialFacts: [],
+      audienceRoles: ['operational', 'strategic', 'board'],
+      deliveredAt: new Date('2026-01-01T00:00:00Z'),
+    });
+    await seedReport('rep-list-secreto', {
+      classification: 'secret',
+      materialFacts: [],
+      audienceRoles: ['strategic'],
+      deliveredAt: new Date('2026-01-02T00:00:00Z'),
+    });
+  });
+
+  it('operational lista só os relatórios com seu papel em audienceRoles', async () => {
+    const alice = personaContext('alice', { tenantId: TENANT_A, role: 'operational' });
+    const q = query(
+      collection(alice.firestore(), 'tenants', TENANT_A, 'reports'),
+      where('audienceRoles', 'array-contains', 'operational'),
+      orderBy('deliveredAt', 'desc'),
+    );
+    const snapshot = await assertSucceeds(getDocs(q));
+    assert.deepStrictEqual(
+      snapshot.docs.map((d) => d.id),
+      ['rep-list-visivel'],
+    );
+  });
+
+  it('a mesma coleção SEM o where derruba a query inteira (o bug do achado 1)', async () => {
+    const alice = personaContext('alice', { tenantId: TENANT_A, role: 'operational' });
+    const qSemWhere = query(
+      collection(alice.firestore(), 'tenants', TENANT_A, 'reports'),
+      orderBy('deliveredAt', 'desc'),
+    );
+    await assertFails(getDocs(qSemWhere));
   });
 });
 

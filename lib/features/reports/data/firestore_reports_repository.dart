@@ -14,6 +14,12 @@ import 'reports_repository.dart';
 /// decisão de o que cada leitor alcança. As funções de mapeamento vivem em
 /// `firestore_reports_mappers.dart`, para manter este arquivo abaixo do
 /// limite de 250 linhas.
+///
+/// `watchReports` filtra por `audienceRoles` (`array-contains: roleWire`)
+/// porque a regra de `list` em `firestore.rules` precisa ser decidível por
+/// documento sem overhead de `get()` - sem esse `where`, um único
+/// relatório que o papel não alcance derruba a query inteira com
+/// `permission-denied` (achado 1, docs/20_RETOMADA_SESSAO.md).
 class FirestoreReportsRepository implements ReportsRepository {
   FirestoreReportsRepository({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
@@ -27,6 +33,7 @@ class FirestoreReportsRepository implements ReportsRepository {
   }) {
     return _firestore
         .collection(FirestorePaths.reports(tenantId))
+        .where('audienceRoles', arrayContains: roleWire)
         .orderBy('deliveredAt', descending: true)
         .snapshots()
         .map((QuerySnapshot<Map<String, dynamic>> snapshot) =>

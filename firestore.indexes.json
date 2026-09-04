@@ -71,8 +71,8 @@
       "collectionGroup": "reports",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "audience", "order": "ASCENDING" },
-        { "fieldPath": "publishedAt", "order": "DESCENDING" }
+        { "fieldPath": "audienceRoles", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "deliveredAt", "order": "DESCENDING" }
       ]
     },
     {
