@@ -20,8 +20,7 @@ List<RiskItem> buildInitialRisks(DateTime anchor) {
     ),
     RiskItem(
       id: 'risk-ecommerce-ddos',
-      title:
-          'Indisponibilidade do e-commerce por ataque de negação de serviço',
+      title: 'Indisponibilidade do e-commerce por ataque de negação de serviço',
       businessUnit: 'Varejo',
       domain: SecurityDomain.cloud,
       inherentScore: 70,
