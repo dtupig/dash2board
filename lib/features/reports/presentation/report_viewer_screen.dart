@@ -27,22 +27,36 @@ class ReportViewerScreen extends ConsumerStatefulWidget {
 class _ReportViewerScreenState extends ConsumerState<ReportViewerScreen> {
   bool _receiptRecorded = false;
   bool _recordingReceipt = false;
+  bool _receiptFailed = false;
 
   Future<void> _recordReceipt(String tenantId, UserRole role) async {
-    setState(() => _recordingReceipt = true);
-    final String uid = ref.read(appUserProvider).value?.uid ?? '';
-    await ref.read(reportsRepositoryProvider).recordReadReceipt(
-          tenantId: tenantId,
-          reportId: widget.reportId,
-          uid: uid,
-        );
-    if (!mounted) {
-      return;
-    }
     setState(() {
-      _receiptRecorded = true;
-      _recordingReceipt = false;
+      _recordingReceipt = true;
+      _receiptFailed = false;
     });
+    final String uid = ref.read(appUserProvider).value?.uid ?? '';
+    try {
+      await ref.read(reportsRepositoryProvider).recordReadReceipt(
+            tenantId: tenantId,
+            reportId: widget.reportId,
+            uid: uid,
+          );
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _receiptRecorded = true;
+        _recordingReceipt = false;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _recordingReceipt = false;
+        _receiptFailed = true;
+      });
+    }
   }
 
   @override
@@ -82,6 +96,7 @@ class _ReportViewerScreenState extends ConsumerState<ReportViewerScreen> {
           if (needsReceipt && !_receiptRecorded) {
             return _ReadReceiptGate(
               recording: _recordingReceipt,
+              failed: _receiptFailed,
               onContinue: () => _recordReceipt(tenantId, role),
             );
           }
@@ -110,9 +125,14 @@ class _ReportViewerScreenState extends ConsumerState<ReportViewerScreen> {
 }
 
 class _ReadReceiptGate extends StatelessWidget {
-  const _ReadReceiptGate({required this.recording, required this.onContinue});
+  const _ReadReceiptGate({
+    required this.recording,
+    required this.failed,
+    required this.onContinue,
+  });
 
   final bool recording;
+  final bool failed;
   final VoidCallback onContinue;
 
   @override
@@ -139,6 +159,16 @@ class _ReadReceiptGate extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium,
             ),
+            if (failed) ...<Widget>[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Não foi possível registrar a leitura. Verifique sua conexão '
+                'e tente novamente.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.error),
+              ),
+            ],
             const SizedBox(height: AppSpacing.lg),
             FilledButton(
               onPressed: recording ? null : onContinue,
