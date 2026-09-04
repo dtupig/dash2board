@@ -15,9 +15,9 @@
 
 import * as admin from "firebase-admin";
 import {setGlobalOptions} from "firebase-functions/v2";
-import {onDocumentWritten} from "firebase-functions/v2/firestore";
-import {HttpsError, onCall} from "firebase-functions/v2/https";
-import {beforeUserCreated} from "firebase-functions/v2/identity";
+import {Change, FirestoreEvent, onDocumentWritten} from "firebase-functions/v2/firestore";
+import {CallableRequest, HttpsError, onCall} from "firebase-functions/v2/https";
+import {AuthBlockingEvent, beforeUserCreated} from "firebase-functions/v2/identity";
 import {logger} from "firebase-functions";
 
 admin.initializeApp();
@@ -73,46 +73,52 @@ async function writeAudit(
  * Bloqueia a criação de contas fora da allowlist de convites.
  * O convite é indexado pelo e-mail em minúsculas: /invites/{email}
  */
+// Handler extraído (em vez de inline) para poder ser chamado direto pelos
+// testes (`functions/test/`) sem depender do wrapper HTTP assinado que o
+// Auth emulator usa para disparar blocking functions de verdade - ver
+// docs/21_BACKLOG_ACHADOS_TECNICOS.md, item 4.
+export async function handleGateSignUp(event: AuthBlockingEvent) {
+  const email = event.data?.email?.toLowerCase();
+
+  if (!email) {
+    throw new HttpsError(
+      "permission-denied",
+      "É necessário um e-mail corporativo para acessar o Dash2Board."
+    );
+  }
+
+  const inviteSnap = await db.doc(`invites/${email}`).get();
+
+  if (!inviteSnap.exists) {
+    logger.warn("Tentativa de cadastro sem convite", {email});
+    throw new HttpsError(
+      "permission-denied",
+      "Esta conta não está autorizada. Fale com o administrador da sua organização."
+    );
+  }
+
+  const invite = inviteSnap.data() as InviteDoc;
+
+  if (!invite.tenantId || !isRole(invite.role)) {
+    throw new HttpsError(
+      "failed-precondition",
+      "Convite inválido. Fale com o suporte da Elytron."
+    );
+  }
+
+  // Claims iniciais já saem no primeiro token emitido.
+  return {
+    customClaims: {
+      role: invite.role,
+      tenantId: invite.tenantId,
+      tenantAdmin: invite.tenantAdmin === true,
+    },
+  };
+}
+
 export const gateSignUp = beforeUserCreated(
   {region: IDENTITY_REGION},
-  async (event) => {
-    const email = event.data?.email?.toLowerCase();
-
-    if (!email) {
-      throw new HttpsError(
-        "permission-denied",
-        "É necessário um e-mail corporativo para acessar o Dash2Board."
-      );
-    }
-
-    const inviteSnap = await db.doc(`invites/${email}`).get();
-
-    if (!inviteSnap.exists) {
-      logger.warn("Tentativa de cadastro sem convite", {email});
-      throw new HttpsError(
-        "permission-denied",
-        "Esta conta não está autorizada. Fale com o administrador da sua organização."
-      );
-    }
-
-    const invite = inviteSnap.data() as InviteDoc;
-
-    if (!invite.tenantId || !isRole(invite.role)) {
-      throw new HttpsError(
-        "failed-precondition",
-        "Convite inválido. Fale com o suporte da Elytron."
-      );
-    }
-
-    // Claims iniciais já saem no primeiro token emitido.
-    return {
-      customClaims: {
-        role: invite.role,
-        tenantId: invite.tenantId,
-        tenantAdmin: invite.tenantAdmin === true,
-      },
-    };
-  }
+  handleGateSignUp
 );
 
 // ---------------------------------------------------------------------------
@@ -123,61 +129,68 @@ export const gateSignUp = beforeUserCreated(
  * Mantém os custom claims em sincronia com o documento de membro.
  * É a única rota pela qual o papel de um usuário muda de fato.
  */
+export async function handleSyncMemberClaims(
+  event: FirestoreEvent<
+    Change<admin.firestore.DocumentSnapshot> | undefined,
+    {tenantId: string; uid: string}
+  >
+): Promise<void> {
+  const {tenantId, uid} = event.params;
+  const after = event.data?.after?.data();
+  const before = event.data?.before?.data();
+
+  if (!after) {
+    // Membro removido: derruba o acesso imediatamente.
+    await admin.auth().setCustomUserClaims(uid, {
+      role: "pending",
+      tenantId: "",
+      tenantAdmin: false,
+    });
+    await admin.auth().revokeRefreshTokens(uid);
+    await writeAudit(tenantId, "member.removed", "system", {uid});
+    return;
+  }
+
+  const role: Role = isRole(after.role) ? after.role : "pending";
+  const tenantAdmin = after.tenantAdmin === true;
+  const changed =
+    before?.role !== after.role || before?.tenantAdmin !== after.tenantAdmin;
+
+  if (!changed) {
+    return;
+  }
+
+  await admin.auth().setCustomUserClaims(uid, {
+    role,
+    tenantId,
+    tenantAdmin,
+  });
+
+  // Força a emissão de um novo ID token com os claims atualizados.
+  await admin.auth().revokeRefreshTokens(uid);
+
+  await db.doc(`users/${uid}`).set(
+    {
+      tenantId,
+      role,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true}
+  );
+
+  await writeAudit(tenantId, "member.role_changed", "system", {
+    uid,
+    from: before?.role ?? null,
+    to: role,
+    tenantAdmin,
+  });
+
+  logger.info("Claims sincronizados", {uid, tenantId, role});
+}
+
 export const syncMemberClaims = onDocumentWritten(
   "tenants/{tenantId}/members/{uid}",
-  async (event) => {
-    const {tenantId, uid} = event.params;
-    const after = event.data?.after?.data();
-    const before = event.data?.before?.data();
-
-    if (!after) {
-      // Membro removido: derruba o acesso imediatamente.
-      await admin.auth().setCustomUserClaims(uid, {
-        role: "pending",
-        tenantId: "",
-        tenantAdmin: false,
-      });
-      await admin.auth().revokeRefreshTokens(uid);
-      await writeAudit(tenantId, "member.removed", "system", {uid});
-      return;
-    }
-
-    const role: Role = isRole(after.role) ? after.role : "pending";
-    const tenantAdmin = after.tenantAdmin === true;
-    const changed =
-      before?.role !== after.role || before?.tenantAdmin !== after.tenantAdmin;
-
-    if (!changed) {
-      return;
-    }
-
-    await admin.auth().setCustomUserClaims(uid, {
-      role,
-      tenantId,
-      tenantAdmin,
-    });
-
-    // Força a emissão de um novo ID token com os claims atualizados.
-    await admin.auth().revokeRefreshTokens(uid);
-
-    await db.doc(`users/${uid}`).set(
-      {
-        tenantId,
-        role,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      {merge: true}
-    );
-
-    await writeAudit(tenantId, "member.role_changed", "system", {
-      uid,
-      from: before?.role ?? null,
-      to: role,
-      tenantAdmin,
-    });
-
-    logger.info("Claims sincronizados", {uid, tenantId, role});
-  }
+  handleSyncMemberClaims
 );
 
 // ---------------------------------------------------------------------------
@@ -201,34 +214,41 @@ function isRiskDecision(value: unknown): value is RiskDecision {
  * essa escrita e registra o evento na trilha de auditoria, que o cliente
  * não pode ler nem escrever diretamente.
  */
+export async function handleLogRiskDecision(
+  event: FirestoreEvent<
+    Change<admin.firestore.DocumentSnapshot> | undefined,
+    {tenantId: string; riskId: string}
+  >
+): Promise<void> {
+  const {tenantId, riskId} = event.params;
+  const after = event.data?.after?.data();
+  const before = event.data?.before?.data();
+
+  if (!after || !isRiskDecision(after.acceptance)) {
+    return;
+  }
+  if (before?.acceptance === after.acceptance) {
+    // Já registrado nesta decisão - evita duplicar a entrada de auditoria
+    // se o documento for regravado sem mudança de fato (ex.: retry).
+    return;
+  }
+
+  await writeAudit(tenantId, "risk.decision_recorded", after.acceptedByUid ?? "unknown", {
+    riskId,
+    decision: after.acceptance,
+    boardNote: after.boardNote ?? null,
+  });
+
+  logger.info("Decisão de risco registrada na auditoria", {
+    tenantId,
+    riskId,
+    decision: after.acceptance,
+  });
+}
+
 export const logRiskDecision = onDocumentWritten(
   "tenants/{tenantId}/risks/{riskId}",
-  async (event) => {
-    const {tenantId, riskId} = event.params;
-    const after = event.data?.after?.data();
-    const before = event.data?.before?.data();
-
-    if (!after || !isRiskDecision(after.acceptance)) {
-      return;
-    }
-    if (before?.acceptance === after.acceptance) {
-      // Já registrado nesta decisão - evita duplicar a entrada de auditoria
-      // se o documento for regravado sem mudança de fato (ex.: retry).
-      return;
-    }
-
-    await writeAudit(tenantId, "risk.decision_recorded", after.acceptedByUid ?? "unknown", {
-      riskId,
-      decision: after.acceptance,
-      boardNote: after.boardNote ?? null,
-    });
-
-    logger.info("Decisão de risco registrada na auditoria", {
-      tenantId,
-      riskId,
-      decision: after.acceptance,
-    });
-  }
+  handleLogRiskDecision
 );
 
 // ---------------------------------------------------------------------------
@@ -241,7 +261,9 @@ interface AssignRoleRequest {
   tenantAdmin?: boolean;
 }
 
-export const assignRole = onCall<AssignRoleRequest>(async (request) => {
+export async function handleAssignRole(
+  request: CallableRequest<AssignRoleRequest>
+) {
   const auth = request.auth;
 
   if (!auth) {
@@ -298,13 +320,15 @@ export const assignRole = onCall<AssignRoleRequest>(async (request) => {
   });
 
   return {ok: true, role};
-});
+}
+
+export const assignRole = onCall<AssignRoleRequest>(handleAssignRole);
 
 // ---------------------------------------------------------------------------
 // 4. Callable: consome o convite e cria o membro no primeiro login
 // ---------------------------------------------------------------------------
 
-export const claimInvite = onCall(async (request) => {
+export async function handleClaimInvite(request: CallableRequest) {
   const auth = request.auth;
 
   if (!auth) {
@@ -355,7 +379,9 @@ export const claimInvite = onCall(async (request) => {
   await writeAudit(invite.tenantId, "invite.claimed", auth.uid, {email});
 
   return {ok: true, role: invite.role, tenantId: invite.tenantId};
-});
+}
+
+export const claimInvite = onCall(handleClaimInvite);
 
 // ---------------------------------------------------------------------------
 // 5. Callable: registro de leitura de relatório sigiloso
@@ -400,55 +426,59 @@ interface RecordReadReceiptRequest {
  * `secret`). Recalcula o acesso a partir do documento real via Admin SDK
  * em vez de confiar em qualquer coisa que o cliente afirme.
  */
-export const recordReadReceipt = onCall<RecordReadReceiptRequest>(
-  async (request) => {
-    const auth = request.auth;
+export async function handleRecordReadReceipt(
+  request: CallableRequest<RecordReadReceiptRequest>
+) {
+  const auth = request.auth;
 
-    if (!auth) {
-      throw new HttpsError("unauthenticated", "Sessão inválida.");
-    }
-
-    const tenantId = (auth.token.tenantId as string | undefined) ?? "";
-    const role: Role = isRole(auth.token.role) ? auth.token.role : "pending";
-
-    if (!tenantId) {
-      throw new HttpsError(
-        "permission-denied",
-        "Sua conta ainda não tem organização associada."
-      );
-    }
-
-    const {reportId} = request.data;
-
-    if (!reportId) {
-      throw new HttpsError("invalid-argument", "Relatório inválido.");
-    }
-
-    const reportSnap = await db
-      .doc(`tenants/${tenantId}/reports/${reportId}`)
-      .get();
-
-    if (!reportSnap.exists) {
-      throw new HttpsError("not-found", "Relatório não encontrado.");
-    }
-
-    const report = reportSnap.data() as ReportDoc;
-    const classification = report.classification ?? "secret";
-    const isMaterialFact =
-      Array.isArray(report.materialFacts) && report.materialFacts.length > 0;
-
-    if (!canOpenReport(role, classification, isMaterialFact)) {
-      throw new HttpsError(
-        "permission-denied",
-        "Seu perfil não tem acesso a este relatório."
-      );
-    }
-
-    await writeAudit(tenantId, "report.read_receipt", auth.uid, {
-      reportId,
-      classification,
-    });
-
-    return {ok: true};
+  if (!auth) {
+    throw new HttpsError("unauthenticated", "Sessão inválida.");
   }
+
+  const tenantId = (auth.token.tenantId as string | undefined) ?? "";
+  const role: Role = isRole(auth.token.role) ? auth.token.role : "pending";
+
+  if (!tenantId) {
+    throw new HttpsError(
+      "permission-denied",
+      "Sua conta ainda não tem organização associada."
+    );
+  }
+
+  const {reportId} = request.data;
+
+  if (!reportId) {
+    throw new HttpsError("invalid-argument", "Relatório inválido.");
+  }
+
+  const reportSnap = await db
+    .doc(`tenants/${tenantId}/reports/${reportId}`)
+    .get();
+
+  if (!reportSnap.exists) {
+    throw new HttpsError("not-found", "Relatório não encontrado.");
+  }
+
+  const report = reportSnap.data() as ReportDoc;
+  const classification = report.classification ?? "secret";
+  const isMaterialFact =
+    Array.isArray(report.materialFacts) && report.materialFacts.length > 0;
+
+  if (!canOpenReport(role, classification, isMaterialFact)) {
+    throw new HttpsError(
+      "permission-denied",
+      "Seu perfil não tem acesso a este relatório."
+    );
+  }
+
+  await writeAudit(tenantId, "report.read_receipt", auth.uid, {
+    reportId,
+    classification,
+  });
+
+  return {ok: true};
+}
+
+export const recordReadReceipt = onCall<RecordReadReceiptRequest>(
+  handleRecordReadReceipt
 );

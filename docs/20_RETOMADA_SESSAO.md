@@ -78,11 +78,12 @@ converter.
    (terceira cópia da mesma regra, junto de `firestore.rules` e do Dart) — e
    grava em `audit_logs` via `writeAudit`. O cliente Flutter chama a function
    (`cloud_functions`, nova dependência) em vez de fazer no-op; a tela trata
-   falha (antes assumia sucesso incondicional). **Pendência não resolvida:**
-   `functions/` não tem suíte de testes automatizados (nenhuma das 6
-   functions tem) — a validação desta PR foi só `tsc --noEmit` limpo, mesmo
-   nível de rigor das functions vizinhas. Registrar como achado de
-   infraestrutura de teste se isso incomodar antes da demo.
+   falha (antes assumia sucesso incondicional). ~~**Pendência não
+   resolvida:** `functions/` não tem suíte de testes automatizados.~~
+   **Corrigido em 04/09/2026** (docs/21_BACKLOG_ACHADOS_TECNICOS.md, item
+   4): 12 testes (as 6 functions × positivo/negativo) em
+   `functions/test/functions.spec.ts`, chamando cada handler direto contra
+   Firestore/Auth emulator, rodando num job novo (`functions`) da CI.
 3. ~~**Índice defasado.**~~ **Corrigido junto com o item 1** — o índice morto
    `reports: ['audience','publishedAt']` (campos que não existem em nenhum
    documento, query ou rule) virou

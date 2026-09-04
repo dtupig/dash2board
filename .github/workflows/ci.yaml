@@ -119,6 +119,29 @@ jobs:
             echo "::warning::test/rules ainda não existe (achado A-02 da auditoria)"
           fi
 
+  functions:
+    # Cobertura mínima das Cloud Functions (docs/21_BACKLOG_ACHADOS_TECNICOS.md,
+    # item 4): mesma dupla mocha + emulador já usada no job `rules`, mas
+    # aqui chamando cada handler exportado direto contra Firestore/Auth
+    # emulator - sem precisar do emulador de Functions.
+    name: Testes das Cloud Functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Dependências
+        run: cd functions && npm ci
+      - name: Análise estática
+        run: cd functions && npm run lint
+      - name: Testes
+        run: cd functions && npm test
+
   build-android:
     # S2 (docs/21_BACKLOG_ACHADOS_TECNICOS.md, item 3): builda de verdade em
     # vez de só analisar/testar, para pegar erro de build nativo no PR. Usa

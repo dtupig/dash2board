@@ -6,7 +6,7 @@ como histórias com critério de aceite, e os pontos onde a decisão é de
 negócio, não técnica.
 
 Item 1 (Bucket B) e item 3 tiveram decisão de negócio já tomada pelo PO —
-ver cada seção. Itens 1 (Bucket A), 2 e 3 concluídos.
+ver cada seção. Itens 1 (Bucket A), 2, 3 e 4 concluídos — backlog fechado.
 
 ---
 
@@ -138,11 +138,31 @@ Functions (`syncMemberClaims`, `assignRole`, `claimInvite`,
 `recordReadReceipt` e as demais), para que uma regressão numa regra de
 autorização do backend seja pega antes do deploy, não em produção.
 
-**Critério de aceite:** framework leve (`firebase-functions-test` +
-`mocha`, mesmo par já usado em `test/rules/`) cobrindo as 7 functions
-existentes com pelo menos um caso positivo e um negativo cada, rodando na CI.
-Escopo deliberadamente mínimo - não é o objetivo desta história construir uma
+**Critério de aceite:** framework leve (`mocha`, mesmo runner já usado em
+`test/rules/`) cobrindo as 6 functions existentes (`gateSignUp`,
+`syncMemberClaims`, `logRiskDecision`, `assignRole`, `claimInvite`,
+`recordReadReceipt` - a história original citava "7", contagem errada)
+com pelo menos um caso positivo e um negativo cada, rodando na CI. Escopo
+deliberadamente mínimo - não é o objetivo desta história construir uma
 suíte exaustiva, e se o escopo começar a crescer além disso, o PO é
 consultado antes de continuar.
+
+**Status:** ✅ concluído. 12 testes (6 functions × positivo/negativo) em
+`functions/test/functions.spec.ts`, rodando via `firebase emulators:exec
+--only firestore,auth "mocha"` (job `functions` novo em
+`.github/workflows/ci.yaml`) - **sem** o emulador de Functions: cada
+handler é chamado direto (`handleAssignRole(request)`, não `assignRole`
+via HTTP), com o Admin SDK real (o mesmo usado em produção) falando com os
+emuladores Firestore/Auth para estado de verdade. Isso testa a *lógica* de
+cada function (autorização, o que grava, o que rejeita), não a *fiação*
+(será que o Firebase de fato invoca a function quando um cliente real
+assina/chama/escreve) - essa segunda camada ficaria bem mais cara de testar
+(token real, emulador de Functions, polling de trigger assíncrono) para um
+ganho de cobertura pequeno frente ao risco real (regressão de autorização).
+Refatoração necessária: os 6 handlers, antes definidos inline dentro da
+chamada do trigger (`onCall(async (request) => {...})`), foram extraídos
+para funções nomeadas e exportadas (`handleAssignRole`, etc.) - mesmo
+comportamento em produção, só isso que torna a chamada direta possível nos
+testes.
 
 **Status:** não iniciado.
