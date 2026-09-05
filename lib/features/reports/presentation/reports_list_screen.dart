@@ -6,6 +6,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../services/data/services_providers.dart';
 import '../../services/domain/contracted_service.dart';
+import '../../shell/back_or_home_button.dart';
 import '../data/reports_providers.dart';
 import '../domain/report.dart';
 import 'reports_formatting.dart';
@@ -26,7 +27,10 @@ class ReportsListScreen extends ConsumerWidget {
         ref.watch(contractedServicesProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Relatórios')),
+      appBar: AppBar(
+        leading: const BackOrHomeButton(),
+        title: const Text('Relatórios'),
+      ),
       body: reportsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (Object error, StackTrace stackTrace) => const Center(
