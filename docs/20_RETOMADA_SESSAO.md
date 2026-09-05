@@ -8,23 +8,18 @@ Documento vivo. O `docs/17_PONTO_DE_RETOMADA.md` descreve o estado até
 
 ---
 
-## 1. Correção importante ao docs/17
+## 1. Correção importante ao docs/17 — ~~pendente~~ resolvido
 
-O `docs/17` diz que o **prompt 11 está "destravado, pronto para executar"**.
-Ele **já foi executado**. Existe o branch `prompt/11-relatorios-especialistas`
-e o **PR #18, aberto e verde desde 25/08/2026**, nunca mesclado.
+~~O `docs/17` diz que o **prompt 11 está "destravado, pronto para
+executar"**. Ele **já foi executado**. Existe o branch
+`prompt/11-relatorios-especialistas` e o **PR #18, aberto e verde desde
+25/08/2026**, nunca mesclado.~~
 
-| PR #18 | |
-|---|---|
-| Estado | `OPEN`, `MERGEABLE`, `mergeStateStatus: CLEAN`, não-draft |
-| Checks | 3/3 `SUCCESS` |
-| Tamanho | 53 arquivos, +4.906 / −63 |
-| Validado localmente | `flutter analyze` limpo · `flutter test` 142 testes verdes (Flutter 3.47.1) |
-| Conteúdo | 8 modelos especialistas, `ReportAccessPolicy`, `MaterialFactEvaluator`, visualizador em 3 profundidades, mock + Firestore, rules e `test/rules/reports.spec.ts` |
-
-**Ação pendente:** mesclar. As 3 suposições de produto do PR foram aprovadas
-pelo PO em 03/09/2026 (board nunca baixa relatório; `operational` nunca vê
-`personalData`/`chainOfCustody`; visão do board é curada, não filtrada).
+**Mesclado em 04/09/2026.** As 3 suposições de produto do PR foram aprovadas
+pelo PO no mesmo dia (board nunca baixa relatório; `operational` nunca vê
+`personalData`/`chainOfCustody`; visão do board é curada, não filtrada). O
+`docs/17` segue desatualizado nesse ponto especificamente - o resto deste
+documento (seções 4 em diante) é o estado real desde então.
 
 ## 2. Decisões tomadas pelo PO em 03/09/2026
 
@@ -37,13 +32,24 @@ pelo PO em 03/09/2026 (board nunca baixa relatório; `operational` nunca vê
 
 ## 3. Plano vigente — sprints por valor de negócio
 
-| Sprint | Entrega | Duração |
-|---|---|---|
-| **S1** | Relatórios entram no produto (merge do PR #18 + correções) | 3 dias |
-| **S2** | Repositório confiável (config versionada + job de build na CI) | 2 dias |
-| **S3** | Web no ar — `HU-W-01` a `05` do épico E-W | 1 semana |
-| **S4** | A cena da demo — `W2` + `W3`, painéis em tela larga | 2 semanas |
-| **S5** | Catálogo e RFS na web — `W4` | 1 semana |
+| Sprint | Entrega | Duração | Status em 05/09/2026 |
+|---|---|---|---|
+| **S1** | Relatórios entram no produto (merge do PR #18 + correções) | 3 dias | ✅ concluído |
+| **S2** | Repositório confiável (config versionada + job de build na CI) | 2 dias | ✅ concluído |
+| **S3** | Web no ar — `HU-W-01` a `05` do épico E-W | 1 semana | 🔶 parcial — só `HU-W-01`; `02` a `05` pendentes |
+| **S4** | A cena da demo — `W2` + `W3`, painéis em tela larga | 2 semanas | 🔶 parcial — `W2` (`06`/`07`/`08`) feito; `W3` pendente |
+| **S5** | Catálogo e RFS na web — `W4` | 1 semana | não iniciado |
+
+**Desvio registrado (não é erro, é decisão de fato):** a execução pulou
+direto de `HU-W-01` para as histórias de entrada de `W2` (`06`-`08`),
+sem fechar `HU-W-02` a `05` primeiro - a ordem do plano previa o shell
+adaptativo e o roteamento antes da jornada de entrada. Na prática,
+`HU-W-06` e `07` já vinham prontas do produto mobile (autofill, mensagem
+genérica de credencial, tela de acesso pendente) e só precisaram de
+validação; só `HU-W-08` exigiu código novo. Isso deixou o shell adaptativo
+(`HU-W-02`, com `NavigationRail`) e o roteamento com negativa explícita em
+link profundo (`HU-W-03`) como a lacuna real do épico até agora - nenhum dos
+dois foi iniciado.
 
 **Parqueado até depois da demo:** identidade do consultor (prompt 12),
 autoria de relatórios (prompt 13), estrutura física de dados (prompt 14).
@@ -152,13 +158,15 @@ converter.
 
 ## 6. Pendências fora do código
 
-- [ ] Mesclar o PR #18 (aguarda aval)
+- [x] Mesclar o PR #18 — feito em 04/09/2026
 - [ ] `sudo rm -rf ~/.npm` — 80 arquivos do `root` sobraram no cache
 - [ ] Exclusões do Defender para `DerivedData`, `CoreSimulator` e `.pub-cache`
 - [ ] Reiniciar a máquina (swap com 7,3 GB presos do período de disco cheio)
-- [ ] Revisar o `git status`: há mudanças não commitadas em `firebase.json`,
-      `ios/Flutter/*.xcconfig`, `project.pbxproj` e 2 `Package.resolved`
-      **deletados** (o `pod install` migrou de SwiftPM para CocoaPods)
+- [x] Revisar o `git status` do `pod install`/`flutterfire configure` — as
+      mudanças em `firebase.json`, `ios/Flutter/*.xcconfig`, `project.pbxproj`
+      e os `Package.resolved` já foram commitadas em ciclos anteriores;
+      `git status` na raiz está limpo hoje (05/09/2026), fora do estado
+      normal de arquivo de build local já coberto pelo `.gitignore`.
 
 ## 7. Novo neste ciclo
 
@@ -166,3 +174,60 @@ converter.
   — fecha o **D-21**, que estava registrado como decisão pendente mas era, na
   verdade, especificação faltando: nenhum prompt de 11 a 14 descrevia a função
   de criação de tenant nem resolvia o bootstrap do primeiro `staffAdmin`.
+
+## 8. Sessão de 05/09/2026 — UAT, épico web (S3 parcial + S4 parcial)
+
+Fechou o backlog técnico das 4 frentes (item 4 do backlog, `docs/21`) e
+avançou o épico web a partir de um roteiro de teste de usuário por persona.
+
+- **PR #31 — correção dos achados do UAT.** Duas telas (`ServicesHubScreen`,
+  `RequestInboxScreen`) e mais duas (`InsightsScreen`,
+  `ExecutiveBriefingScreen`, `ComplianceScreen`) navegavam com `context.go()`
+  a partir de outra tela — isso substitui a pilha de navegação inteira, então
+  quem chegasse por elas ficava sem botão de voltar. Trocado por
+  `context.push()` nos pontos de entrada, e criado `BackOrHomeButton`
+  (`lib/features/shell/back_or_home_button.dart`) para as telas que não
+  tinham nenhum jeito de sair. Também corrigido overflow de 77px no bottom
+  sheet "Ver dados" de `ChartFrame` (faltava `isScrollControlled: true`).
+  **Investigado e não é bug do app:** o relato de acentuação quebrada no
+  teclado é uma limitação conhecida do Flutter Engine com teclado físico no
+  iOS Simulator (flutter/flutter#96638, #96277, #117294) - nenhum
+  `TextField` do projeto tem lógica própria de acentuação para corrigir.
+- **PR #32 — HU-W-01, alvo web habilitado.** `flutter create . --platforms=web`,
+  `web/index.html`/`manifest.json` com branding real (não o boilerplate:
+  título, descrição, cor de tema `#070B12`) e ícones redesenhados a partir
+  do hexágono da marca (`lib/core/widgets/elytron_logo.dart`). Validado com
+  `flutter build web --release` e `flutter run -d chrome`.
+- **PR #33 — guia de publicação em Google Sites** do plano do épico
+  (`docs/20_PUBLICAR_NO_GOOGLE_SITES.md`), sem relação com código de produto.
+- **PR #34 — Sprint W2 (HU-W-06/07/08), jornada de entrada.** `HU-W-06`
+  (login) e `HU-W-07` (acesso pendente) já vinham prontas do produto mobile
+  antes deste épico existir - autofill/Enter já ligados, mensagem de
+  credencial sempre genérica, `PendingAccessScreen` já com "verificar
+  liberação" e "sair". Só validadas, sem mudança de código.
+  **`HU-W-08` exigiu código novo e corrigiu um bug real:** o "onboarding já
+  visto" vivia em `shared_preferences` por *dispositivo*, não por conta -
+  quem completasse a introdução no mobile a veria de novo ao abrir a web,
+  pela primeira vez, no mesmo navegador. Nova `FirestoreOnboardingRepository`
+  grava a flag por `uid` em `/tenants/{tenantId}/preferences/{uid}` (coleção
+  e regra de segurança que já existiam, sem uso até então) quando fora do
+  modo mock. Também criado `lib/core/layout/breakpoints.dart` (`LayoutSize`,
+  limiares de P-8 do épico) - infraestrutura mínima para o layout lado a
+  lado do onboarding em telas `>=1200px`, reutilizável quando `HU-W-02`
+  (shell adaptativo) começar.
+- **Sync de repositório** (este commit): `git remote prune origin` (10 refs
+  de branch já deletadas no GitHub, só a referência local sobrava);
+  removida a pasta solta `Claude outputs/` (duplicata bit-a-bit de
+  `docs/19_PLANO_INTERFACE_WEB_googlesites.txt`, já commitado);
+  `.claude/settings.json` e `.claude/scheduled_tasks.lock` (estado local
+  desta máquina/sessão, não conhecimento do projeto) adicionados ao
+  `.gitignore` — `.claude/skills/` continua versionado normalmente, sem
+  mudança (já estava desde o PR #19).
+
+**O que ficou pendente do épico web:** `HU-W-02` (shell adaptativo com
+`NavigationRail` - hoje não existe nenhuma navegação além de tela cheia com
+`context.go/push`, nem bottom nav mobile) e `HU-W-03` (negativa explícita em
+link profundo sem permissão + preservar a URL de destino para depois do
+login - hoje o roteador redireciona em silêncio para o painel do próprio
+papel, funciona mas não avisa por quê) e `HU-W-04` (sessão de 12h / limpeza
+de armazenamento no logout - nada disso existe ainda).

@@ -68,6 +68,12 @@ lcov.info
 # Config local do Dart & Flutter DevTools (por máquina, não por projeto)
 devtools_options.yaml
 
+# Estado local do Claude Code (allowlist de permissão da sessão, lock de
+# agendamento) - não é conhecimento do projeto. `.claude/skills/` continua
+# versionado normalmente.
+.claude/settings.json
+.claude/scheduled_tasks.lock
+
 # Relatórios reais de cliente (D-27) - dado confidencial de terceiro,
 # nunca versionar. Ver docs/13_DECISOES_PENDENTES.md.
 docs/Client_reports/
