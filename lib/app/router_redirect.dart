@@ -44,7 +44,11 @@ String? Function(BuildContext, GoRouterState) buildRedirect(
     // 5. Impede acesso ao dashboard de outra persona - e a QUALQUER rota
     // filha dele (ex.: `/estrategia/compliance`), não só ao path exato.
     // Comparar por prefixo aqui é o que faz o guard valer para subrotas
-    // futuras sem precisar listá-las uma a uma.
+    // futuras sem precisar listá-las uma a uma. `?acessoNegado=1` no
+    // destino é a única forma de levar um aviso através de um redirect do
+    // GoRouter (que só retorna a URL, não `extra`) - `HomeShell` lê esse
+    // parâmetro para mostrar a negativa explícita exigida por HU-W-03 e
+    // depois o remove da URL.
     const Set<String> dashboards = <String>{
       AppRoute.operational,
       AppRoute.strategic,
@@ -54,7 +58,7 @@ String? Function(BuildContext, GoRouterState) buildRedirect(
       final bool isUnderDashboard =
           location == dashboard || location.startsWith('$dashboard/');
       if (isUnderDashboard && dashboard != home) {
-        return home;
+        return '$home?acessoNegado=1';
       }
     }
 
