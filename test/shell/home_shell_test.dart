@@ -32,6 +32,7 @@ void main() {
             StatefulNavigationShell shell,
           ) =>
               HomeShell(
+            state: state,
             navigationShell: shell,
             servicesBranch: 3,
             reportsBranch: 4,

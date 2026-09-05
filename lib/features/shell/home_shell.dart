@@ -23,17 +23,32 @@ import '../auth/presentation/persona_visuals.dart';
 /// ordem de [UserRole] (`operational` 0, `strategic` 1, `board` 2), a
 /// mesma ordem em que `router_shell_branches.dart` declara os 3 primeiros
 /// branches.
-class HomeShell extends ConsumerWidget {
+///
+/// [state] é usado só para ler `?acessoNegado=1` (HU-W-03): quando um link
+/// tenta abrir o dashboard de outra persona, `router_redirect.dart` bate o
+/// usuário de volta ao próprio painel com esse parâmetro, e aqui mostramos
+/// a negativa explícita exigida - "nunca conteúdo parcial nem tela em
+/// branco" - antes de removê-lo da URL.
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({
     super.key,
+    required this.state,
     required this.navigationShell,
     required this.servicesBranch,
     required this.reportsBranch,
   });
 
+  final GoRouterState state;
   final StatefulNavigationShell navigationShell;
   final int servicesBranch;
   final int reportsBranch;
+
+  @override
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell> {
+  bool _accessDeniedHandled = false;
 
   static int _homeBranchFor(UserRole role) => switch (role) {
         UserRole.operational => 0,
@@ -43,13 +58,32 @@ class HomeShell extends ConsumerWidget {
       };
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    if (widget.state.uri.queryParameters['acessoNegado'] == '1' &&
+        !_accessDeniedHandled) {
+      _accessDeniedHandled = true;
+      final String cleanPath = widget.state.uri.path;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Esse link não é para o seu perfil. Voltamos ao seu painel.',
+            ),
+          ),
+        );
+        GoRouter.of(context).go(cleanPath);
+      });
+    }
+
     final UserRole role =
         ref.watch(appUserProvider).value?.role ?? UserRole.pending;
     final List<int> visibleBranches = <int>[
       _homeBranchFor(role),
-      servicesBranch,
-      reportsBranch,
+      widget.servicesBranch,
+      widget.reportsBranch,
     ];
     final List<_Destination> destinations = <_Destination>[
       _Destination(icon: role.icon, label: 'Painel'),
@@ -63,14 +97,15 @@ class HomeShell extends ConsumerWidget {
       ),
     ];
 
-    final int matched = visibleBranches.indexOf(navigationShell.currentIndex);
+    final int matched =
+        visibleBranches.indexOf(widget.navigationShell.currentIndex);
     final int selectedIndex = matched < 0 ? 0 : matched;
 
     void onSelect(int index) {
       final int branch = visibleBranches[index];
-      navigationShell.goBranch(
+      widget.navigationShell.goBranch(
         branch,
-        initialLocation: branch == navigationShell.currentIndex,
+        initialLocation: branch == widget.navigationShell.currentIndex,
       );
     }
 
@@ -78,7 +113,7 @@ class HomeShell extends ConsumerWidget {
 
     if (size == LayoutSize.compact) {
       return Scaffold(
-        body: navigationShell,
+        body: widget.navigationShell,
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex,
           onDestinationSelected: onSelect,
@@ -106,7 +141,7 @@ class HomeShell extends ConsumerWidget {
             ],
           ),
           const VerticalDivider(width: 1),
-          Expanded(child: navigationShell),
+          Expanded(child: widget.navigationShell),
         ],
       ),
     );

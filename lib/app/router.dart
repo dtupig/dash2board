@@ -73,6 +73,7 @@ final Provider<GoRouter> routerProvider = Provider<GoRouter>((ref) {
           StatefulNavigationShell navigationShell,
         ) =>
             HomeShell(
+          state: state,
           navigationShell: navigationShell,
           // Os índices dos 2 últimos branches declarados por
           // `buildHomeShellBranches()` - os 3 primeiros são os painéis,
