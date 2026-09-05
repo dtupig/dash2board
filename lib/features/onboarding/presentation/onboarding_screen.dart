@@ -4,6 +4,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../auth/domain/user_role.dart';
 import '../../auth/presentation/persona_visuals.dart';
 import 'onboarding_content.dart';
+import 'onboarding_page_layout.dart';
 
 /// Introdução de 3 telas mostrada só no primeiro acesso de cada persona a
 /// seu painel - pulável, nunca obrigatória, e nunca reaparece depois que
@@ -82,49 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.xl,
                     ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: AppSpacing.maxContentWidth,
-                      ),
-                      child: Center(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Container(
-                                width: 88,
-                                height: 88,
-                                decoration: BoxDecoration(
-                                  color: accent.withValues(alpha: 0.14),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(page.icon, size: 40, color: accent),
-                              ),
-                              const SizedBox(height: AppSpacing.xl),
-                              Semantics(
-                                header: true,
-                                child: Text(
-                                  page.title,
-                                  textAlign: TextAlign.center,
-                                  style:
-                                      theme.textTheme.headlineSmall?.copyWith(
-                                    color: scheme.onSurface,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                page.description,
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    child: OnboardingPageLayout(page: page, accent: accent),
                   );
                 },
               ),
