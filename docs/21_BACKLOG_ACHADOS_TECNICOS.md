@@ -164,5 +164,3 @@ chamada do trigger (`onCall(async (request) => {...})`), foram extraídos
 para funções nomeadas e exportadas (`handleAssignRole`, etc.) - mesmo
 comportamento em produção, só isso que torna a chamada direta possível nos
 testes.
-
-**Status:** não iniciado.
