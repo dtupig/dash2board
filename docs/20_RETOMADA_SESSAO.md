@@ -36,7 +36,7 @@ documento (seções 4 em diante) é o estado real desde então.
 |---|---|---|---|
 | **S1** | Relatórios entram no produto (merge do PR #18 + correções) | 3 dias | ✅ concluído |
 | **S2** | Repositório confiável (config versionada + job de build na CI) | 2 dias | ✅ concluído |
-| **S3** | Web no ar — `HU-W-01` a `05` do épico E-W | 1 semana | 🔶 parcial — só `HU-W-01`; `02` a `05` pendentes |
+| **S3** | Web no ar — `HU-W-01` a `05` do épico E-W | 1 semana | 🔶 parcial — `01`/`02`/`03` feitos; só `HU-W-04`/`05` pendentes |
 | **S4** | A cena da demo — `W2` + `W3`, painéis em tela larga | 2 semanas | 🔶 parcial — `W2` (`06`/`07`/`08`) feito; `W3` pendente |
 | **S5** | Catálogo e RFS na web — `W4` | 1 semana | não iniciado |
 
@@ -46,10 +46,10 @@ sem fechar `HU-W-02` a `05` primeiro - a ordem do plano previa o shell
 adaptativo e o roteamento antes da jornada de entrada. Na prática,
 `HU-W-06` e `07` já vinham prontas do produto mobile (autofill, mensagem
 genérica de credencial, tela de acesso pendente) e só precisaram de
-validação; só `HU-W-08` exigiu código novo. Isso deixou o shell adaptativo
-(`HU-W-02`, com `NavigationRail`) e o roteamento com negativa explícita em
-link profundo (`HU-W-03`) como a lacuna real do épico até agora - nenhum dos
-dois foi iniciado.
+validação; só `HU-W-08` exigiu código novo. **`HU-W-02` e `HU-W-03` foram
+fechadas logo em seguida** (PR#36/#37, ver seção 9) - só `HU-W-04` (sessão
+de 12h) e `HU-W-05` (endurecimento de segurança da entrega web) restam do
+Sprint W1.
 
 **Parqueado até depois da demo:** identidade do consultor (prompt 12),
 autoria de relatórios (prompt 13), estrutura física de dados (prompt 14).
@@ -224,10 +224,44 @@ avançou o épico web a partir de um roteiro de teste de usuário por persona.
   `.gitignore` — `.claude/skills/` continua versionado normalmente, sem
   mudança (já estava desde o PR #19).
 
-**O que ficou pendente do épico web:** `HU-W-02` (shell adaptativo com
-`NavigationRail` - hoje não existe nenhuma navegação além de tela cheia com
-`context.go/push`, nem bottom nav mobile) e `HU-W-03` (negativa explícita em
-link profundo sem permissão + preservar a URL de destino para depois do
-login - hoje o roteador redireciona em silêncio para o painel do próprio
-papel, funciona mas não avisa por quê) e `HU-W-04` (sessão de 12h / limpeza
-de armazenamento no logout - nada disso existe ainda).
+**O que ficou pendente do épico web ao final desta sessão:** `HU-W-02`
+(shell adaptativo com `NavigationRail` - hoje não existe nenhuma navegação
+além de tela cheia com `context.go/push`, nem bottom nav mobile) e
+`HU-W-03` (negativa explícita em link profundo sem permissão) e `HU-W-04`
+(sessão de 12h / limpeza de armazenamento no logout). **Os dois primeiros
+foram fechados na sequência, mesmo dia - ver seção 9.**
+
+## 9. Ainda 05/09/2026 — fecha HU-W-02 e HU-W-03
+
+- **PR #35 — sync de repositório.** `git remote prune origin` (10 refs de
+  branch já deletadas no GitHub); removida a pasta solta `Claude outputs/`
+  (duplicata já commitada em `docs/`); corrigido um bug literal em
+  `docs/21` (item 4 terminava com duas linhas de "Status" contraditórias -
+  "concluído" e "não iniciado" ao mesmo tempo); `docs/20` sincronizado com
+  os PRs até então.
+- **PR #36 — HU-W-02, shell adaptativo por breakpoint.** Achado: o app
+  **não tinha navegação persistente nenhuma antes disso**, nem bottom nav
+  no mobile - trocar de painel/serviços/relatórios era só botão dentro da
+  própria tela. Como o épico assume um único código Flutter (P-1) e
+  paridade de caso de uso entre plataformas (P-2), o shell novo vale para
+  mobile **e** web, variando só a chrome pelo breakpoint (P-8): `compact`
+  ganha `NavigationBar` (novidade também no celular), `medium`/`expanded`
+  ganham `NavigationRail` recolhido, `large` ganha rail expandido com
+  rótulo. `lib/app/router_shell_branches.dart` (novo) move os 5 destinos
+  de topo para branches de um `StatefulShellRoute.indexedStack` - cada
+  branch preserva seu próprio `Navigator`/estado ao trocar de aba.
+  `lib/features/shell/home_shell.dart` (novo) é a chrome em si, com 4
+  testes cobrindo breakpoint e preservação de estado
+  (`test/shell/home_shell_test.dart`).
+- **PR #37 — HU-W-03, negativa explícita em link profundo.** Dos 3
+  critérios da história, 2 já vinham de graça do PR#36 (URL própria por
+  tela, voltar do navegador respeitando a ordem). O gap real: abrir o
+  dashboard de outra persona já batia de volta ao próprio painel, mas em
+  silêncio. Como o `redirect` do GoRouter só retorna uma URL (não carrega
+  `extra`), o aviso viaja como `?acessoNegado=1` no destino do bounce -
+  `HomeShell` lê esse parâmetro uma vez, mostra um `SnackBar` explícito e
+  limpa a URL. 3 testes novos em `test/app/router_redirect_denial_test.dart`.
+
+Sprint W1 fica só com `HU-W-04` (sessão de 12h) e `HU-W-05` (endurecimento
+de segurança da entrega web) pendentes. Sprint W3 (painéis em tela larga)
+segue não iniciado - é o próximo item natural do roteiro do épico.
