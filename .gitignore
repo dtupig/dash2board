@@ -77,3 +77,7 @@ devtools_options.yaml
 # Relatórios reais de cliente (D-27) - dado confidencial de terceiro,
 # nunca versionar. Ver docs/13_DECISOES_PENDENTES.md.
 docs/Client_reports/
+
+# Referência de design (canvas do Claude Design, ~21 MB) - insumo visual
+# para a Fase 1 do épico E-W, não é código-fonte do projeto.
+App platform UI mockups.zip
