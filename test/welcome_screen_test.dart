@@ -50,4 +50,27 @@ void main() {
 
     expect(find.text('Board & Executivos de Negócio'), findsOneWidget);
   });
+
+  testWidgets(
+    'em large, o login já aparece embutido - sem precisar navegar',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1400, 900);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(harness());
+      await tester.pump(const Duration(milliseconds: 1200));
+
+      // O formulário já está na tela - não é mais preciso navegar a
+      // `/entrar` primeiro.
+      expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);
+      expect(find.byType(TextFormField), findsNWidgets(2));
+      // O CTA de navegação da versão estreita não faz sentido aqui.
+      expect(
+        find.widgetWithText(FilledButton, 'Entrar com e-mail corporativo'),
+        findsNothing,
+      );
+    },
+  );
 }
