@@ -3,6 +3,7 @@ import 'package:elytron_dash2board/core/theme/app_theme.dart';
 import 'package:elytron_dash2board/features/auth/domain/app_user.dart';
 import 'package:elytron_dash2board/features/auth/domain/user_role.dart';
 import 'package:elytron_dash2board/features/dashboard/presentation/board_dashboard_screen.dart';
+import 'package:elytron_dash2board/features/dashboard/presentation/widgets/board_wide_layout.dart';
 import 'package:elytron_dash2board/features/strategic/data/mock_strategic_repository.dart';
 import 'package:elytron_dash2board/features/strategic/data/strategic_providers.dart';
 import 'package:flutter/material.dart';
@@ -153,4 +154,26 @@ void main() {
         .widget<FilledButton>(find.widgetWithText(FilledButton, 'Confirmar'));
     expect(confirmButton.onPressed, isNull);
   });
+
+  testWidgets(
+    'em large, exposição e unidades ficam lado a lado, decisões em grade '
+    '(HU-W-14)',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1400, 1400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(harness());
+      await tester.pump(loadDelay);
+
+      expect(find.byType(BoardWideLayout), findsOneWidget);
+      expect(find.textContaining('R\$ 12.830.000'), findsOneWidget);
+      expect(find.text('Decisões pendentes do board'), findsOneWidget);
+      expect(
+        find.widgetWithText(FilledButton, 'Aceitar o risco'),
+        findsWidgets,
+      );
+    },
+  );
 }
