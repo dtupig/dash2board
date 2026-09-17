@@ -25,7 +25,7 @@ comportamento (`flutter analyze` limpo, `flutter test` verde, sem diff visual
 | Linhas | Arquivo | Bucket | Split proposto | Status |
 |---|---|---|---|---|
 | 744 | `lib/features/strategic/data/mock_strategic_repository.dart` | A | Extrair dado de demonstração por domínio (posture, riscos, compliance, insights) para `data/mock/mock_strategic_*.dart`, mesmo padrão já usado em `features/reports/data/mock/` | ✅ 159 linhas |
-| 670 | `lib/features/dashboard/presentation/board_dashboard_screen.dart` | **B** | Extrair cards/seções para `widgets/` | parqueado |
+| 670 | `lib/features/dashboard/presentation/board_dashboard_screen.dart` | **B** | Extrair cards/seções para `widgets/` | ✅ 225 linhas (+5 arquivos auxiliares) - feito junto com HU-W-14, PR#42 |
 | 648 | `lib/features/strategic/presentation/compliance_screen.dart` | **B** | Extrair tabela de controles e filtros para `widgets/` | parqueado |
 | 564 | `lib/core/widgets/charts/trend_line_chart.dart` | A | Separar builder de série/eixo/tooltip do widget principal | ✅ 193 linhas (+4 arquivos auxiliares) |
 | 549 | `lib/features/auth/presentation/welcome_screen.dart` | A | Extrair seções (hero, proposta de valor, CTA) para `widgets/` | ✅ 194 linhas (+4 arquivos auxiliares) |
@@ -55,9 +55,20 @@ em widgets internos hoje, S4 pode reagrupar esses mesmos widgets num grid de
 > reagrupar o mesmo código em poucas semanas. `./scripts/prompt check` vai
 > continuar reprovando nesses 5 arquivos até lá; é esperado, não é regressão.
 
-**Status:** Bucket A **concluído** (9/9 arquivos). Bucket B parqueado (decisão
-do PO, 04/09/2026) — revisitar quando o S4 definir o layout de tela larga.
-`./scripts/prompt check` só reprova mais nos 5 arquivos do Bucket B, como
+**Atualização em 17/09/2026:** o gatilho aconteceu - a Fase 1 do mockup web
+deu a HU-W-14 (painel do board) seu layout de tela larga, e
+`board_dashboard_screen.dart` foi dividido *junto* com o redesenho (mesmo
+PR, sem retrabalho - exatamente o cenário que a decisão do PO evitava).
+Fecha 1 dos 5 arquivos do Bucket B. Os 4 restantes
+(`compliance_screen`/`executive_briefing_screen`/`survey_screen`/
+`insights_screen`) continuam parqueados - não fazem parte das 4 telas que
+o mockup desenhou (só boas-vindas/login + os 3 painéis) - revisitar quando
+HU-W-11/12/13 (compliance, insights, briefing) ganharem sua própria
+composição de tela larga.
+
+**Status:** Bucket A **concluído** (9/9 arquivos). Bucket B **1/5
+concluído** (`board_dashboard_screen`, 17/09/2026) - os 4 restantes seguem
+parqueados. `./scripts/prompt check` reprova nesses 4 arquivos, como
 esperado.
 
 ---

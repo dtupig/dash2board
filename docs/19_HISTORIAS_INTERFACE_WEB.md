@@ -42,16 +42,23 @@ web nunca foi habilitado. HU-W-01 é literalmente o primeiro commit possível.
 
 ## 3. Mapa do épico
 
-| Sprint | Foco | Histórias | Pontos |
-|---|---|---|---|
-| W1 | Fundação web | HU-W-01 a 05 | 26 |
-| W2 | Jornada de entrada | HU-W-06 a 08 | 13 |
-| W3 | Painéis das 3 personas | HU-W-09 a 14 | 34 |
-| W4 | Serviços e RFS | HU-W-15 a 17 | 21 |
-| W5 | Especialista e relatórios *(condicional a P-7)* | HU-W-18 a 20 | 26 |
-| W6 | Transversais e auditoria | HU-W-21 a 24 | 21 |
+| Sprint | Foco | Histórias | Pontos | Status em 17/09/2026 |
+|---|---|---|---|---|
+| W1 | Fundação web | HU-W-01 a 05 | 26 | 🔶 `01`/`02`/`03` feitos; `04`/`05` pendentes |
+| W2 | Jornada de entrada | HU-W-06 a 08 | 13 | ✅ concluído (`06` ganhou refinamento de tela larga em 17/09) |
+| W3 | Painéis das 3 personas | HU-W-09 a 14 | 34 | 🔶 `09`/`10`/`14` feitos (Fase 1 do mockup web); `11`/`12`/`13` pendentes |
+| W4 | Serviços e RFS | HU-W-15 a 17 | 21 | não iniciado |
+| W5 | Especialista e relatórios *(condicional a P-7)* | HU-W-18 a 20 | 26 | não iniciado |
+| W6 | Transversais e auditoria | HU-W-21 a 24 | 21 | não iniciado |
 
 Escala Fibonacci. Total **141 pontos**; sem o sprint W5, **115**.
+
+**Fase 1 do mockup web** (`App platform UI mockups.zip`, canvas do Claude
+Design trazido em 14/09/2026): deu a `HU-W-06`/`09`/`10`/`14` sua
+composição de tela larga (sidebar + grade de cards), grounded nos tokens
+de cor já existentes (`AppColors` bate byte a byte) - a peça nova foi só a
+tipografia (Archivo/IBM Plex Sans/IBM Plex Mono via `google_fonts`) e a
+composição em si. Detalhe em `docs/20_RETOMADA_SESSAO.md`, seção 10.
 
 ---
 
