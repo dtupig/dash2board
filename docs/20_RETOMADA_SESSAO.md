@@ -32,12 +32,12 @@ documento (seções 4 em diante) é o estado real desde então.
 
 ## 3. Plano vigente — sprints por valor de negócio
 
-| Sprint | Entrega | Duração | Status em 05/09/2026 |
+| Sprint | Entrega | Duração | Status em 17/09/2026 |
 |---|---|---|---|
 | **S1** | Relatórios entram no produto (merge do PR #18 + correções) | 3 dias | ✅ concluído |
 | **S2** | Repositório confiável (config versionada + job de build na CI) | 2 dias | ✅ concluído |
 | **S3** | Web no ar — `HU-W-01` a `05` do épico E-W | 1 semana | 🔶 parcial — `01`/`02`/`03` feitos; só `HU-W-04`/`05` pendentes |
-| **S4** | A cena da demo — `W2` + `W3`, painéis em tela larga | 2 semanas | 🔶 parcial — `W2` (`06`/`07`/`08`) feito; `W3` pendente |
+| **S4** | A cena da demo — `W2` + `W3`, painéis em tela larga | 2 semanas | 🔶 parcial — `W2` completo; `W3`: `09`/`10`/`14` feitos (Fase 1 do mockup web, seção 10), `11`/`12`/`13` pendentes |
 | **S5** | Catálogo e RFS na web — `W4` | 1 semana | não iniciado |
 
 **Desvio registrado (não é erro, é decisão de fato):** a execução pulou
@@ -263,5 +263,62 @@ foram fechados na sequência, mesmo dia - ver seção 9.**
   limpa a URL. 3 testes novos em `test/app/router_redirect_denial_test.dart`.
 
 Sprint W1 fica só com `HU-W-04` (sessão de 12h) e `HU-W-05` (endurecimento
-de segurança da entrega web) pendentes. Sprint W3 (painéis em tela larga)
-segue não iniciado - é o próximo item natural do roteiro do épico.
+de segurança da entrega web) pendentes.
+
+## 10. 14-17/09/2026 — Fase 1 do mockup web (RETOMAR D2B)
+
+Sessão retomada com `RETOMAR D2B`. Achado de integridade ao retomar:
+`docs/20` estava 3 PRs atrasado (#35/#36/#37 já mesclados, não
+registrados) - corrigido no PR#38 (sync), mesma convenção de sempre.
+
+O usuário trouxe `App platform UI mockups.zip` na raiz do projeto - um
+canvas do Claude Design (`Dash2Board Web.dc.html`, não um export de
+Figma) com 4 telas: boas-vindas/login + os 3 painéis (Operação, CISO,
+Board). Lendo o HTML/CSS fonte: as cores batem **byte a byte** com
+`AppColors` já existente - não é identidade visual nova, é a mesma marca
+numa composição de tela larga (sidebar + grade de cards) que o app não
+tinha em lugar nenhum. Decisão combinada com o usuário: Fase 1 é só essas
+4 telas, uma história por PR, mesmo ritmo desta sessão.
+
+- **PR #39 — fundação visual.** `google_fonts` + 3 famílias (Archivo em
+  títulos/números, IBM Plex Sans no corpo, IBM Plex Mono em rótulos -
+  muda a tipografia do app inteiro, mobile incluso).
+  `lib/features/shell/web_sidebar.dart` (novo) reestiliza o
+  `NavigationRail` que HU-W-02 já criava - logo + saudação + papel no
+  topo, item ativo com pílula tintada na cor da persona, "Sair" fixo
+  embaixo. Bug corrigido no processo: `Container(width: double.infinity)`
+  dentro do `trailing`/`leading` do `NavigationRail` recebe largura
+  irrestrita e quebrava ("BoxConstraints forces an infinite width").
+- **PR #40 — HU-W-06 (refinamento).** Boas-vindas/login em duas colunas
+  na `large`, com o login já embutido (sem navegar a `/entrar`) -
+  `SignInFormCard` extraído de `SignInScreen` para reaproveitar nos dois
+  lugares sem duplicar estado. `/entrar` continua existindo normalmente
+  em qualquer largura.
+- **PR #41 — HU-W-10.** Índice de postura + tendência + risco por domínio
+  lado a lado na `large`, sem rolagem. AC3 (tooltip no hover do mouse):
+  `trend_line_chart.dart` já tinha crosshair+tooltip completo, só
+  disparava por toque - adicionado `MouseRegion.onHover`.
+- **PR #42 — HU-W-14, fecha 1/5 do Bucket B.** Exposição financeira +
+  impacto por unidade lado a lado; decisões pendentes em grade.
+  `board_dashboard_screen.dart` (672 linhas, o maior do Bucket B) dividido
+  *junto* com o redesenho - exatamente o cenário que a decisão do PO de
+  04/09 evitava (retrabalho). Bug pego pelo teste antes do commit: flex
+  desproporcional (`10:12` vs `1:12` por engano) espremia o card de
+  exposição a ~54px e estourava o `DeltaBadge`.
+- **PR #43 — HU-W-09, com ressalva.** `operational_dashboard_screen.dart`
+  é **inteiramente demonstração** hoje (`PlaceholderPanel`, "Em breve") -
+  não existe fila de incidente, priorização de vulnerabilidade nem
+  triagem real em lugar nenhum do app. Entregue só a disposição de 3
+  colunas em `large` sobre o mesmo conteúdo honesto - continuar dizendo
+  "em breve" pesa mais do que fingir dado real para bater o mockup ao pé
+  da letra.
+
+**Ao final:** `flutter analyze` limpo, 158 testes verdes,
+`./scripts/prompt check` aprovado, Bucket B em 1/5 (era 0/5).
+`docs/19`/`docs/21` atualizados no mesmo commit desta seção.
+
+**O que fica para depois** (não é regressão, é o resto do épico):
+`HU-W-11`/`12`/`13` (compliance/insights/briefing - as 3 telas restantes
+de W3, nenhuma delas no mockup); `HU-W-04`/`05` (Sprint W1); todo o `W4`
+em diante (serviços, wizard, relatório, especialista, transversais). O
+sidebar/tipografia da Fase 1 já são a base reutilizável para todas elas.
