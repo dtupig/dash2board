@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/providers.dart';
+import '../../../core/layout/breakpoints.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/aurora_backdrop.dart';
@@ -11,6 +12,7 @@ import 'widgets/welcome_actions_footer.dart';
 import 'widgets/welcome_fade.dart';
 import 'widgets/welcome_persona_showcase.dart';
 import 'widgets/welcome_top_bar.dart';
+import 'widgets/welcome_wide_layout.dart';
 
 /// Tela de boas-vindas do Elytron Dash2Board.
 ///
@@ -68,6 +70,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
                 final bool compact = constraints.maxHeight < 720;
+                final bool isLarge = LayoutSize.of(context) == LayoutSize.large;
                 return Column(
                   children: <Widget>[
                     WelcomeTopBar(
@@ -84,48 +87,57 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                           AppSpacing.xl,
                         ),
                         child: Center(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              maxWidth: AppSpacing.maxContentWidth,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                WelcomeFade(
-                                  controller: _entrance,
-                                  start: 0,
-                                  child: _Brand(compact: compact),
+                          child: isLarge
+                              ? _WideBody(
+                                  entrance: _entrance,
+                                  brand: const _Brand(compact: false),
+                                  headline: const _Headline(compact: false),
+                                  scheme: scheme,
+                                )
+                              : ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: AppSpacing.maxContentWidth,
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: <Widget>[
+                                      WelcomeFade(
+                                        controller: _entrance,
+                                        start: 0,
+                                        child: _Brand(compact: compact),
+                                      ),
+                                      SizedBox(
+                                        height: compact
+                                            ? AppSpacing.xl
+                                            : AppSpacing.xxxl,
+                                      ),
+                                      WelcomeFade(
+                                        controller: _entrance,
+                                        start: 0.12,
+                                        child: _Headline(compact: compact),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xl),
+                                      WelcomeFade(
+                                        controller: _entrance,
+                                        start: 0.24,
+                                        child: const PersonaShowcase(),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xl),
+                                      WelcomeFade(
+                                        controller: _entrance,
+                                        start: 0.40,
+                                        child: const WelcomeActions(),
+                                      ),
+                                      const SizedBox(height: AppSpacing.xl),
+                                      WelcomeFade(
+                                        controller: _entrance,
+                                        start: 0.55,
+                                        child: WelcomeFooter(scheme: scheme),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(
-                                  height:
-                                      compact ? AppSpacing.xl : AppSpacing.xxxl,
-                                ),
-                                WelcomeFade(
-                                  controller: _entrance,
-                                  start: 0.12,
-                                  child: _Headline(compact: compact),
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
-                                WelcomeFade(
-                                  controller: _entrance,
-                                  start: 0.24,
-                                  child: const PersonaShowcase(),
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
-                                WelcomeFade(
-                                  controller: _entrance,
-                                  start: 0.40,
-                                  child: const WelcomeActions(),
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
-                                WelcomeFade(
-                                  controller: _entrance,
-                                  start: 0.55,
-                                  child: WelcomeFooter(scheme: scheme),
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ),
                     ),
@@ -135,6 +147,39 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Corpo de `large`: `WelcomeWideLayout` (marca/headline/personas + login
+/// embutido) seguido do rodapé legal, com um único fade de entrada em vez
+/// do escalonamento por bloco do layout estreito - a composição muda
+/// demais entre os dois para reaproveitar os mesmos deslocamentos.
+class _WideBody extends StatelessWidget {
+  const _WideBody({
+    required this.entrance,
+    required this.brand,
+    required this.headline,
+    required this.scheme,
+  });
+
+  final AnimationController entrance;
+  final Widget brand;
+  final Widget headline;
+  final ColorScheme scheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return WelcomeFade(
+      controller: entrance,
+      start: 0,
+      child: Column(
+        children: <Widget>[
+          WelcomeWideLayout(brand: brand, headline: headline),
+          const SizedBox(height: AppSpacing.xxxl),
+          WelcomeFooter(scheme: scheme),
+        ],
       ),
     );
   }

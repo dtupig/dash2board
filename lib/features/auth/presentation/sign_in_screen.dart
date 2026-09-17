@@ -1,99 +1,30 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router.dart';
-import '../../../core/config/app_config.dart';
-import '../../../core/errors/app_failure.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/aurora_backdrop.dart';
-import '../../../core/widgets/elytron_logo.dart';
-import 'sign_in_controller.dart';
-import 'widgets/reset_password_dialog.dart';
-import 'widgets/sign_in_banner_notice.dart';
-import 'widgets/sign_in_demo_accounts_card.dart';
-import 'widgets/sign_in_form_fields.dart';
+import 'widgets/sign_in_form_card.dart';
 
-/// Autenticação por e-mail corporativo e senha.
+/// Autenticação por e-mail corporativo e senha - `/entrar`.
 ///
 /// Em caso de sucesso NÃO navegamos manualmente: o `redirect` do GoRouter
 /// observa o estado do usuário e leva à rota da persona correspondente.
 ///
-/// O banner de erro, o aviso de segurança, o atalho de contas de
-/// demonstração e o diálogo de redefinição de senha vivem em
-/// `widgets/`, para manter este arquivo abaixo do limite de 250 linhas.
-class SignInScreen extends ConsumerStatefulWidget {
+/// O formulário em si (campos, banner de erro, contas de demonstração,
+/// diálogo de redefinição de senha) vive em
+/// `widgets/sign_in_form_card.dart` - reaproveitado também dentro de
+/// `WelcomeScreen` em `large` (HU-W-06), onde o login aparece direto na
+/// boas-vindas em vez de exigir uma navegação separada.
+class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
-
-  @override
-  ConsumerState<SignInScreen> createState() => _SignInScreenState();
-}
-
-class _SignInScreenState extends ConsumerState<SignInScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword = true;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final FormState? form = _formKey.currentState;
-    if (form == null || !form.validate()) {
-      return;
-    }
-    FocusScope.of(context).unfocus();
-    await ref.read(signInControllerProvider.notifier).signIn(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-  }
-
-  Future<void> _forgotPassword() async {
-    final String? email = await showDialog<String>(
-      context: context,
-      builder: (BuildContext dialogContext) => ResetPasswordDialog(
-        initialEmail: _emailController.text,
-      ),
-    );
-
-    if (email == null || email.isEmpty) {
-      return;
-    }
-
-    await ref.read(signInControllerProvider.notifier).sendPasswordReset(email);
-
-    if (!mounted) {
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Se este e-mail estiver cadastrado, você receberá as instruções em '
-          'instantes.',
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme scheme = theme.colorScheme;
-    final AsyncValue<void> signInState = ref.watch(signInControllerProvider);
-    final bool isBusy = signInState.isLoading;
-
-    final Object? error = signInState.hasError ? signInState.error : null;
-    final AppFailure? failure = error is AppFailure ? error : null;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: AppTheme.overlayFor(theme.brightness),
@@ -107,8 +38,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     child: IconButton(
-                      onPressed:
-                          isBusy ? null : () => context.go(AppRoute.welcome),
+                      onPressed: () => context.go(AppRoute.welcome),
                       tooltip: 'Voltar',
                       icon: Icon(
                         Icons.arrow_back,
@@ -130,79 +60,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         constraints: const BoxConstraints(
                           maxWidth: AppSpacing.maxContentWidth,
                         ),
-                        child: Form(
-                          key: _formKey,
-                          child: AutofillGroup(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                const Center(child: ElytronLogo(size: 56)),
-                                const SizedBox(height: AppSpacing.xl),
-                                Semantics(
-                                  header: true,
-                                  child: Text(
-                                    'Entrar',
-                                    style: theme.textTheme.displaySmall,
-                                  ),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                Text(
-                                  'Use o e-mail corporativo cadastrado pela '
-                                  'sua organização.',
-                                  style: theme.textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
-                                if (failure != null) ...<Widget>[
-                                  SignInErrorBanner(failure: failure),
-                                  const SizedBox(height: AppSpacing.lg),
-                                ],
-                                SignInFormFields(
-                                  emailController: _emailController,
-                                  passwordController: _passwordController,
-                                  obscurePassword: _obscurePassword,
-                                  onToggleObscurePassword: () => setState(
-                                    () => _obscurePassword = !_obscurePassword,
-                                  ),
-                                  isBusy: isBusy,
-                                  onPasswordSubmitted: () =>
-                                      unawaited(_submit()),
-                                  onForgotPassword: () =>
-                                      unawaited(_forgotPassword()),
-                                ),
-                                const SizedBox(height: AppSpacing.sm),
-                                FilledButton(
-                                  onPressed: isBusy
-                                      ? null
-                                      : () => unawaited(_submit()),
-                                  child: isBusy
-                                      ? SizedBox(
-                                          width: 22,
-                                          height: 22,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.4,
-                                            color: scheme.onSurfaceVariant,
-                                          ),
-                                        )
-                                      : const Text('Entrar'),
-                                ),
-                                const SizedBox(height: AppSpacing.xl),
-                                SignInSecurityNotice(scheme: scheme),
-                                if (AppConfig.useMockData) ...<Widget>[
-                                  const SizedBox(height: AppSpacing.md),
-                                  SignInDemoAccountsCard(
-                                    onSelect: (String email) {
-                                      setState(() {
-                                        _emailController.text = email;
-                                        _passwordController.text =
-                                            'demo-elytron-2026';
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ),
+                        child: const SignInFormCard(),
                       ),
                     ),
                   ),
