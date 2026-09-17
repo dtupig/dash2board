@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/providers.dart';
 import '../../core/layout/breakpoints.dart';
+import '../auth/domain/app_user.dart';
 import '../auth/domain/user_role.dart';
 import '../auth/presentation/persona_visuals.dart';
+import '../auth/presentation/sign_in_controller.dart';
+import 'web_sidebar.dart';
 
 /// Casca de navegação persistente das 3 personas (HU-W-02).
 ///
@@ -78,20 +83,20 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       });
     }
 
-    final UserRole role =
-        ref.watch(appUserProvider).value?.role ?? UserRole.pending;
+    final AppUser? user = ref.watch(appUserProvider).value;
+    final UserRole role = user?.role ?? UserRole.pending;
     final List<int> visibleBranches = <int>[
       _homeBranchFor(role),
       widget.servicesBranch,
       widget.reportsBranch,
     ];
-    final List<_Destination> destinations = <_Destination>[
-      _Destination(icon: role.icon, label: 'Painel'),
-      const _Destination(
+    final List<SidebarDestination> destinations = <SidebarDestination>[
+      SidebarDestination(icon: role.icon, label: 'Painel'),
+      const SidebarDestination(
         icon: Icons.miscellaneous_services_outlined,
         label: 'Serviços',
       ),
-      const _Destination(
+      const SidebarDestination(
         icon: Icons.folder_copy_outlined,
         label: 'Relatórios',
       ),
@@ -109,6 +114,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       );
     }
 
+    void signOut() =>
+        unawaited(ref.read(signInControllerProvider.notifier).signOut());
+
     final LayoutSize size = LayoutSize.of(context);
 
     if (size == LayoutSize.compact) {
@@ -118,7 +126,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
           selectedIndex: selectedIndex,
           onDestinationSelected: onSelect,
           destinations: <Widget>[
-            for (final _Destination d in destinations)
+            for (final SidebarDestination d in destinations)
               NavigationDestination(icon: Icon(d.icon), label: d.label),
           ],
         ),
@@ -128,17 +136,14 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     return Scaffold(
       body: Row(
         children: <Widget>[
-          NavigationRail(
+          WebSidebar(
+            role: role,
+            userName: user?.firstName ?? 'executivo',
+            extended: size == LayoutSize.large,
             selectedIndex: selectedIndex,
             onDestinationSelected: onSelect,
-            extended: size == LayoutSize.large,
-            destinations: <NavigationRailDestination>[
-              for (final _Destination d in destinations)
-                NavigationRailDestination(
-                  icon: Icon(d.icon),
-                  label: Text(d.label),
-                ),
-            ],
+            destinations: destinations,
+            onSignOut: signOut,
           ),
           const VerticalDivider(width: 1),
           Expanded(child: widget.navigationShell),
@@ -146,11 +151,4 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       ),
     );
   }
-}
-
-class _Destination {
-  const _Destination({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
 }

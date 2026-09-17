@@ -33,6 +33,7 @@ dependencies:
   # UI / utilidades
   intl: ^0.20.3
   shared_preferences: ^2.5.5
+  google_fonts: ^6.2.1
 
   # Geração e compartilhamento do briefing executivo (PDF)
   pdf: ^3.13.0
