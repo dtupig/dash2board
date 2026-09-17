@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../theme/app_spacing.dart';
@@ -130,44 +131,53 @@ class _TrendLineChartState extends State<TrendLineChart> {
                     constraints.maxHeight,
                   );
                   return ExcludeSemantics(
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTapDown: (TapDownDetails details) =>
-                          _updateHover(details.localPosition, size),
-                      onPanStart: (DragStartDetails details) =>
-                          _updateHover(details.localPosition, size),
-                      onPanUpdate: (DragUpdateDetails details) =>
-                          _updateHover(details.localPosition, size),
-                      onPanEnd: (_) => _clearHover(),
-                      onTapCancel: _clearHover,
-                      child: Stack(
-                        children: <Widget>[
-                          Positioned.fill(
-                            child: CustomPaint(
-                              painter: TrendPainter(
-                                timestamps: widget.timestamps,
-                                series: widget.series,
-                                gridColor: scheme.outlineVariant,
-                                textColor: scheme.onSurface,
-                                mutedTextColor: scheme.onSurfaceVariant,
-                                crosshairColor: ChartTokens.divergentNeutral,
-                                hoverIndex: _hoverIndex,
-                                valueSuffix: widget.valueSuffix,
-                                yAxisMin: widget.yAxisMin,
-                                yAxisMax: widget.yAxisMax,
-                                gridLineCount: widget.gridLineCount,
+                    child: MouseRegion(
+                      // Só mouse (web/desktop): hover sem precisar tocar ou
+                      // arrastar - comportamento novo, exclusivo da web
+                      // (HU-W-10). Toque continua via `GestureDetector`
+                      // abaixo, sem mudança.
+                      onHover: (PointerHoverEvent event) =>
+                          _updateHover(event.localPosition, size),
+                      onExit: (_) => _clearHover(),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTapDown: (TapDownDetails details) =>
+                            _updateHover(details.localPosition, size),
+                        onPanStart: (DragStartDetails details) =>
+                            _updateHover(details.localPosition, size),
+                        onPanUpdate: (DragUpdateDetails details) =>
+                            _updateHover(details.localPosition, size),
+                        onPanEnd: (_) => _clearHover(),
+                        onTapCancel: _clearHover,
+                        child: Stack(
+                          children: <Widget>[
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: TrendPainter(
+                                  timestamps: widget.timestamps,
+                                  series: widget.series,
+                                  gridColor: scheme.outlineVariant,
+                                  textColor: scheme.onSurface,
+                                  mutedTextColor: scheme.onSurfaceVariant,
+                                  crosshairColor: ChartTokens.divergentNeutral,
+                                  hoverIndex: _hoverIndex,
+                                  valueSuffix: widget.valueSuffix,
+                                  yAxisMin: widget.yAxisMin,
+                                  yAxisMax: widget.yAxisMax,
+                                  gridLineCount: widget.gridLineCount,
+                                ),
                               ),
                             ),
-                          ),
-                          if (_hoverIndex != null)
-                            TrendTooltip(
-                              timestamps: widget.timestamps,
-                              series: widget.series,
-                              index: _hoverIndex!,
-                              size: size,
-                              valueSuffix: widget.valueSuffix,
-                            ),
-                        ],
+                            if (_hoverIndex != null)
+                              TrendTooltip(
+                                timestamps: widget.timestamps,
+                                series: widget.series,
+                                index: _hoverIndex!,
+                                size: size,
+                                valueSuffix: widget.valueSuffix,
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   );

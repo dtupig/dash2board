@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/layout/breakpoints.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/surface_card.dart';
 import '../../auth/domain/user_role.dart';
@@ -11,6 +12,7 @@ import '../../strategic/presentation/widgets/domain_risk_section.dart';
 import '../../strategic/presentation/widgets/posture_headline.dart';
 import '../../strategic/presentation/widgets/posture_trend_section.dart';
 import '../../strategic/presentation/widgets/top_risks_section.dart';
+import 'widgets/strategic_wide_layout.dart';
 
 /// Largura a partir da qual os blocos 3 e 4 (risco por domínio e top riscos)
 /// passam a dividir a largura em duas colunas, em vez de empilhar.
@@ -61,37 +63,39 @@ class StrategicDashboardScreen extends StatelessWidget {
         label: const Text('Gerar briefing'),
       ),
       children: <Widget>[
-        // Bloco 1 - hero number.
-        const PostureHeadline(),
-        const SizedBox(height: AppSpacing.xl),
-
-        // Bloco 2 - tendência de 12 meses.
-        const PostureTrendSection(),
-        const SizedBox(height: AppSpacing.xl),
-
-        // Blocos 3 e 4 - risco por domínio e top riscos de negócio, lado a
-        // lado a partir de 600 de largura.
-        LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            if (constraints.maxWidth >= _twoColumnBreakpoint) {
-              return const Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        // Blocos 1 a 4: em `large`, índice de postura + tendência + risco
+        // por domínio lado a lado, sem rolagem (HU-W-10) - abaixo disso,
+        // empilhado, com risco por domínio e top riscos lado a lado a
+        // partir de 600 (layout de hoje, sem mudança).
+        if (LayoutSize.of(context) == LayoutSize.large)
+          const StrategicWideLayout()
+        else ...<Widget>[
+          const PostureHeadline(),
+          const SizedBox(height: AppSpacing.xl),
+          const PostureTrendSection(),
+          const SizedBox(height: AppSpacing.xl),
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              if (constraints.maxWidth >= _twoColumnBreakpoint) {
+                return const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(child: DomainRiskSection()),
+                    SizedBox(width: AppSpacing.lg),
+                    Expanded(child: TopRisksSection()),
+                  ],
+                );
+              }
+              return const Column(
                 children: <Widget>[
-                  Expanded(child: DomainRiskSection()),
-                  SizedBox(width: AppSpacing.lg),
-                  Expanded(child: TopRisksSection()),
+                  DomainRiskSection(),
+                  SizedBox(height: AppSpacing.xl),
+                  TopRisksSection(),
                 ],
               );
-            }
-            return const Column(
-              children: <Widget>[
-                DomainRiskSection(),
-                SizedBox(height: AppSpacing.xl),
-                TopRisksSection(),
-              ],
-            );
-          },
-        ),
+            },
+          ),
+        ],
         const SizedBox(height: AppSpacing.xl),
 
         // Atalho para o módulo de serviços (prompt 10): relatórios por

@@ -3,6 +3,7 @@ import 'package:elytron_dash2board/core/theme/app_theme.dart';
 import 'package:elytron_dash2board/features/auth/domain/app_user.dart';
 import 'package:elytron_dash2board/features/auth/domain/user_role.dart';
 import 'package:elytron_dash2board/features/dashboard/presentation/strategic_dashboard_screen.dart';
+import 'package:elytron_dash2board/features/dashboard/presentation/widgets/strategic_wide_layout.dart';
 import 'package:elytron_dash2board/features/strategic/data/mock_strategic_repository.dart';
 import 'package:elytron_dash2board/features/strategic/data/strategic_providers.dart';
 import 'package:elytron_dash2board/features/strategic/domain/posture_index.dart';
@@ -109,4 +110,26 @@ void main() {
     // provider falhou.
     expect(find.text('Top riscos de negócio'), findsOneWidget);
   });
+
+  testWidgets(
+    'em large, postura + tendência + risco por domínio ficam lado a lado '
+    '(HU-W-10)',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1400, 1000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(harness(repository: MockStrategicRepository()));
+      await tester.pump(loadDelay);
+
+      expect(find.byType(StrategicWideLayout), findsOneWidget);
+      // Os 4 blocos resolvem juntos - nenhum ficou perdido na composição
+      // nova.
+      expect(find.text('72'), findsOneWidget);
+      expect(find.text('Evolução da postura'), findsOneWidget);
+      expect(find.text('Identidade e Acesso'), findsOneWidget);
+      expect(find.text('Top riscos de negócio'), findsOneWidget);
+    },
+  );
 }

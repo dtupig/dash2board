@@ -1,6 +1,7 @@
 import 'package:elytron_dash2board/core/theme/app_theme.dart';
 import 'package:elytron_dash2board/core/theme/chart_tokens.dart';
 import 'package:elytron_dash2board/core/widgets/charts/trend_line_chart.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -94,4 +95,34 @@ void main() {
 
     expect(find.textContaining('fev/26'), findsOneWidget);
   });
+
+  testWidgets(
+    'passar o mouse sobre um ponto abre o tooltip, sem precisar tocar '
+    '(HU-W-10)',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        harness(
+          TrendLineChart(timestamps: timestamps, series: seriesOfLength(2)),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final TestGesture mouse = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(() => mouse.removePointer());
+      await mouse.addPointer(location: Offset.zero);
+      await tester.pump();
+
+      await mouse.moveTo(tester.getCenter(find.byType(TrendLineChart)));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.textContaining('fev/26'), findsOneWidget);
+
+      await mouse.moveTo(Offset.zero);
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.textContaining('fev/26'), findsNothing);
+    },
+  );
 }
